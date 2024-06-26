@@ -20,25 +20,9 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2023.0.1"
-
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-    }
-}
-
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2")
-
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

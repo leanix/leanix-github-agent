@@ -1,4 +1,0 @@
-github-enterprise:
-  baseUrl: ${GITHUB_ENTERPRISE_BASE_URL:dummy}
-  githubAppId: ${GITHUB_APP_ID:dummy}
-  pemFile: ${PEM_FILE:dummy}
