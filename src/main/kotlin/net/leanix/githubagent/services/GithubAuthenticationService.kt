@@ -1,11 +1,9 @@
 package net.leanix.githubagent.services
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import net.leanix.githubagent.client.GithubClient
 import net.leanix.githubagent.config.GithubEnterpriseProperties
-import net.leanix.githubagent.dto.GithubAppResponse
 import net.leanix.githubagent.exceptions.AuthenticationFailedException
 import net.leanix.githubagent.exceptions.ConnectingToGithubEnterpriseFailedException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -45,7 +43,10 @@ class GithubAuthenticationService(
             createJwtToken(privateKey)?.also {
                 cachingService.set("jwtToken", it)
                 verifyJwt(it)
-            } ?: throw AuthenticationFailedException("Failed to generate a valid JWT token")
+            }
+        }.onFailure {
+            logger.error("Failed to generate/validate JWT token", it)
+            throw AuthenticationFailedException("Failed to generate a valid JWT token")
         }
     }
 
@@ -68,10 +69,7 @@ class GithubAuthenticationService(
 
     private fun verifyJwt(jwt: String) {
         runCatching {
-            val githubApp = jacksonObjectMapper().readValue(
-                githubClient.getApp("Bearer $jwt"),
-                GithubAppResponse::class.java
-            )
+            val githubApp = githubClient.getApp("Bearer $jwt")
             logger.info("Authenticated as GitHub App: ${githubApp.name}")
         }.onFailure {
             throw ConnectingToGithubEnterpriseFailedException("Failed to verify JWT token")

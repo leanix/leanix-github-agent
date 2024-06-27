@@ -1,5 +1,6 @@
 package net.leanix.githubagent.client
 
+import net.leanix.githubagent.dto.GithubAppResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader
@@ -11,5 +12,5 @@ interface GithubClient {
     fun getApp(
         @RequestHeader("Authorization") jwt: String,
         @RequestHeader("Accept") accept: String = "application/vnd.github.v3+json"
-    ): String
+    ): GithubAppResponse
 }
