@@ -2,10 +2,8 @@ package net.leanix.githubagent.services
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import net.leanix.githubagent.client.GithubClient
 import net.leanix.githubagent.config.GithubEnterpriseProperties
-import net.leanix.githubagent.exceptions.AuthenticationFailedException
-import net.leanix.githubagent.exceptions.ConnectingToGithubEnterpriseFailedException
+import net.leanix.githubagent.exceptions.FailedToCreateJWTException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ResourceLoader
@@ -17,19 +15,22 @@ import java.nio.file.Files
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.Security
+import java.security.spec.InvalidKeySpecException
 import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 
 @Service
 class GithubAuthenticationService(
     private val cachingService: CachingService,
-    private val githubClient: GithubClient,
     private val githubEnterpriseProperties: GithubEnterpriseProperties,
-    private val resourceLoader: ResourceLoader
+    private val resourceLoader: ResourceLoader,
+    private val gitHubEnterpriseService: GitHubEnterpriseService
 ) {
 
     companion object {
         private const val JWT_EXPIRATION_DURATION = 600000L
+        private const val pemPrefix = "-----BEGIN RSA PRIVATE KEY-----"
+        private const val pemSuffix = "-----END RSA PRIVATE KEY-----"
         private val logger = LoggerFactory.getLogger(GithubAuthenticationService::class.java)
     }
 
@@ -37,45 +38,47 @@ class GithubAuthenticationService(
         runCatching {
             logger.info("Generating JWT token")
             Security.addProvider(BouncyCastleProvider())
-            val rsaPrivateKey: String = readPrivateKey(loadPemFile())
+            val rsaPrivateKey: String = readPrivateKey()
             val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
             val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
-            createJwtToken(privateKey)?.also {
-                cachingService.set("jwtToken", it)
-                verifyJwt(it)
-            }
+            val jwt = createJwtToken(privateKey)
+            cachingService.set("jwtToken", jwt.getOrThrow())
+            gitHubEnterpriseService.verifyJwt(jwt.getOrThrow())
         }.onFailure {
             logger.error("Failed to generate/validate JWT token", it)
-            throw AuthenticationFailedException("Failed to generate a valid JWT token")
+            if (it is InvalidKeySpecException) {
+                throw IllegalArgumentException("The provided private key is not in a valid PKCS8 format.", it)
+            } else {
+                throw it
+            }
         }
     }
 
-    private fun createJwtToken(privateKey: PrivateKey): String? {
-        return Jwts.builder()
-            .setIssuedAt(Date())
-            .setExpiration(Date(System.currentTimeMillis() + JWT_EXPIRATION_DURATION))
-            .setIssuer(cachingService.get("githubAppId"))
-            .signWith(privateKey, SignatureAlgorithm.RS256)
-            .compact()
+    private fun createJwtToken(privateKey: PrivateKey): Result<String> {
+        return runCatching {
+            Jwts.builder()
+                .setIssuedAt(Date())
+                .setExpiration(Date(System.currentTimeMillis() + JWT_EXPIRATION_DURATION))
+                .setIssuer(cachingService.get("githubAppId"))
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .compact()
+        }.onFailure {
+            throw FailedToCreateJWTException("Failed to generate a valid JWT token")
+        }
     }
 
     @Throws(IOException::class)
-    private fun readPrivateKey(file: File): String {
-        return String(Files.readAllBytes(file.toPath()), Charset.defaultCharset())
-            .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-            .replace(System.lineSeparator().toRegex(), "")
-            .replace("-----END RSA PRIVATE KEY-----", "")
-    }
+    private fun readPrivateKey(): String {
+        val pemFile = File(resourceLoader.getResource("file:${githubEnterpriseProperties.pemFile}").uri)
+        val fileContent = String(Files.readAllBytes(pemFile.toPath()), Charset.defaultCharset()).trim()
 
-    private fun verifyJwt(jwt: String) {
-        runCatching {
-            val githubApp = githubClient.getApp("Bearer $jwt")
-            logger.info("Authenticated as GitHub App: ${githubApp.name}")
-        }.onFailure {
-            throw ConnectingToGithubEnterpriseFailedException("Failed to verify JWT token")
+        require(fileContent.startsWith(pemPrefix) && fileContent.endsWith(pemSuffix)) {
+            "The provided file is not a valid PEM file."
         }
-    }
 
-    private fun loadPemFile() =
-        File(resourceLoader.getResource("file:${githubEnterpriseProperties.pemFile}").uri)
+        return fileContent
+            .replace(pemPrefix, "")
+            .replace(System.lineSeparator().toRegex(), "")
+            .replace(pemSuffix, "")
+    }
 }

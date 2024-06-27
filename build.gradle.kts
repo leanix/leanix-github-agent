@@ -32,16 +32,24 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("org.bouncycastle:bcprov-jdk18on:1.78")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.78")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
+
+    // Dependencies for generating JWT token
     implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.2")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.junit.platform:junit-platform-launcher")
+    testImplementation("io.mockk:mockk:1.12.0")
+}
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            when (requested.module.toString()) {
+                "org.bouncycastle:bcprov-jdk18on" -> useVersion("1.78")
+            }
+        }
+    }
 }
 
 detekt {
