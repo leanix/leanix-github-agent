@@ -1,0 +1,20 @@
+name: Snyk vulnerability scan
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 * * *'
+  push:
+    branches:
+      - main
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: snyk/actions/gradle@master
+        with:
+          command: monitor
+          args: -d --severity-threshold=high --org=leanix --project-name=leanix-github-agent --project-tags=Team=Cider
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

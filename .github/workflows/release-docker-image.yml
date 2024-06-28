@@ -1,0 +1,99 @@
+name: Release Docker Image
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+
+jobs:
+  release_draft:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.merged
+
+    steps:
+      - name: Tag next version
+        id: tag-action
+        uses: K-Phoen/semver-release-action@master
+        with:
+          release_branch: main
+          release_strategy: tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Release Draft
+        uses: actions/github-script@v6.4.1
+        if: (steps.tag-action.outputs.tag != '')
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const tag = "${{ steps.tag-action.outputs.tag }}";
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const draftRelease = releases.find(release => release.tag_name === tag && release.draft === true);
+            if (!draftRelease) {
+              console.log(`No draft release found for tag ${tag}`);
+              return;
+            }
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: draftRelease.id,
+              draft: false
+            });
+            console.log(`Published draft release for tag ${tag}`);     
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        if: (steps.tag-action.outputs.tag != '')
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        if: (steps.tag-action.outputs.tag != '')
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        if: (steps.tag-action.outputs.tag != '')
+        continue-on-error: false
+        with:
+          arguments: build
+
+      - name: Login to Azure registry
+        uses: azure/docker-login@v1
+        if: (steps.tag-action.outputs.tag != '')
+        with:
+          login-server: ${{ secrets.ACR_PUBLIC_LOGIN }}
+          username: ${{ secrets.ACR_PUBLIC_USERNAME }}
+          password: ${{ secrets.ACR_PUBLIC_PASSWORD }}
+
+      - name: Setup ssh
+        uses: webfactory/ssh-agent@v0.4.1
+        if: (steps.tag-action.outputs.tag != '')
+        with:
+          ssh-private-key: ${{ secrets.CI_GITHUB_SSH_PRIVATE_KEY }}
+          ssh-auth-sock: ${{ env.SSH_AUTH_SOCK }}
+
+      - name: Build and push image to Azure public registry
+        if: (steps.tag-action.outputs.tag != '')
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: Dockerfile
+          tags: ${{ secrets.ACR_PUBLIC_LOGIN }}/leanix-github-agent:${{ steps.tag-action.outputs.tag }}, ${{ secrets.ACR_PUBLIC_LOGIN }}/leanix-github-agent:latest
+          push: true
+          ssh: default=${{ env.SSH_AUTH_SOCK }}
