@@ -1,9 +1,9 @@
 import io.mockk.every
 import io.mockk.mockk
-import net.leanix.githubagent.config.GithubEnterpriseProperties
+import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.services.CachingService
+import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubEnterpriseService
-import net.leanix.githubagent.services.GithubAuthenticationService
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -11,13 +11,13 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.ResourceLoader
 
-class GithubAuthenticationServiceTest {
+class GitHubAuthenticationServiceTest {
 
     private val cachingService = mockk<CachingService>()
-    private val githubEnterpriseProperties = mockk<GithubEnterpriseProperties>()
+    private val githubEnterpriseProperties = mockk<GitHubEnterpriseProperties>()
     private val resourceLoader = mockk<ResourceLoader>()
     private val gitHubEnterpriseService = mockk<GitHubEnterpriseService>()
-    private val githubAuthenticationService = GithubAuthenticationService(
+    private val githubAuthenticationService = GitHubAuthenticationService(
         cachingService,
         githubEnterpriseProperties,
         resourceLoader,

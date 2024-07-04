@@ -1,12 +1,12 @@
 package net.leanix.githubagent.services
 
 import jakarta.annotation.PostConstruct
-import net.leanix.githubagent.config.GithubEnterpriseProperties
+import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import org.springframework.stereotype.Service
 
 @Service
 class CachingService(
-    private val githubEnterpriseProperties: GithubEnterpriseProperties
+    private val githubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
     private val cache = HashMap<String, String?>()
 

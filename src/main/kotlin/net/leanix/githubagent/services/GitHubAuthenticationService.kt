@@ -2,7 +2,7 @@ package net.leanix.githubagent.services
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import net.leanix.githubagent.config.GithubEnterpriseProperties
+import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.exceptions.FailedToCreateJWTException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
@@ -20,9 +20,9 @@ import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 
 @Service
-class GithubAuthenticationService(
+class GitHubAuthenticationService(
     private val cachingService: CachingService,
-    private val githubEnterpriseProperties: GithubEnterpriseProperties,
+    private val githubEnterpriseProperties: GitHubEnterpriseProperties,
     private val resourceLoader: ResourceLoader,
     private val gitHubEnterpriseService: GitHubEnterpriseService
 ) {
@@ -31,7 +31,7 @@ class GithubAuthenticationService(
         private const val JWT_EXPIRATION_DURATION = 600000L
         private const val pemPrefix = "-----BEGIN RSA PRIVATE KEY-----"
         private const val pemSuffix = "-----END RSA PRIVATE KEY-----"
-        private val logger = LoggerFactory.getLogger(GithubAuthenticationService::class.java)
+        private val logger = LoggerFactory.getLogger(GitHubAuthenticationService::class.java)
     }
 
     fun generateJwtToken() {

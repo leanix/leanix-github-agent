@@ -1,12 +1,12 @@
 package net.leanix.githubagent.config
 
 import jakarta.annotation.PostConstruct
-import net.leanix.githubagent.exceptions.GithubEnterpriseConfigurationMissingException
+import net.leanix.githubagent.exceptions.GitHubEnterpriseConfigurationMissingException
 import org.springframework.stereotype.Component
 
 @Component
 class AgentSetupValidation(
-    private val githubEnterpriseProperties: GithubEnterpriseProperties
+    private val githubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
 
     @PostConstruct
@@ -24,7 +24,7 @@ class AgentSetupValidation(
         }
 
         if (missingProperties.isNotEmpty()) {
-            throw GithubEnterpriseConfigurationMissingException(missingProperties.joinToString(", "))
+            throw GitHubEnterpriseConfigurationMissingException(missingProperties.joinToString(", "))
         }
     }
 }
