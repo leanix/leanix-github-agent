@@ -27,7 +27,7 @@ class GitHubAuthenticationServiceTest {
     @Test
     fun `generateJwtToken with valid data should not throw exception`() {
         every { cachingService.get(any()) } returns "dummy-value"
-        every { cachingService.set(any(), any()) } returns Unit
+        every { cachingService.set(any(), any(), any()) } returns Unit
         every { githubEnterpriseProperties.pemFile } returns "valid-private-key.pem"
         every { resourceLoader.getResource(any()) } returns ClassPathResource("valid-private-key.pem")
         every { gitHubEnterpriseService.verifyJwt(any()) } returns Unit

@@ -42,7 +42,7 @@ class GitHubAuthenticationService(
             val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
             val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
             val jwt = createJwtToken(privateKey)
-            cachingService.set("jwtToken", jwt.getOrThrow())
+            cachingService.set("jwtToken", jwt.getOrThrow(), JWT_EXPIRATION_DURATION)
             gitHubEnterpriseService.verifyJwt(jwt.getOrThrow())
         }.onFailure {
             logger.error("Failed to generate/validate JWT token", it)
@@ -59,7 +59,7 @@ class GitHubAuthenticationService(
             Jwts.builder()
                 .setIssuedAt(Date())
                 .setExpiration(Date(System.currentTimeMillis() + JWT_EXPIRATION_DURATION))
-                .setIssuer(cachingService.get("githubAppId"))
+                .setIssuer(cachingService.get("githubAppId").toString())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact()
         }.onFailure {
