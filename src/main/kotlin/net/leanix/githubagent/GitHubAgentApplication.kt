@@ -6,7 +6,7 @@ import org.springframework.boot.runApplication
 import org.springframework.cloud.openfeign.EnableFeignClients
 
 @SpringBootApplication
-@EnableFeignClients(value = ["net.leanix.githubagent.client"])
+@EnableFeignClients
 @EnableConfigurationProperties(value = [net.leanix.githubagent.config.GitHubEnterpriseProperties::class])
 class GitHubAgentApplication
 
