@@ -24,8 +24,6 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
 
 4. **Configure the Agent**: The agent requires several environment variables to run. These could be passed to the Docker command when starting the agent. The required variables are:
 
-    - `LEANIX_DOMAIN`: Your LeanIX domain.
-    - `LEANIX_API_TOKEN`: Your LeanIX API token.
     - `GITHUB_ENTERPRISE_BASE_URL`: The base URL of your GitHub Enterprise Server instance.
     - `GITHUB_APP_ID`: The ID of your GitHub App.
     - `PEM_FILE`: The path to your GitHub App's PEM file inside the Docker container.
@@ -35,8 +33,6 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
     ```bash
     docker run -p 8000:8080 \
     -v $(pwd)/path/to/your/privateKey.pem:/privateKey.pem \
-    -e LEANIX_DOMAIN=<leanix_domain> \
-    -e LEANIX_API_TOKEN=<leanix_api_token> \
     -e GITHUB_ENTERPRISE_BASE_URL=<github_enterprise_base_url> \
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
