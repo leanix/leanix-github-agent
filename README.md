@@ -45,7 +45,7 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
 
    This command starts the agent and exposes it on port 8000. The agent will start scanning your for organisations and repositories.
 
-**Disclaimer**: The Docker image for the agent is not yet available. It will be available for pulling once a new version is published. Please check the [releases](https://github.com/your-repo/your-project/releases) page for updates.
+**Disclaimer**: The Docker image for the agent is not yet available. It will be available for pulling once a new version is published. Please check the [releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
 
 
 ## Support, Feedback, Contributing
