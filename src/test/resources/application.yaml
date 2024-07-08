@@ -2,3 +2,9 @@ github-enterprise:
   baseUrl: ${GITHUB_ENTERPRISE_BASE_URL:dummy}
   githubAppId: ${GITHUB_APP_ID:dummy}
   pemFile: ${PEM_FILE:dummy}
+leanix:
+    base-url: https://${LEANIX_DOMAIN:dummy}/services
+    ws-base-url: wss://${LEANIX_DOMAIN:dummy}/services
+    auth:
+        access-token-uri: ${leanix.base-url}/mtm/v1
+        api-user-token: ${LEANIX_TECHNICAL_USER_TOKEN:dummy}

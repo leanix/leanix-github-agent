@@ -5,6 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "github-enterprise")
 data class GitHubEnterpriseProperties(
     val baseUrl: String,
-    val githubAppId: String,
+    val gitHubAppId: String,
     val pemFile: String,
 )

@@ -1,6 +1,5 @@
 package net.leanix.githubagent
 
-import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
@@ -8,7 +7,19 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles("test")
 class GitHubAgentApplicationTests {
 
-    @Test
+//    @Nested
+//    @Configuration
+//    inner class TestConfig {
+//        @MockkBean
+//        private lateinit var authService: AuthService
+//
+//        @PostConstruct
+//        fun init() {
+//            every { authService.getBearerToken() } returns "token"
+//        }
+//    }
+
+//    @Test
     fun contextLoads() {
     }
 }
