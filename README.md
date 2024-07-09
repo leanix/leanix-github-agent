@@ -36,7 +36,7 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
     -e GITHUB_ENTERPRISE_BASE_URL=<github_enterprise_base_url> \
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
-    trc-github-enterprise-broker
+    leanix-github-agent
     ```
 
    This command starts the agent and exposes it on port 8000. The agent will start scanning your for organisations and repositories.
