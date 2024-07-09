@@ -2,7 +2,6 @@ package net.leanix.githubagent.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.resilience4j.retry.annotation.Retry
-import jakarta.annotation.PostConstruct
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.AuthService
 import org.springframework.context.annotation.Bean
@@ -55,10 +54,5 @@ class WebSocketClientConfig(
         scheduler.initialize()
         stompClient.taskScheduler = scheduler
         return stompClient
-    }
-
-    @PostConstruct
-    fun initWebSocketConnection() {
-        initSession()
     }
 }

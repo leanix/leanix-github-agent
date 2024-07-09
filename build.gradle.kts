@@ -43,8 +43,9 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.2")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.mockk:mockk:1.12.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    testImplementation("com.ninja-squad:springmockk:4.0.2"){
+        exclude(module = "mockito-core")
+    }
 }
 
 configurations.all {
