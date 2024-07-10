@@ -7,4 +7,4 @@ leanix:
   ws-base-url: wss://${LEANIX_DOMAIN}/services
   auth:
     access-token-uri: ${leanix.base-url}/mtm/v1
-    api-user-token: ${LEANIX_TECHNICAL_USER_TOKEN}
+    technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN}

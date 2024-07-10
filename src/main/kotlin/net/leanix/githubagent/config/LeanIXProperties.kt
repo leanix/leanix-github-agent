@@ -9,6 +9,6 @@ data class LeanIXProperties(
 ) {
     data class Auth(
         val accessTokenUri: String,
-        val apiUserToken: String
+        val technicalUserToken: String
     )
 }

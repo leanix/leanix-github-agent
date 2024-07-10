@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader
     name = "authentication",
     url = "\${leanix.auth.access-token-uri}",
 )
-fun interface AuthClient {
+fun interface LeanIXAuthClient {
 
     @PostMapping(value = ["/oauth2/token"], consumes = [APPLICATION_FORM_URLENCODED_VALUE])
     fun getToken(

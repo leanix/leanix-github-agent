@@ -3,24 +3,24 @@ package net.leanix.githubagent.services
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import net.leanix.githubagent.client.AuthClient
+import net.leanix.githubagent.client.LeanIXAuthClient
 import net.leanix.githubagent.config.LeanIXProperties
 import net.leanix.githubagent.dto.JwtDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AuthServiceTest {
+class LeanIXAuthServiceTest {
 
-    private lateinit var authService: AuthService
-    private val authClient: AuthClient = mockk()
+    private lateinit var leanIXAuthService: LeanIXAuthService
+    private val leanIXAuthClient: LeanIXAuthClient = mockk()
     private val leanIXProperties: LeanIXProperties = mockk(relaxed = true)
 
     @BeforeEach
     fun setUp() {
-        authService = AuthService(authClient, leanIXProperties)
-        every { leanIXProperties.auth.apiUserToken } returns "apiUserToken"
-        every { authClient.getToken(any(), any()) } returns JwtDto(
+        leanIXAuthService = LeanIXAuthService(leanIXAuthClient, leanIXProperties)
+        every { leanIXProperties.auth.technicalUserToken } returns "apiUserToken"
+        every { leanIXAuthClient.getToken(any(), any()) } returns JwtDto(
             "valid_access_token",
             false,
             "valid_access_token",
@@ -31,11 +31,11 @@ class AuthServiceTest {
 
     @Test
     fun `getBearerToken should return valid token`() {
-        val token = authService.getBearerToken()
+        val token = leanIXAuthService.getBearerToken()
 
         assertEquals("valid_access_token", token)
         verify {
-            authClient.getToken("Basic YXBpdG9rZW46YXBpVXNlclRva2Vu", "grant_type=client_credentials")
+            leanIXAuthClient.getToken("Basic YXBpdG9rZW46YXBpVXNlclRva2Vu", "grant_type=client_credentials")
         }
     }
 }

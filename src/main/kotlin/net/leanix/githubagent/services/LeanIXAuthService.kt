@@ -1,18 +1,18 @@
 package net.leanix.githubagent.services
 
-import net.leanix.githubagent.client.AuthClient
+import net.leanix.githubagent.client.LeanIXAuthClient
 import net.leanix.githubagent.config.LeanIXProperties
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class AuthService(
-    private val authClient: AuthClient,
+class LeanIXAuthService(
+    private val leanIXAuthClient: LeanIXAuthClient,
     private val leanIXProperties: LeanIXProperties
 ) {
 
     fun getBearerToken(): String {
-        return authClient.getToken(
+        return leanIXAuthClient.getToken(
             authorization = getBasicAuthHeader(),
             body = "grant_type=client_credentials",
         ).accessToken
@@ -20,6 +20,6 @@ class AuthService(
 
     private fun getBasicAuthHeader(): String =
         "Basic " + Base64.getEncoder().encodeToString(
-            "apitoken:${leanIXProperties.auth.apiUserToken}".toByteArray(),
+            "apitoken:${leanIXProperties.auth.technicalUserToken}".toByteArray(),
         )
 }
