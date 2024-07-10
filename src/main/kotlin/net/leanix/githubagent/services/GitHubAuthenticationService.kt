@@ -3,7 +3,6 @@ package net.leanix.githubagent.services
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
-import net.leanix.githubagent.config.LeanIXProperties
 import net.leanix.githubagent.exceptions.FailedToCreateJWTException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory

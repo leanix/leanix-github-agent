@@ -5,7 +5,6 @@ import io.github.resilience4j.retry.annotation.Retry
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.LeanIXAuthService
 import net.leanix.githubagent.shared.GitHubAgentProperties.GITHUB_AGENT_VERSION
-import net.leanix.githubagent.shared.GradlePropertiesConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
@@ -24,8 +23,7 @@ class WebSocketClientConfig(
     private val objectMapper: ObjectMapper,
     private val leanIXAuthService: LeanIXAuthService,
     private val leanIXProperties: LeanIXProperties,
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
-    private val gradlePropertiesConfiguration: GradlePropertiesConfiguration
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
 
     @Retry(name = "ws-init-session")
