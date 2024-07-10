@@ -1,6 +1,9 @@
 package net.leanix.githubagent.handler
 
+import net.leanix.githubagent.services.WebSocketService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
@@ -9,11 +12,17 @@ import org.springframework.stereotype.Component
 
 @Component
 class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
+    @Lazy
+    @Autowired
+    private lateinit var webSocketService: WebSocketService
 
     private val logger = LoggerFactory.getLogger(BrokerStompSessionHandler::class.java)
 
+    private var isConnected = false
+
     override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
         logger.info("connected to the server: ${session.sessionId}")
+        isConnected = true
         session.subscribe("/user/queue/repositories-string", this)
     }
 
@@ -30,6 +39,10 @@ class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
 
     override fun handleTransportError(session: StompSession, exception: Throwable) {
         logger.error("handleTransportError", exception)
-        logger.error(exception.message)
+        if (isConnected) {
+            logger.info("session closed")
+            isConnected = false
+            webSocketService.initSession()
+        }
     }
 }
