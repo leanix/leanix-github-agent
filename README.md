@@ -2,33 +2,33 @@
 
 # leanix-github-agent
 
-## About this project
+## About This Project
 
-SAP LeanIX agent to discover self built software in self-hosted GitHub Enterprise setups and communicate back to the SAP LeanIX workspace.
+The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterprise setups and communicates this information to an SAP LeanIX workspace.
 
-## Requirements and Setup
+## Prerequisites and Installation
 
-### Requirements
+### Prerequisites
 
-- Docker: The agent is packaged as a Docker image and requires Docker to run.
-- GitHub Enterprise Server: The agent is designed to interact with GitHub Enterprise Server. You need access to a GitHub Enterprise Server instance.
-- GitHub App: The agent operates as a GitHub App. You need to create a GitHub App in your GitHub Enterprise Server instance.
+- **Docker**: The agent is distributed as a Docker image. Docker is required to run it.
+- **GitHub Enterprise Server**: The agent interacts with GitHub Enterprise Server. You need access to a GitHub Enterprise Server instance.
+- **GitHub App**: The agent operates as a GitHub App. You need to create a GitHub App in your GitHub Enterprise Server instance.
 
-### Setup
+### Installation
 
-1. **Create a GitHub App**: Follow the instructions provided by GitHub to create a new GitHub App in your GitHub Enterprise Server instance.
+1. **Create a GitHub App**: Create a new GitHub App in your GitHub Enterprise Server instance. For details, refer to the [GitHub documentation](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/about-creating-github-apps).
 
-2. **Generate a Private Key**: In your GitHub App settings, generate a private key. This will download a PEM file, which the agent will use to authenticate to the GitHub Enterprise environment.
+2. **Generate a private key**: In your GitHub App settings, generate a private key. For instructions, refer to the [GitHub documentation](https://docs.github.com/en/enterprise-cloud@latest/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps). The agent will use the downloaded PEM file to authenticate with the GitHub Enterprise environment.
 
-3. **Install the App**: Install the app on all organizations you want the agent to have access to.
+3. **Install the GitHub App**: Install the app on all organizations that the agent should access. For instructions, refer to the [GitHub documentation](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app).
 
-4. **Configure the Agent**: The agent requires several environment variables to run. These could be passed to the Docker command when starting the agent. The required variables are:
+4. **Configure the agent**: The agent requires the following environment variables to run. Pass them to the Docker command when starting the agent.
 
     - `GITHUB_ENTERPRISE_BASE_URL`: The base URL of your GitHub Enterprise Server instance.
     - `GITHUB_APP_ID`: The ID of your GitHub App.
     - `PEM_FILE`: The path to your GitHub App's PEM file inside the Docker container.
 
-5. **Start the Agent**: Run the Docker command to start the agent. Replace `<variable>` with your actual values:
+5. **Start the agent**: To start the agent, run the following Docker command. Replace the variables in angle brackets with your actual values.
 
     ```bash
     docker run -p 8000:8080 \
@@ -39,17 +39,21 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
     leanix-github-agent
     ```
 
-   This command starts the agent and exposes it on port 8000. The agent will start scanning your for organisations and repositories.
+   This command starts the agent and exposes it on port 8000. The agent starts scanning your organizations and repositories.
 
-**Disclaimer**: The Docker image for the agent is not yet available. It will be available for pulling once a new version is published. Please check the [releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
+**Note**: The Docker image for the agent is currently unavailable. It will become available for download once a new version is released. Please check the [Releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
 
+## Support and Feedback
 
-## Support, Feedback, Contributing
+We welcome your feedback, feature suggestions, and bug reports via [GitHub issues](https://github.com/leanix/leanix-github-agent/issues).
 
-This project is open to feature requests/suggestions, bug reports etc. via [GitHub issues](https://github.com/leanix/leanix-github-agent/issues). Contribution and feedback are encouraged and always welcome. For more information about how to contribute, the project structure, as well as additional contribution information, see our [Contribution Guidelines](CONTRIBUTING.md).
+## Contributing
 
-## Security / Disclosure
-If you find any bug that may be a security problem, please follow our instructions at [in our security policy](https://github.com/leanix/leanix-github-agent/security/policy) on how to report it. Please do not create GitHub issues for security-related doubts or problems.
+We encourage contributions to this project. For details on how to contribute, the project structure, and other related information, refer to [Contributing](CONTRIBUTING.md).
+
+## Reporting Security Issues
+
+If you discover a potential security issue, follow our [Security Policy](https://github.com/leanix/leanix-github-agent/security/policy) for reporting. Please do not create GitHub issues for security-related matters.
 
 ## Code of Conduct
 
@@ -57,4 +61,4 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 ## Licensing
 
-Copyright 2024 SAP SE or an SAP affiliate company and leanix-github-agent contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/leanix/leanix-github-agent).
+Copyright 2024 by SAP SE or an SAP affiliate company and leanix-github-agent contributors. For detailed copyright and license information, see our [LICENSE](LICENSE). For specifics on third-party components and their respective licensing/copyright information, refer to the [REUSE tool](https://api.reuse.software/info/github.com/leanix/leanix-github-agent).
