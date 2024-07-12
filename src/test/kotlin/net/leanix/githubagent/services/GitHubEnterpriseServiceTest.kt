@@ -1,10 +1,11 @@
+package net.leanix.githubagent.services
+
 import io.mockk.every
 import io.mockk.mockk
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import net.leanix.githubagent.exceptions.UnableToConnectToGitHubEnterpriseException
-import net.leanix.githubagent.services.GitHubEnterpriseService
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

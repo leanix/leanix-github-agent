@@ -1,9 +1,8 @@
+package net.leanix.githubagent.services
+
 import io.mockk.every
 import io.mockk.mockk
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
-import net.leanix.githubagent.services.CachingService
-import net.leanix.githubagent.services.GitHubAuthenticationService
-import net.leanix.githubagent.services.GitHubEnterpriseService
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test

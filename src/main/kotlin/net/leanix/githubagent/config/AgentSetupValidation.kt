@@ -6,20 +6,20 @@ import org.springframework.stereotype.Component
 
 @Component
 class AgentSetupValidation(
-    private val githubEnterpriseProperties: GitHubEnterpriseProperties
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
 
     @PostConstruct
     fun validateConfiguration() {
         val missingProperties = mutableListOf<String>()
 
-        if (githubEnterpriseProperties.baseUrl.isBlank()) {
+        if (gitHubEnterpriseProperties.baseUrl.isBlank()) {
             missingProperties.add("GITHUB_ENTERPRISE_BASE_URL")
         }
-        if (githubEnterpriseProperties.githubAppId.isBlank()) {
+        if (gitHubEnterpriseProperties.gitHubAppId.isBlank()) {
             missingProperties.add("GITHUB_ENTERPRISE_GITHUB_APP_ID")
         }
-        if (githubEnterpriseProperties.pemFile.isBlank()) {
+        if (gitHubEnterpriseProperties.pemFile.isBlank()) {
             missingProperties.add("GITHUB_ENTERPRISE_PEM_FILE")
         }
 

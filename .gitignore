@@ -1,45 +1,38 @@
-.idea
-.vscode
-
-# Connectors
-**/node_modules
-**/dist
-**/.env
-**/combined.log
-**/error.log
-**/coverage
-
 ### OSX ###
 .DS_Store
 
 ### Server ###
-HELP.md
-.gradle
-build/
+server/HELP.md
+server/.gradle
+server/build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+!**/server/src/main/**/build/
+!**/server/src/test/**/build/
 
 ### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+server/.apt_generated
+server/.classpath
+server/.factorypath
+server/.project
+server/.settings
+server/.springBeans
+server/.sts4-cache
+server/bin/
+!**/server/src/main/**/bin/
+!**/server/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+.idea
 *.iws
 *.iml
 *.ipr
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+!**/server/src/main/**/out/
+!**/server/src/test/**/out/
 
+
+### Develpment files ###
+db-data/
 
 ### K8s ###
 k8s/*.d.ts
@@ -51,4 +44,15 @@ k8s/imports
 k8s/k8s-deployment
 k8s/__snapshots__
 
+### connectors
+**/node_modules
 
+# build
+.gradle/
+build/
+
+### local files ###
+**/application-local.yaml
+**/application-local.yml
+**/bom.json
+**/bom.xml

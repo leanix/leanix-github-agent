@@ -33,6 +33,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.8.8")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
 
@@ -41,7 +43,9 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.2")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("com.ninja-squad:springmockk:4.0.2"){
+        exclude(module = "mockito-core")
+    }
 }
 
 configurations.all {
@@ -83,5 +87,11 @@ tasks.jacocoTestReport {
     reports {
         xml.required.set(true)
         xml.outputLocation.set(File("${projectDir}/build/jacocoXml/jacocoTestReport.xml"))
+    }
+}
+
+tasks.processResources {
+    doLast {
+        file("build/resources/main/gradle.properties").writeText("version=${project.version}")
     }
 }

@@ -7,7 +7,12 @@ import org.springframework.cloud.openfeign.EnableFeignClients
 
 @SpringBootApplication
 @EnableFeignClients
-@EnableConfigurationProperties(value = [net.leanix.githubagent.config.GitHubEnterpriseProperties::class])
+@EnableConfigurationProperties(
+    value = [
+        net.leanix.githubagent.config.GitHubEnterpriseProperties::class,
+        net.leanix.githubagent.config.LeanIXProperties::class
+    ]
+)
 class GitHubAgentApplication
 
 fun main() {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CachingService(
-    private val githubEnterpriseProperties: GitHubEnterpriseProperties
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
 
     data class CacheValue(val value: Any, val expiry: Long?)
@@ -55,7 +55,7 @@ class CachingService(
 
     @PostConstruct
     private fun init() {
-        set("baseUrl", githubEnterpriseProperties.baseUrl, null)
-        set("githubAppId", githubEnterpriseProperties.githubAppId, null)
+        set("baseUrl", gitHubEnterpriseProperties.baseUrl, null)
+        set("githubAppId", gitHubEnterpriseProperties.gitHubAppId, null)
     }
 }
