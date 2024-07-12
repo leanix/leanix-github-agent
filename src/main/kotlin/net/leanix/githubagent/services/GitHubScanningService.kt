@@ -30,8 +30,7 @@ class GitHubScanningService(
     ) {
         installations.forEach { installation ->
             val installationToken = gitHubClient.createInstallationToken(installation.id, "Bearer $jwtToken").token
-            cachingService.set("installationToken:${installation.id}", installationToken, null)
-            // cachingService.set("installationToken:${installation.id}", installationToken, 3600L)
+            cachingService.set("installationToken:${installation.id}", installationToken, 3600L)
         }
     }
 
