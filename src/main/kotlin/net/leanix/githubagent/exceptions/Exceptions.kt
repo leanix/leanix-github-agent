@@ -6,3 +6,4 @@ class GitHubEnterpriseConfigurationMissingException(properties: String) : Runtim
 class GitHubAppInsufficientPermissionsException(message: String) : RuntimeException(message)
 class FailedToCreateJWTException(message: String) : RuntimeException(message)
 class UnableToConnectToGitHubEnterpriseException(message: String) : RuntimeException(message)
+class JwtTokenNotFound : RuntimeException("JWT token not found")
