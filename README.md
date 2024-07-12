@@ -61,4 +61,4 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 ## Licensing
 
-Copyright 2024 by SAP SE or an SAP affiliate company and leanix-github-agent contributors. For detailed copyright and license information, see our [LICENSE](LICENSE). For specifics on third-party components and their respective licensing/copyright information, refer to the [REUSE tool](https://api.reuse.software/info/github.com/leanix/leanix-github-agent).
+Copyright 2024 SAP SE or an SAP affiliate company and leanix-github-agent contributors. Please see our [LICENSE](LICENSE) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/leanix/leanix-github-agent).
