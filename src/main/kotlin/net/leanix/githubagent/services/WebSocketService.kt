@@ -17,4 +17,8 @@ class WebSocketService(
         logger.info("init session")
         stompSession = webSocketClientConfig.initSession()
     }
+
+    fun sendMessage(topic: String, data: Any) {
+        stompSession!!.send(topic, data)
+    }
 }

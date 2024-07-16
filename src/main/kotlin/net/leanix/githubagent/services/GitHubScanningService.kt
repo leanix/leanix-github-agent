@@ -10,12 +10,13 @@ import org.springframework.stereotype.Service
 class GitHubScanningService(
     private val gitHubClient: GitHubClient,
     private val cachingService: CachingService,
+    private val webSocketService: WebSocketService
 ) {
     fun scanGitHubResources() {
         val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
         val installations = getInstallations(jwtToken.toString())
-        generateOrganizations(installations)
-        // send organizations to backend
+        val organizations = generateOrganizations(installations)
+        webSocketService.sendMessage("/app/ghe/organizations", organizations)
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
