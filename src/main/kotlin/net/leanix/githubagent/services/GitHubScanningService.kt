@@ -4,6 +4,7 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,11 +13,18 @@ class GitHubScanningService(
     private val cachingService: CachingService,
     private val webSocketService: WebSocketService
 ) {
+    private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
+
     fun scanGitHubResources() {
-        val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
-        val installations = getInstallations(jwtToken.toString())
-        val organizations = generateOrganizations(installations)
-        webSocketService.sendMessage("/app/ghe/organizations", organizations)
+        runCatching {
+            val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
+            val installations = getInstallations(jwtToken.toString())
+            val organizations = generateOrganizations(installations)
+            webSocketService.sendMessage("/app/ghe/organizations", organizations)
+        }.onFailure {
+            logger.error("Error while scanning GitHub resources")
+            throw it
+        }
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
