@@ -26,6 +26,7 @@ data class Account(
 data class Organization(
     @JsonProperty("login") val login: String,
     @JsonProperty("id") val id: Int,
+    @JsonProperty("node_id") val nodeId: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

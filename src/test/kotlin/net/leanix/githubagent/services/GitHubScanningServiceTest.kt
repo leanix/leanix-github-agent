@@ -36,7 +36,7 @@ class GitHubScanningServiceTest {
         every { gitHubClient.createInstallationToken(1, any()) } returns
             InstallationTokenResponse("testToken", "2024-01-01T00:00:00Z", mapOf(), "all")
         every { cachingService.set(any(), any(), any()) } returns Unit
-        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
+        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1, "testNodeId"))
         every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
             repositories = emptyList(),
             hasNextPage = false,
