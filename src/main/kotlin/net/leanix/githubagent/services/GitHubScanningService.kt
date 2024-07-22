@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service
 class GitHubScanningService(
     private val gitHubClient: GitHubClient,
     private val cachingService: CachingService,
-    private val webSocketService: WebSocketService
+    private val webSocketService: WebSocketService,
+    private val gitHubGraphQLService: GitHubGraphQLService
 ) {
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
 
@@ -19,8 +20,11 @@ class GitHubScanningService(
         runCatching {
             val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
             val installations = getInstallations(jwtToken.toString())
-            val organizations = generateOrganizations(installations)
-            webSocketService.sendMessage("/app/ghe/organizations", organizations)
+            fetchAndBroadcastOrganisationsData(installations)
+            installations.forEach { installation ->
+                logger.info("Fetching repositories for organisation ${installation.account.login}")
+                fetchAndBroadcastRepositoriesData(installation)
+            }
         }.onFailure {
             logger.error("Error while scanning GitHub resources")
             throw it
@@ -43,17 +47,37 @@ class GitHubScanningService(
         }
     }
 
-    private fun generateOrganizations(
+    private fun fetchAndBroadcastOrganisationsData(
         installations: List<Installation>
-    ): List<OrganizationDto> {
+    ) {
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
+        println(installationToken)
         val organizations = gitHubClient.getOrganizations("Bearer $installationToken")
-        return organizations.map { organization ->
-            if (installations.find { it.account.login == organization.login } != null) {
-                OrganizationDto(organization.id, organization.login, true)
-            } else {
-                OrganizationDto(organization.id, organization.login, false)
+            .map { organization ->
+                if (installations.find { it.account.login == organization.login } != null) {
+                    OrganizationDto(organization.id, organization.login, true)
+                } else {
+                    OrganizationDto(organization.id, organization.login, false)
+                }
             }
-        }
+        webSocketService.sendMessage("/app/ghe/organizations", organizations)
+    }
+
+    private fun fetchAndBroadcastRepositoriesData(installation: Installation) {
+        val installationToken = cachingService.get("installationToken:${installation.id}").toString()
+        var cursor: String? = null
+        var totalRepos = 0
+        var page = 1
+        do {
+            val repositoriesPage = gitHubGraphQLService.getRepositories(
+                token = installationToken,
+                cursor = cursor
+            )
+            webSocketService.sendMessage("/app/ghe/repositories", repositoriesPage.repositories)
+            cursor = repositoriesPage.cursor
+            totalRepos += repositoriesPage.repositories.size
+            page++
+        } while (repositoriesPage.hasNextPage)
+        logger.info("Fetched $totalRepos repositories")
     }
 }

@@ -1,0 +1,38 @@
+query GetRepositories($pageCount: Int!, $cursor: String, $expression: String!) {
+    viewer {
+        repositories(first: $pageCount, after: $cursor) {
+            pageInfo {
+                endCursor
+                hasNextPage
+            }
+            nodes {
+                id
+                name
+                description
+                url
+                owner{
+                    id
+                  login
+                }
+                languages(first: 10) {
+                    nodes {
+                        name
+                    }
+                }
+                repositoryTopics(first:10) {
+                    nodes {
+                        topic {
+                            name
+                        }
+                    }
+                }
+                object(expression: $expression) {
+                    __typename
+                    ... on Blob {
+                        text
+                    }
+                }
+            }
+        }
+    }
+}

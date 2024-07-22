@@ -2,6 +2,7 @@ github-enterprise:
   baseUrl: ${GITHUB_ENTERPRISE_BASE_URL:}
   githubAppId: ${GITHUB_APP_ID:}
   pemFile: ${PEM_FILE:}
+  manifestFilePath: ${MANIFEST_FILE_PATH:}
 leanix:
   base-url: https://${LEANIX_DOMAIN}/services
   ws-base-url: wss://${LEANIX_DOMAIN}/services
