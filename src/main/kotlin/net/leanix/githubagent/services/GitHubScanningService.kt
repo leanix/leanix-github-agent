@@ -58,9 +58,9 @@ class GitHubScanningService(
         val organizations = gitHubClient.getOrganizations("Bearer $installationToken")
             .map { organization ->
                 if (installations.find { it.account.login == organization.login } != null) {
-                    OrganizationDto(organization.id, organization.nodeId, organization.login, true)
+                    OrganizationDto(organization.id, organization.login, true)
                 } else {
-                    OrganizationDto(organization.id, organization.nodeId, organization.login, false)
+                    OrganizationDto(organization.id, organization.login, false)
                 }
             }
         logger.info("Sending organizations data")
