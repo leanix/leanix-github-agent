@@ -55,7 +55,6 @@ class GitHubScanningService(
         installations: List<Installation>
     ) {
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
-        println(installationToken)
         val organizations = gitHubClient.getOrganizations("Bearer $installationToken")
             .map { organization ->
                 if (installations.find { it.account.login == organization.login } != null) {
@@ -64,6 +63,7 @@ class GitHubScanningService(
                     OrganizationDto(organization.id, organization.nodeId, organization.login, false)
                 }
             }
+        logger.info("Sending organizations data")
         webSocketService.sendMessage(WS_ORGANIZATIONS_TOPIC, organizations)
     }
 
@@ -77,6 +77,7 @@ class GitHubScanningService(
                 token = installationToken,
                 cursor = cursor
             )
+            logger.info("Sending page $page of repositories")
             webSocketService.sendMessage(WS_REPOSITORIES_TOPIC, repositoriesPage.repositories)
             cursor = repositoriesPage.cursor
             totalRepos += repositoriesPage.repositories.size
