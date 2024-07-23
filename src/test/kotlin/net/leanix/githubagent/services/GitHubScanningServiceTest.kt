@@ -9,6 +9,8 @@ import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.PagedRepositories
+import net.leanix.githubagent.dto.RepositoryDto
+import net.leanix.githubagent.dto.RepositoryOrganizationDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -56,5 +58,27 @@ class GitHubScanningServiceTest {
         assertThrows<JwtTokenNotFound> {
             gitHubScanningService.scanGitHubResources()
         }
+    }
+
+    @Test
+    fun `scanGitHubResources should send repositories over WebSocket`() {
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    organization = RepositoryOrganizationDto(id = "org1", name = "TestOrg"),
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                    manifest = "dependencies { implementation 'com.example:example-lib:1.0.0' }"
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        gitHubScanningService.scanGitHubResources()
+        verify { webSocketService.sendMessage(eq("/app/ghe/repositories"), any()) }
     }
 }

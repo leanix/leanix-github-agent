@@ -14,6 +14,10 @@ class GitHubScanningService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService
 ) {
+    companion object {
+        const val WS_ORGANIZATIONS_TOPIC = "/app/ghe/organizations"
+        const val WS_REPOSITORIES_TOPIC = "/app/ghe/repositories"
+    }
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
 
     fun scanGitHubResources() {
@@ -60,7 +64,7 @@ class GitHubScanningService(
                     OrganizationDto(organization.id, organization.nodeId, organization.login, false)
                 }
             }
-        webSocketService.sendMessage("/app/ghe/organizations", organizations)
+        webSocketService.sendMessage(WS_ORGANIZATIONS_TOPIC, organizations)
     }
 
     private fun fetchAndBroadcastRepositoriesData(installation: Installation) {
@@ -73,7 +77,7 @@ class GitHubScanningService(
                 token = installationToken,
                 cursor = cursor
             )
-            webSocketService.sendMessage("/app/ghe/repositories", repositoriesPage.repositories)
+            webSocketService.sendMessage(WS_REPOSITORIES_TOPIC, repositoriesPage.repositories)
             cursor = repositoriesPage.cursor
             totalRepos += repositoriesPage.repositories.size
             page++
