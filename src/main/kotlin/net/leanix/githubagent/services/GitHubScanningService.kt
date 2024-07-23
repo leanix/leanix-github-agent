@@ -24,10 +24,10 @@ class GitHubScanningService(
         runCatching {
             val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
             val installations = getInstallations(jwtToken.toString())
-            fetchAndBroadcastOrganisationsData(installations)
+            fetchAndSendOrganisationsData(installations)
             installations.forEach { installation ->
                 logger.info("Fetching repositories for organisation ${installation.account.login}")
-                fetchAndBroadcastRepositoriesData(installation)
+                fetchAndSendRepositoriesData(installation)
             }
         }.onFailure {
             logger.error("Error while scanning GitHub resources")
@@ -51,7 +51,7 @@ class GitHubScanningService(
         }
     }
 
-    private fun fetchAndBroadcastOrganisationsData(
+    private fun fetchAndSendOrganisationsData(
         installations: List<Installation>
     ) {
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
@@ -67,7 +67,7 @@ class GitHubScanningService(
         webSocketService.sendMessage(WS_ORGANIZATIONS_TOPIC, organizations)
     }
 
-    private fun fetchAndBroadcastRepositoriesData(installation: Installation) {
+    private fun fetchAndSendRepositoriesData(installation: Installation) {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
         var cursor: String? = null
         var totalRepos = 0
