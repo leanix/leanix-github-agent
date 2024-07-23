@@ -20,7 +20,7 @@ class GitHubGraphQLService(
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger(GitHubGraphQLService::class.java)
-        private const val PAGE_COUNT = 100
+        private const val PAGE_COUNT = 20
         private const val MANIFEST_FILE_NAME = "leanix.yaml"
     }
 
