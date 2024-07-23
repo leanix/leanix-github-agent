@@ -11,7 +11,7 @@ import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
-import net.leanix.githubbroker.connector.adapter.graphql.data.enums.RepositoryVisibility
+import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -72,7 +72,7 @@ class GitHubScanningServiceTest {
                 RepositoryDto(
                     id = "repo1",
                     name = "TestRepo",
-                    fullName = "testOrg/testRepo",
+                    organizationName = "testOrg",
                     description = "A test repository",
                     url = "https://github.com/testRepo",
                     isArchived = false,

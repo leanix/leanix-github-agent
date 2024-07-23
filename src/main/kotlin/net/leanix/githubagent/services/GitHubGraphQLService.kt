@@ -6,8 +6,8 @@ import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
-import net.leanix.githubbroker.connector.adapter.graphql.data.GetRepositories
-import net.leanix.githubbroker.connector.adapter.graphql.data.getrepositories.Blob
+import net.leanix.githubagent.graphql.data.GetRepositories
+import net.leanix.githubagent.graphql.data.getrepositories.Blob
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -52,7 +52,7 @@ class GitHubGraphQLService(
                     RepositoryDto(
                         id = it!!.id,
                         name = it.name,
-                        fullName = it.nameWithOwner,
+                        organizationName = it.owner.login,
                         description = it.description,
                         url = it.url,
                         isArchived = it.isArchived,

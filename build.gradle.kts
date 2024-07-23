@@ -53,7 +53,7 @@ dependencies {
 }
 
 val generateGitHubGraphQLClient by tasks.creating(GraphQLGenerateClientTask::class)  {
-    packageName.set("net.leanix.githubbroker.connector.adapter.graphql.data")
+    packageName.set("net.leanix.githubagent.graphql.data")
     schemaFile = file("${project.projectDir}/src/main/resources/schemas/schema.docs-enterprise.graphql")
     queryFileDirectory = file("${project.projectDir}/src/main/resources/graphql")
 }
