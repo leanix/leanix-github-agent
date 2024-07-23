@@ -34,7 +34,7 @@ class GitHubGraphQLService(
             GetRepositories.Variables(
                 pageCount = PAGE_COUNT,
                 cursor = cursor,
-                expression = "HEAD:${gitHubEnterpriseProperties.manifestFilePath}$MANIFEST_FILE_NAME"
+                expression = "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}$MANIFEST_FILE_NAME"
             )
         )
 

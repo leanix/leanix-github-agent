@@ -7,5 +7,5 @@ data class GitHubEnterpriseProperties(
     val baseUrl: String,
     val gitHubAppId: String,
     val pemFile: String,
-    val manifestFilePath: String,
+    val manifestFileDirectory: String,
 )
