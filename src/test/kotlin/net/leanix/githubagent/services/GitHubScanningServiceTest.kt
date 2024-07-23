@@ -15,6 +15,7 @@ import net.leanix.githubbroker.connector.adapter.graphql.data.enums.RepositoryVi
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.UUID
 
 class GitHubScanningServiceTest {
 
@@ -28,6 +29,7 @@ class GitHubScanningServiceTest {
         webSocketService,
         gitHubGraphQLService
     )
+    private val runId = UUID.randomUUID()
 
     @BeforeEach
     fun setup() {
@@ -49,8 +51,9 @@ class GitHubScanningServiceTest {
 
     @Test
     fun `scanGitHubResources should send organizations over WebSocket`() {
+        every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(any(), any()) }
+        verify { webSocketService.sendMessage(eq("/ghe/$runId/organizations"), any()) }
     }
 
     @Test
@@ -63,6 +66,7 @@ class GitHubScanningServiceTest {
 
     @Test
     fun `scanGitHubResources should send repositories over WebSocket`() {
+        every { cachingService.get("runId") } returns runId
         every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
             repositories = listOf(
                 RepositoryDto(
@@ -83,6 +87,6 @@ class GitHubScanningServiceTest {
             cursor = null
         )
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(any(), any()) }
+        verify { webSocketService.sendMessage(eq("/ghe/$runId/repositories"), any()) }
     }
 }
