@@ -27,6 +27,7 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
     - `GITHUB_ENTERPRISE_BASE_URL`: The base URL of your GitHub Enterprise Server instance.
     - `GITHUB_APP_ID`: The ID of your GitHub App.
     - `PEM_FILE`: The path to your GitHub App's PEM file inside the Docker container.
+    - `MANIFEST_FILE_DIRECTORY`: The directory path where the manifest files are located in every repository. For more details on the manifest file: [Microservice Discovery Through a Manifest File](https://docs-eam.leanix.net/reference/microservice-discovery-manifest-file)
 
 5. **Start the Agent**: Run the Docker command to start the agent. Replace `<variable>` with your actual values:
 
@@ -36,6 +37,7 @@ SAP LeanIX agent to discover self built software in self-hosted GitHub Enterpris
     -e GITHUB_ENTERPRISE_BASE_URL=<github_enterprise_base_url> \
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
+    -e MANIFEST_FILE_DIRECTORY=<manifest_file_directory> \
     leanix-github-agent
     ```
 
