@@ -8,12 +8,12 @@ query GetRepositories($pageCount: Int!, $cursor: String, $expression: String!) {
             nodes {
                 id
                 name
+                nameWithOwner
                 description
                 url
-                owner{
-                    id
-                  login
-                }
+                isArchived
+                visibility
+                updatedAt
                 languages(first: 10) {
                     nodes {
                         name

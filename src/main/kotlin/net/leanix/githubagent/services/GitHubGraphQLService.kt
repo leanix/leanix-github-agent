@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
-import net.leanix.githubagent.dto.RepositoryOrganizationDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubbroker.connector.adapter.graphql.data.GetRepositories
 import net.leanix.githubbroker.connector.adapter.graphql.data.getrepositories.Blob
@@ -53,15 +52,15 @@ class GitHubGraphQLService(
                     RepositoryDto(
                         id = it!!.id,
                         name = it.name,
+                        fullName = it.nameWithOwner,
                         description = it.description,
                         url = it.url,
-                        organization = RepositoryOrganizationDto(
-                            id = it.owner.id,
-                            name = it.owner.login
-                        ),
+                        isArchived = it.isArchived,
+                        visibility = it.visibility,
+                        updatedAt = it.updatedAt,
                         languages = it.languages!!.nodes!!.map { language -> language!!.name },
                         topics = it.repositoryTopics.nodes!!.map { topic -> topic!!.topic.name },
-                        manifest = (it.`object` as Blob?)?.text
+                        manifestFileContent = (it.`object` as Blob?)?.text
                     )
                 }
             )

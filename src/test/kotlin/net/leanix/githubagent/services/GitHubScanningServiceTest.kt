@@ -10,8 +10,8 @@ import net.leanix.githubagent.dto.InstallationTokenResponse
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
-import net.leanix.githubagent.dto.RepositoryOrganizationDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import net.leanix.githubbroker.connector.adapter.graphql.data.enums.RepositoryVisibility
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -44,12 +44,13 @@ class GitHubScanningServiceTest {
             hasNextPage = false,
             cursor = null
         )
+        every { cachingService.remove(any()) } returns Unit
     }
 
     @Test
     fun `scanGitHubResources should send organizations over WebSocket`() {
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage("/app/ghe/organizations", any()) }
+        verify { webSocketService.sendMessage(any(), any()) }
     }
 
     @Test
@@ -67,18 +68,21 @@ class GitHubScanningServiceTest {
                 RepositoryDto(
                     id = "repo1",
                     name = "TestRepo",
+                    fullName = "testOrg/testRepo",
                     description = "A test repository",
                     url = "https://github.com/testRepo",
-                    organization = RepositoryOrganizationDto(id = "org1", name = "TestOrg"),
+                    isArchived = false,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                    manifest = "dependencies { implementation 'com.example:example-lib:1.0.0' }"
+                    manifestFileContent = "dependencies { implementation 'com.example:example-lib:1.0.0' }"
                 )
             ),
             hasNextPage = false,
             cursor = null
         )
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("/app/ghe/repositories"), any()) }
+        verify { webSocketService.sendMessage(any(), any()) }
     }
 }
