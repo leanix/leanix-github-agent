@@ -22,7 +22,7 @@ class CachingService(
                 value: CacheValue,
                 currentTime: Long
             ): Long {
-                return value.expiry ?: Long.MAX_VALUE
+                return value.expiry?.times(1_000_000_000) ?: Long.MAX_VALUE
             }
 
             override fun expireAfterUpdate(
@@ -31,7 +31,7 @@ class CachingService(
                 currentTime: Long,
                 currentDuration: Long
             ): Long {
-                return value.expiry ?: Long.MAX_VALUE
+                return value.expiry?.times(1_000_000_000) ?: Long.MAX_VALUE
             }
 
             override fun expireAfterRead(
