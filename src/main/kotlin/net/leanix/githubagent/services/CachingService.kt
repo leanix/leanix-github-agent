@@ -53,6 +53,10 @@ class CachingService(
         return cache.getIfPresent(key)?.value
     }
 
+    fun remove(key: String) {
+        cache.invalidate(key)
+    }
+
     @PostConstruct
     private fun init() {
         set("baseUrl", gitHubEnterpriseProperties.baseUrl, null)

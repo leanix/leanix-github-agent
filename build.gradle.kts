@@ -1,6 +1,9 @@
+import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
+
 plugins {
-    id("org.springframework.boot") version "3.3.1"
+    id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.5"
+    id("com.expediagroup.graphql") version "7.0.2"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
     kotlin("jvm") version "1.9.21"
     kotlin("plugin.spring") version "1.9.21"
@@ -37,6 +40,7 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
+    implementation("com.expediagroup:graphql-kotlin-spring-client:7.0.2")
 
     // Dependencies for generating JWT token
     implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
@@ -46,6 +50,12 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:4.0.2"){
         exclude(module = "mockito-core")
     }
+}
+
+val generateGitHubGraphQLClient by tasks.creating(GraphQLGenerateClientTask::class)  {
+    packageName.set("net.leanix.githubagent.graphql.data")
+    schemaFile = file("${project.projectDir}/src/main/resources/schemas/schema.docs-enterprise.graphql")
+    queryFileDirectory = file("${project.projectDir}/src/main/resources/graphql")
 }
 
 configurations.all {
