@@ -64,7 +64,7 @@ class GitHubScanningService(
                 }
             }
         logger.info("Sending organizations data")
-        webSocketService.sendMessage("/ghe/${cachingService.get("runId")}/organizations", organizations)
+        webSocketService.sendMessage("/app/ghe/${cachingService.get("runId")}/organizations", organizations)
     }
 
     private fun fetchAndSendRepositoriesData(installation: Installation) {
@@ -79,7 +79,7 @@ class GitHubScanningService(
             )
             logger.info("Sending page $page of repositories")
             webSocketService.sendMessage(
-                "/ghe/${cachingService.get("runId")}/repositories",
+                "/app/ghe/${cachingService.get("runId")}/repositories",
                 repositoriesPage.repositories
             )
             cursor = repositoriesPage.cursor

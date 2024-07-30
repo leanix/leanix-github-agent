@@ -53,7 +53,7 @@ class GitHubScanningServiceTest {
     fun `scanGitHubResources should send organizations over WebSocket`() {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("/ghe/$runId/organizations"), any()) }
+        verify { webSocketService.sendMessage(eq("/app/ghe/$runId/organizations"), any()) }
     }
 
     @Test
@@ -87,6 +87,6 @@ class GitHubScanningServiceTest {
             cursor = null
         )
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("/ghe/$runId/repositories"), any()) }
+        verify { webSocketService.sendMessage(eq("/app/ghe/$runId/repositories"), any()) }
     }
 }
