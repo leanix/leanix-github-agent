@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - feature/CID-2862/create-a-seperate-GH-action-to-release-dev-docker-image
+      - "feature/**"
   workflow_dispatch:
 
 jobs:
