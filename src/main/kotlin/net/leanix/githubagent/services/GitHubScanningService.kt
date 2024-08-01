@@ -4,6 +4,7 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -64,7 +65,7 @@ class GitHubScanningService(
                 }
             }
         logger.info("Sending organizations data")
-        webSocketService.sendMessage("/app/ghe/${cachingService.get("runId")}/organizations", organizations)
+        webSocketService.sendMessage("$TOPIC_PREFIX${cachingService.get("runId")}/organizations", organizations)
     }
 
     private fun fetchAndSendRepositoriesData(installation: Installation) {
@@ -79,7 +80,7 @@ class GitHubScanningService(
             )
             logger.info("Sending page $page of repositories")
             webSocketService.sendMessage(
-                "/app/ghe/${cachingService.get("runId")}/repositories",
+                "$TOPIC_PREFIX${cachingService.get("runId")}/repositories",
                 repositoriesPage.repositories
             )
             cursor = repositoriesPage.cursor
