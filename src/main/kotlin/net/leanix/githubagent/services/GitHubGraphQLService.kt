@@ -7,6 +7,7 @@ import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
+import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
 import net.leanix.githubagent.graphql.data.getrepositories.Blob
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -20,7 +21,7 @@ class GitHubGraphQLService(
     companion object {
         private val logger = LoggerFactory.getLogger(GitHubGraphQLService::class.java)
         private const val PAGE_COUNT = 20
-        private const val MANIFEST_FILE_NAME = "leanix.yaml"
+        const val MANIFEST_FILE_NAME = "leanix.yaml"
     }
 
     fun getRepositories(
@@ -64,6 +65,32 @@ class GitHubGraphQLService(
                     )
                 }
             )
+        }
+    }
+
+    fun getFileContent(
+        repositoryFullName: String,
+        filePath: String,
+        token: String
+    ): String? {
+        val client = buildGitHubGraphQLClient(token)
+
+        val query = GetRepositoryManifestContent(
+            GetRepositoryManifestContent.Variables(
+                repositoryFullName = repositoryFullName,
+                filePath = filePath
+            )
+        )
+
+        val result = runBlocking {
+            client.execute(query)
+        }
+
+        return if (result.errors != null && result.errors!!.isNotEmpty()) {
+            logger.error("Error getting file content: ${result.errors}")
+            throw GraphQLApiException(result.errors!!)
+        } else {
+            (result.data!!.viewer.repository!!.`object` as Blob?)?.text
         }
     }
 

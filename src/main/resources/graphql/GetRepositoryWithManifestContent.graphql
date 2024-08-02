@@ -1,0 +1,12 @@
+query GetRepositoryManifestContent($repositoryFullName: String!, $filePath: String!) {
+   viewer{
+        repository(name: $repositoryFullName) {
+            object(expression: $filePath) {
+                __typename
+                ... on Blob {
+                    text
+                }
+            }
+        }
+   }
+}
