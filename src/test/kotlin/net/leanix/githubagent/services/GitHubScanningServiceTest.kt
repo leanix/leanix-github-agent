@@ -12,6 +12,7 @@ import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
+import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -53,7 +54,7 @@ class GitHubScanningServiceTest {
     fun `scanGitHubResources should send organizations over WebSocket`() {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("/app/ghe/$runId/organizations"), any()) }
+        verify { webSocketService.sendMessage(eq("$TOPIC_PREFIX$runId/organizations"), any()) }
     }
 
     @Test
@@ -87,6 +88,6 @@ class GitHubScanningServiceTest {
             cursor = null
         )
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("/app/ghe/$runId/repositories"), any()) }
+        verify { webSocketService.sendMessage(eq("$TOPIC_PREFIX$runId/repositories"), any()) }
     }
 }
