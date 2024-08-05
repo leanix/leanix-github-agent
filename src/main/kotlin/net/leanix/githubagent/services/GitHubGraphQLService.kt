@@ -69,7 +69,8 @@ class GitHubGraphQLService(
     }
 
     fun getFileContent(
-        repositoryFullName: String,
+        owner: String,
+        repositoryName: String,
         filePath: String,
         token: String
     ): String? {
@@ -77,7 +78,8 @@ class GitHubGraphQLService(
 
         val query = GetRepositoryManifestContent(
             GetRepositoryManifestContent.Variables(
-                repositoryFullName = repositoryFullName,
+                owner = owner,
+                repositoryName = repositoryName,
                 filePath = filePath
             )
         )
@@ -90,7 +92,10 @@ class GitHubGraphQLService(
             logger.error("Error getting file content: ${result.errors}")
             throw GraphQLApiException(result.errors!!)
         } else {
-            (result.data!!.viewer.repository!!.`object` as Blob?)?.text
+            (
+                result.data!!.repository!!.`object`
+                    as net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob?
+                )?.text
         }
     }
 

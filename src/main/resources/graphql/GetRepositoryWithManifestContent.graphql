@@ -1,12 +1,10 @@
-query GetRepositoryManifestContent($repositoryFullName: String!, $filePath: String!) {
-   viewer{
-        repository(name: $repositoryFullName) {
-            object(expression: $filePath) {
-                __typename
-                ... on Blob {
-                    text
-                }
+query GetRepositoryManifestContent($owner: String!, $repositoryName: String!, $filePath: String!) {
+   repository(owner: $owner, name: $repositoryName) {
+        object(expression: $filePath) {
+            __typename
+            ... on Blob {
+                text
             }
         }
-   }
+    }
 }
