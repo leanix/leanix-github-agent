@@ -13,7 +13,8 @@ class GitHubScanningService(
     private val gitHubClient: GitHubClient,
     private val cachingService: CachingService,
     private val webSocketService: WebSocketService,
-    private val gitHubGraphQLService: GitHubGraphQLService
+    private val gitHubGraphQLService: GitHubGraphQLService,
+    private val gitHubAuthenticationService: GitHubAuthenticationService
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -37,18 +38,8 @@ class GitHubScanningService(
 
     private fun getInstallations(jwtToken: String): List<Installation> {
         val installations = gitHubClient.getInstallations("Bearer $jwtToken")
-        generateAndCacheInstallationTokens(installations, jwtToken)
+        gitHubAuthenticationService.generateAndCacheInstallationTokens(installations, jwtToken)
         return installations
-    }
-
-    private fun generateAndCacheInstallationTokens(
-        installations: List<Installation>,
-        jwtToken: String
-    ) {
-        installations.forEach { installation ->
-            val installationToken = gitHubClient.createInstallationToken(installation.id, "Bearer $jwtToken").token
-            cachingService.set("installationToken:${installation.id}", installationToken, 3600L)
-        }
     }
 
     private fun fetchAndSendOrganisationsData(

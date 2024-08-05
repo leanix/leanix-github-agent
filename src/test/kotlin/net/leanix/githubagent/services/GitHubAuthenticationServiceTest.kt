@@ -2,6 +2,7 @@ package net.leanix.githubagent.services
 
 import io.mockk.every
 import io.mockk.mockk
+import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -16,11 +17,13 @@ class GitHubAuthenticationServiceTest {
     private val githubEnterpriseProperties = mockk<GitHubEnterpriseProperties>()
     private val resourceLoader = mockk<ResourceLoader>()
     private val gitHubEnterpriseService = mockk<GitHubEnterpriseService>()
+    private val gitHubClient = mockk<GitHubClient>()
     private val githubAuthenticationService = GitHubAuthenticationService(
         cachingService,
         githubEnterpriseProperties,
         resourceLoader,
-        gitHubEnterpriseService
+        gitHubEnterpriseService,
+        gitHubClient
     )
 
     @Test

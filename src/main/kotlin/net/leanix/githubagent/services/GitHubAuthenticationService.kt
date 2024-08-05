@@ -2,8 +2,11 @@ package net.leanix.githubagent.services
 
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
+import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.exceptions.FailedToCreateJWTException
+import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ResourceLoader
@@ -24,7 +27,8 @@ class GitHubAuthenticationService(
     private val cachingService: CachingService,
     private val githubEnterpriseProperties: GitHubEnterpriseProperties,
     private val resourceLoader: ResourceLoader,
-    private val gitHubEnterpriseService: GitHubEnterpriseService
+    private val gitHubEnterpriseService: GitHubEnterpriseService,
+    private val gitHubClient: GitHubClient,
 ) {
 
     companion object {
@@ -32,6 +36,15 @@ class GitHubAuthenticationService(
         private const val pemPrefix = "-----BEGIN RSA PRIVATE KEY-----"
         private const val pemSuffix = "-----END RSA PRIVATE KEY-----"
         private val logger = LoggerFactory.getLogger(GitHubAuthenticationService::class.java)
+    }
+
+    fun refreshTokens() {
+        generateJwtToken()
+        val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
+        generateAndCacheInstallationTokens(
+            gitHubClient.getInstallations("Bearer $jwtToken"),
+            jwtToken.toString()
+        )
     }
 
     fun generateJwtToken() {
@@ -64,6 +77,16 @@ class GitHubAuthenticationService(
                 .compact()
         }.onFailure {
             throw FailedToCreateJWTException("Failed to generate a valid JWT token")
+        }
+    }
+
+    fun generateAndCacheInstallationTokens(
+        installations: List<Installation>,
+        jwtToken: String
+    ) {
+        installations.forEach { installation ->
+            val installationToken = gitHubClient.createInstallationToken(installation.id, "Bearer $jwtToken").token
+            cachingService.set("installationToken:${installation.id}", installationToken, 3600L)
         }
     }
 

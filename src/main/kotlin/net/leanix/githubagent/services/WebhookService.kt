@@ -15,7 +15,8 @@ class WebhookService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
-    private val cachingService: CachingService
+    private val cachingService: CachingService,
+    private val gitHubAuthenticationService: GitHubAuthenticationService
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookService::class.java)
@@ -38,9 +39,12 @@ class WebhookService(
         val headCommit = pushEventPayload.headCommit
         val organizationName = pushEventPayload.repository.owner.name
 
-        val installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
-            ?: throw IllegalArgumentException("Installation token not found/ expired")
-        // TODO refresh token if expired
+        var installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
+        if (installationToken == null) {
+            gitHubAuthenticationService.refreshTokens()
+            installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
+            require(installationToken != null) { "Installation token not found/ expired" }
+        }
 
         if (pushEventPayload.ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
             when {
