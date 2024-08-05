@@ -6,7 +6,7 @@ import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.services.GitHubGraphQLService.Companion.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -62,7 +62,7 @@ class WebhookService(
         }
     }
 
-    private fun getFileContent(organizationName: String, repositoryName: String, token: String): String? {
+    private fun getFileContent(organizationName: String, repositoryName: String, token: String): String {
         return gitHubGraphQLService.getFileContent(
             owner = organizationName,
             repositoryName,

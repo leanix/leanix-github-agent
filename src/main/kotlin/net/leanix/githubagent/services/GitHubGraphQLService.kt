@@ -9,6 +9,7 @@ import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
 import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
 import net.leanix.githubagent.graphql.data.getrepositories.Blob
+import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -21,7 +22,6 @@ class GitHubGraphQLService(
     companion object {
         private val logger = LoggerFactory.getLogger(GitHubGraphQLService::class.java)
         private const val PAGE_COUNT = 20
-        const val MANIFEST_FILE_NAME = "leanix.yaml"
     }
 
     fun getRepositories(
@@ -73,7 +73,7 @@ class GitHubGraphQLService(
         repositoryName: String,
         filePath: String,
         token: String
-    ): String? {
+    ): String {
         val client = buildGitHubGraphQLClient(token)
 
         val query = GetRepositoryManifestContent(
@@ -95,7 +95,7 @@ class GitHubGraphQLService(
             (
                 result.data!!.repository!!.`object`
                     as net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
-                ).text
+                ).text.toString()
         }
     }
 
