@@ -11,4 +11,3 @@ class UnableToConnectToGitHubEnterpriseException(message: String) : RuntimeExcep
 class JwtTokenNotFound : RuntimeException("JWT token not found")
 class GraphQLApiException(errors: List<GraphQLClientError>) :
     RuntimeException("Errors: ${errors.joinToString(separator = "\n") { it.message }}")
-class GitHubEventTypesNotSupported(message: String) : RuntimeException(message)

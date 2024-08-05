@@ -1,8 +1,8 @@
 package net.leanix.githubagent.controllers
 
-import net.leanix.githubagent.exceptions.GitHubEventTypesNotSupported
 import net.leanix.githubagent.services.WebhookService
 import net.leanix.githubagent.shared.SUPPORTED_EVENT_TYPES
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/github")
 class GitHubWebhookController(private val webhookService: WebhookService) {
 
+    private val logger = LoggerFactory.getLogger(GitHubWebhookController::class.java)
+
     @PostMapping("/webhook")
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun hook(
@@ -22,13 +24,12 @@ class GitHubWebhookController(private val webhookService: WebhookService) {
         @RequestBody payload: String
     ) {
         runCatching {
+            logger.info("Received a GitHub event of type $eventType")
             if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
                 webhookService.consumeWebhookEvent(eventType, payload)
             } else {
-                throw GitHubEventTypesNotSupported("Event Type not supported: $eventType")
+                logger.warn("Event type not supported")
             }
-        }.onFailure {
-            throw it
         }
     }
 }

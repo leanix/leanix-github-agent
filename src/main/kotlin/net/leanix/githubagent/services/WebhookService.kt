@@ -7,7 +7,6 @@ import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventPayload
 import net.leanix.githubagent.services.GitHubGraphQLService.Companion.MANIFEST_FILE_NAME
-import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -25,13 +24,15 @@ class WebhookService(
     fun consumeWebhookEvent(eventType: String, payload: String) {
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
-            else -> webSocketService.sendMessage("$TOPIC_PREFIX/events/other", payload)
+            else -> {
+                logger.info("Sending event")
+                webSocketService.sendMessage("/events/other", payload)
+            }
         }
     }
 
     private fun handlePushEvent(payload: String) {
         val pushEventPayload: PushEventPayload = objectMapper.readValue(payload)
-        val ref = pushEventPayload.ref
         val repositoryName = pushEventPayload.repository.name
         val repositoryFullName = pushEventPayload.repository.fullName
         val headCommit = pushEventPayload.headCommit
@@ -41,7 +42,7 @@ class WebhookService(
             ?: throw IllegalArgumentException("Installation token not found/ expired")
         // TODO refresh token if expired
 
-        if (ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
+        if (pushEventPayload.ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
             when {
                 MANIFEST_FILE_NAME in headCommit.added -> {
                     logger.info("Manifest file added to repository $repositoryFullName")
@@ -73,7 +74,7 @@ class WebhookService(
     private fun sendManifestData(repositoryFullName: String, action: ManifestFileAction, manifestContent: String?) {
         logger.info("Sending manifest file update event for repository $repositoryFullName")
         webSocketService.sendMessage(
-            "$TOPIC_PREFIX/events/manifestFile",
+            "/events/manifestFile",
             ManifestFileUpdateDto(repositoryFullName, action, manifestContent)
         )
     }

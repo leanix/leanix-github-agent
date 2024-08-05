@@ -1,6 +1,7 @@
 package net.leanix.githubagent.services
 
 import net.leanix.githubagent.config.WebSocketClientConfig
+import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.stereotype.Service
@@ -19,6 +20,6 @@ class WebSocketService(
     }
 
     fun sendMessage(topic: String, data: Any) {
-        stompSession!!.send(topic, data)
+        stompSession!!.send("$TOPIC_PREFIX$topic", data)
     }
 }

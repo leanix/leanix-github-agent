@@ -94,8 +94,8 @@ class GitHubGraphQLService(
         } else {
             (
                 result.data!!.repository!!.`object`
-                    as net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob?
-                )?.text
+                    as net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
+                ).text
         }
     }
 
