@@ -68,7 +68,7 @@ class GitHubGraphQLService(
         }
     }
 
-    fun getFileContent(
+    fun getManifestFileContent(
         owner: String,
         repositoryName: String,
         filePath: String,

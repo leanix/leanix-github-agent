@@ -26,7 +26,7 @@ class WebhookService(
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
             else -> {
-                logger.info("Sending event")
+                logger.debug("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other", payload)
             }
         }
@@ -50,12 +50,12 @@ class WebhookService(
             when {
                 MANIFEST_FILE_NAME in headCommit.added -> {
                     logger.info("Manifest file added to repository $repositoryFullName")
-                    val fileContent = getFileContent(organizationName, repositoryName, installationToken)
+                    val fileContent = getManifestFileContent(organizationName, repositoryName, installationToken)
                     sendManifestData(repositoryFullName, ManifestFileAction.ADDED, fileContent)
                 }
                 MANIFEST_FILE_NAME in headCommit.modified -> {
                     logger.info("Manifest file modified in repository $repositoryFullName")
-                    val fileContent = getFileContent(organizationName, repositoryName, installationToken)
+                    val fileContent = getManifestFileContent(organizationName, repositoryName, installationToken)
                     sendManifestData(repositoryFullName, ManifestFileAction.MODIFIED, fileContent)
                 }
                 MANIFEST_FILE_NAME in headCommit.removed -> {
@@ -66,8 +66,8 @@ class WebhookService(
         }
     }
 
-    private fun getFileContent(organizationName: String, repositoryName: String, token: String): String {
-        return gitHubGraphQLService.getFileContent(
+    private fun getManifestFileContent(organizationName: String, repositoryName: String, token: String): String {
+        return gitHubGraphQLService.getManifestFileContent(
             owner = organizationName,
             repositoryName,
             "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}$MANIFEST_FILE_NAME",

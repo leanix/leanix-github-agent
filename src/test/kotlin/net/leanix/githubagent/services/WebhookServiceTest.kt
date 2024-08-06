@@ -64,7 +64,7 @@ class WebhookServiceTest {
     @Test
     fun `should process push event`() {
         every { cachingService.get(any()) } returns "token"
-        every { gitHubGraphQLService.getFileContent(any(), any(), any(), any()) } returns "content"
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
 
         val payload = """{
             "repository": {

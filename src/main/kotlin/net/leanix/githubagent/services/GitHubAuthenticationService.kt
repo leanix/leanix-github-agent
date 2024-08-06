@@ -54,8 +54,8 @@ class GitHubAuthenticationService(
             val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
             val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
             val jwt = createJwtToken(privateKey)
-            cachingService.set("jwtToken", jwt.getOrThrow(), JWT_EXPIRATION_DURATION)
             gitHubEnterpriseService.verifyJwt(jwt.getOrThrow())
+            cachingService.set("jwtToken", jwt.getOrThrow(), JWT_EXPIRATION_DURATION)
         }.onFailure {
             logger.error("Failed to generate/validate JWT token", it)
             if (it is InvalidKeySpecException) {
