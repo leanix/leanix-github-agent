@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/github")
+@RequestMapping("github")
 class GitHubWebhookController(private val webhookService: WebhookService) {
 
     private val logger = LoggerFactory.getLogger(GitHubWebhookController::class.java)
