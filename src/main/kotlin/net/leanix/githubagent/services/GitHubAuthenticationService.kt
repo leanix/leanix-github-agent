@@ -6,7 +6,6 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.exceptions.FailedToCreateJWTException
-import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ResourceLoader
@@ -40,7 +39,7 @@ class GitHubAuthenticationService(
 
     fun refreshTokens() {
         generateJwtToken()
-        val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
+        val jwtToken = cachingService.get("jwtToken")
         generateAndCacheInstallationTokens(
             gitHubClient.getInstallations("Bearer $jwtToken"),
             jwtToken.toString()
