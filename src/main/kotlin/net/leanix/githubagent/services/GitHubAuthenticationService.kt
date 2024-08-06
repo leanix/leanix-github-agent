@@ -38,7 +38,7 @@ class GitHubAuthenticationService(
     }
 
     fun refreshTokens() {
-        generateJwtToken()
+        generateAndCacheJwtToken()
         val jwtToken = cachingService.get("jwtToken")
         generateAndCacheInstallationTokens(
             gitHubClient.getInstallations("Bearer $jwtToken"),
@@ -46,7 +46,7 @@ class GitHubAuthenticationService(
         )
     }
 
-    fun generateJwtToken() {
+    fun generateAndCacheJwtToken() {
         runCatching {
             logger.info("Generating JWT token")
             Security.addProvider(BouncyCastleProvider())

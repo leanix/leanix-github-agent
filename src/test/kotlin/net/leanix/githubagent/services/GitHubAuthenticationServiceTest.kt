@@ -34,7 +34,7 @@ class GitHubAuthenticationServiceTest {
         every { resourceLoader.getResource(any()) } returns ClassPathResource("valid-private-key.pem")
         every { gitHubEnterpriseService.verifyJwt(any()) } returns Unit
 
-        assertDoesNotThrow { githubAuthenticationService.generateJwtToken() }
+        assertDoesNotThrow { githubAuthenticationService.generateAndCacheJwtToken() }
         assertNotNull(cachingService.get("jwtToken"))
     }
 
@@ -44,6 +44,6 @@ class GitHubAuthenticationServiceTest {
         every { githubEnterpriseProperties.pemFile } returns "invalid-private-key.pem"
         every { resourceLoader.getResource(any()) } returns ClassPathResource("invalid-private-key.pem")
 
-        assertThrows(IllegalArgumentException::class.java) { githubAuthenticationService.generateJwtToken() }
+        assertThrows(IllegalArgumentException::class.java) { githubAuthenticationService.generateAndCacheJwtToken() }
     }
 }

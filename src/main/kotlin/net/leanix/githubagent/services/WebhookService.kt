@@ -26,7 +26,7 @@ class WebhookService(
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
             else -> {
-                logger.debug("Sending event of type: $eventType")
+                logger.info("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other", payload)
             }
         }

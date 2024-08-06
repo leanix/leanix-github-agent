@@ -24,11 +24,10 @@ class GitHubWebhookController(private val webhookService: WebhookService) {
         @RequestBody payload: String
     ) {
         runCatching {
-            logger.info("Received a GitHub event of type $eventType")
             if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
                 webhookService.consumeWebhookEvent(eventType, payload)
             } else {
-                logger.warn("Event type not supported")
+                logger.warn("Received an unsupported event of type: $eventType")
             }
         }
     }
