@@ -2,6 +2,7 @@ package net.leanix.githubagent.services
 
 import io.mockk.every
 import io.mockk.mockk
+import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -16,11 +17,13 @@ class GitHubAuthenticationServiceTest {
     private val githubEnterpriseProperties = mockk<GitHubEnterpriseProperties>()
     private val resourceLoader = mockk<ResourceLoader>()
     private val gitHubEnterpriseService = mockk<GitHubEnterpriseService>()
+    private val gitHubClient = mockk<GitHubClient>()
     private val githubAuthenticationService = GitHubAuthenticationService(
         cachingService,
         githubEnterpriseProperties,
         resourceLoader,
-        gitHubEnterpriseService
+        gitHubEnterpriseService,
+        gitHubClient
     )
 
     @Test
@@ -31,7 +34,7 @@ class GitHubAuthenticationServiceTest {
         every { resourceLoader.getResource(any()) } returns ClassPathResource("valid-private-key.pem")
         every { gitHubEnterpriseService.verifyJwt(any()) } returns Unit
 
-        assertDoesNotThrow { githubAuthenticationService.generateJwtToken() }
+        assertDoesNotThrow { githubAuthenticationService.generateAndCacheJwtToken() }
         assertNotNull(cachingService.get("jwtToken"))
     }
 
@@ -41,6 +44,6 @@ class GitHubAuthenticationServiceTest {
         every { githubEnterpriseProperties.pemFile } returns "invalid-private-key.pem"
         every { resourceLoader.getResource(any()) } returns ClassPathResource("invalid-private-key.pem")
 
-        assertThrows(IllegalArgumentException::class.java) { githubAuthenticationService.generateJwtToken() }
+        assertThrows(IllegalArgumentException::class.java) { githubAuthenticationService.generateAndCacheJwtToken() }
     }
 }

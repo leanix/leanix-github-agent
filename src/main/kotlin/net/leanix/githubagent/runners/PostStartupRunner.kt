@@ -18,7 +18,7 @@ class PostStartupRunner(
 
     override fun run(args: ApplicationArguments?) {
         webSocketService.initSession()
-        githubAuthenticationService.generateJwtToken()
+        githubAuthenticationService.generateAndCacheJwtToken()
         gitHubScanningService.scanGitHubResources()
     }
 }

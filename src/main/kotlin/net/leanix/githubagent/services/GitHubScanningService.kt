@@ -4,7 +4,6 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
-import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -14,7 +13,8 @@ class GitHubScanningService(
     private val gitHubClient: GitHubClient,
     private val cachingService: CachingService,
     private val webSocketService: WebSocketService,
-    private val gitHubGraphQLService: GitHubGraphQLService
+    private val gitHubGraphQLService: GitHubGraphQLService,
+    private val gitHubAuthenticationService: GitHubAuthenticationService
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -38,18 +38,8 @@ class GitHubScanningService(
 
     private fun getInstallations(jwtToken: String): List<Installation> {
         val installations = gitHubClient.getInstallations("Bearer $jwtToken")
-        generateAndCacheInstallationTokens(installations, jwtToken)
+        gitHubAuthenticationService.generateAndCacheInstallationTokens(installations, jwtToken)
         return installations
-    }
-
-    private fun generateAndCacheInstallationTokens(
-        installations: List<Installation>,
-        jwtToken: String
-    ) {
-        installations.forEach { installation ->
-            val installationToken = gitHubClient.createInstallationToken(installation.id, "Bearer $jwtToken").token
-            cachingService.set("installationToken:${installation.id}", installationToken, 3600L)
-        }
     }
 
     private fun fetchAndSendOrganisationsData(
@@ -65,7 +55,7 @@ class GitHubScanningService(
                 }
             }
         logger.info("Sending organizations data")
-        webSocketService.sendMessage("$TOPIC_PREFIX${cachingService.get("runId")}/organizations", organizations)
+        webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
 
     private fun fetchAndSendRepositoriesData(installation: Installation) {
@@ -80,7 +70,7 @@ class GitHubScanningService(
             )
             logger.info("Sending page $page of repositories")
             webSocketService.sendMessage(
-                "$TOPIC_PREFIX${cachingService.get("runId")}/repositories",
+                "${cachingService.get("runId")}/repositories",
                 repositoriesPage.repositories
             )
             cursor = repositoriesPage.cursor

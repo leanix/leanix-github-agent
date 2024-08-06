@@ -12,7 +12,6 @@ import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
-import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,11 +23,13 @@ class GitHubScanningServiceTest {
     private val cachingService = mockk<CachingService>()
     private val webSocketService = mockk<WebSocketService>(relaxUnitFun = true)
     private val gitHubGraphQLService = mockk<GitHubGraphQLService>()
+    private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
         webSocketService,
-        gitHubGraphQLService
+        gitHubGraphQLService,
+        gitHubAuthenticationService
     )
     private val runId = UUID.randomUUID()
 
@@ -48,13 +49,14 @@ class GitHubScanningServiceTest {
             cursor = null
         )
         every { cachingService.remove(any()) } returns Unit
+        every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
     }
 
     @Test
     fun `scanGitHubResources should send organizations over WebSocket`() {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("$TOPIC_PREFIX$runId/organizations"), any()) }
+        verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
     }
 
     @Test
@@ -88,6 +90,6 @@ class GitHubScanningServiceTest {
             cursor = null
         )
         gitHubScanningService.scanGitHubResources()
-        verify { webSocketService.sendMessage(eq("$TOPIC_PREFIX$runId/repositories"), any()) }
+        verify { webSocketService.sendMessage(eq("$runId/repositories"), any()) }
     }
 }
