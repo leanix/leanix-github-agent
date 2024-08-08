@@ -28,6 +28,8 @@ style:
     active: false
   UnusedPrivateMember:
     active: false
+  ThrowsCount:
+    active: false
 
 empty-blocks:
   EmptyFunctionBlock:

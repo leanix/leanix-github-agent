@@ -3,6 +3,7 @@ github-enterprise:
   githubAppId: ${GITHUB_APP_ID:}
   pemFile: ${PEM_FILE:}
   manifestFileDirectory: ${MANIFEST_FILE_DIRECTORY:}
+  webhookSecret: ${WEBHOOK_SECRET:}
 leanix:
   base-url: https://${LEANIX_DOMAIN}/services
   ws-base-url: wss://${LEANIX_DOMAIN}/services/git-integrations/v1/git-ws
