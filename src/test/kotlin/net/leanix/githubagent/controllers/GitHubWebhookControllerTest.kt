@@ -1,8 +1,11 @@
 package net.leanix.githubagent.controllers
 
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
 import io.mockk.verify
+import net.leanix.githubagent.services.GitHubWebhookService
 import net.leanix.githubagent.services.WebhookService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +23,14 @@ class GitHubWebhookControllerTest {
     @MockkBean
     private lateinit var webhookService: WebhookService
 
+    @MockkBean
+    private lateinit var gitHubWebhookService: GitHubWebhookService
+
+    @BeforeEach
+    fun setUp() {
+        every { gitHubWebhookService.processWebhookEvent(any(), any(), any(), any()) } returns Unit
+    }
+
     @Test
     fun `should not process not supported events`() {
         val eventType = "UNSUPPORTED_EVENT"
@@ -28,6 +39,7 @@ class GitHubWebhookControllerTest {
         mockMvc.perform(
             MockMvcRequestBuilders.post("/github/webhook")
                 .header("X-GitHub-Event", eventType)
+                .header("X-GitHub-Enterprise-Host", "host")
                 .content(payload)
         )
             .andExpect(MockMvcResultMatchers.status().isAccepted)
