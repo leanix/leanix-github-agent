@@ -2,12 +2,9 @@ package net.leanix.githubagent.controllers
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.verify
+import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
 import net.leanix.githubagent.services.GitHubWebhookService
-import net.leanix.githubagent.services.WebhookService
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.test.web.servlet.MockMvc
@@ -21,29 +18,45 @@ class GitHubWebhookControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var webhookService: WebhookService
-
-    @MockkBean
     private lateinit var gitHubWebhookService: GitHubWebhookService
 
-    @BeforeEach
-    fun setUp() {
-        every { gitHubWebhookService.processWebhookEvent(any(), any(), any(), any()) } returns Unit
-    }
-
     @Test
-    fun `should not process not supported events`() {
-        val eventType = "UNSUPPORTED_EVENT"
+    fun `should return 202 if webhook event is processed successfully`() {
+        val eventType = "PUSH"
         val payload = "{}"
+        val host = "valid.host"
+
+        every { gitHubWebhookService.processWebhookEvent(any(), any(), any(), any()) } returns Unit
 
         mockMvc.perform(
             MockMvcRequestBuilders.post("/github/webhook")
                 .header("X-GitHub-Event", eventType)
-                .header("X-GitHub-Enterprise-Host", "host")
+                .header("X-GitHub-Enterprise-Host", host)
                 .content(payload)
         )
             .andExpect(MockMvcResultMatchers.status().isAccepted)
+    }
 
-        verify(exactly = 0) { webhookService.consumeWebhookEvent(anyString(), anyString()) }
+    @Test
+    fun `should return 400 if missing webhook secret when event had signature`() {
+        val eventType = "UNSUPPORTED_EVENT"
+        val payload = "{}"
+        val host = "host"
+        val signature256 = "sha256=invalidsignature"
+
+        every {
+            gitHubWebhookService.processWebhookEvent(
+                eventType, host, signature256, payload
+            )
+        } throws WebhookSecretNotSetException()
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/github/webhook")
+                .header("X-GitHub-Event", eventType)
+                .header("X-GitHub-Enterprise-Host", host)
+                .header("X-Hub-Signature-256", signature256)
+                .content(payload)
+        )
+            .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
 }
