@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @SpringBootTest
 @ActiveProfiles("test")
-class WebhookServiceTest {
+class WebhookEventServiceTest {
 
     @MockkBean
     private lateinit var webSocketService: WebSocketService
@@ -28,7 +28,7 @@ class WebhookServiceTest {
     private lateinit var gitHubAuthenticationService: GitHubAuthenticationService
 
     @Autowired
-    private lateinit var webhookService: WebhookService
+    private lateinit var webhookEventService: WebhookEventService
 
     @BeforeEach
     fun setUp() {
@@ -56,7 +56,7 @@ class WebhookServiceTest {
 
         every { cachingService.get("installationToken:1") } returns null andThen "token"
 
-        webhookService.consumeWebhookEvent("PUSH", payload)
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
 
         verify(exactly = 1) { gitHubAuthenticationService.refreshTokens() }
     }
@@ -82,7 +82,7 @@ class WebhookServiceTest {
             "ref": "refs/heads/main"
         }"""
 
-        webhookService.consumeWebhookEvent("PUSH", payload)
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
 
         verify(exactly = 1) {
             webSocketService.sendMessage(
@@ -114,7 +114,7 @@ class WebhookServiceTest {
             "ref": "refs/heads/main"
         }"""
 
-        webhookService.consumeWebhookEvent("OTHER", payload)
+        webhookEventService.consumeWebhookEvent("OTHER", payload)
 
         verify(exactly = 1) { webSocketService.sendMessage("/events/other", payload) }
     }

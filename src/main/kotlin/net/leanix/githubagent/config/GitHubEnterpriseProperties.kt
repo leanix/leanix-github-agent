@@ -8,4 +8,5 @@ data class GitHubEnterpriseProperties(
     val gitHubAppId: String,
     val pemFile: String,
     val manifestFileDirectory: String,
+    val webhookSecret: String
 )
