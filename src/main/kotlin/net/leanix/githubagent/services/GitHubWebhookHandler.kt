@@ -26,7 +26,7 @@ class GitHubWebhookHandler(
             logger.error("Received a webhook event from an unknown host: $host")
             return
         }
-        if (gitHubEnterpriseProperties.webhookSecret == "" && !signature256.isNullOrEmpty()) {
+        if (gitHubEnterpriseProperties.webhookSecret.isBlank() && signature256 != null) {
             logger.error(
                 "Event signature is present but webhook secret is not set, " +
                     "please restart the agent with a valid secret"
@@ -34,7 +34,7 @@ class GitHubWebhookHandler(
             isWebhookProcessingEnabled = false
             throw WebhookSecretNotSetException()
         }
-        if (gitHubEnterpriseProperties.webhookSecret != "" && !signature256.isNullOrEmpty()) {
+        if (gitHubEnterpriseProperties.webhookSecret.isNotBlank() && signature256 != null) {
             val hashedSecret = hmacSHA256(gitHubEnterpriseProperties.webhookSecret, payload)
             val isEqual = timingSafeEqual(signature256.removePrefix("sha256="), hashedSecret)
             if (!isEqual) throw InvalidEventSignatureException()
