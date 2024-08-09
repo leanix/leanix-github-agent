@@ -2,6 +2,7 @@ package net.leanix.githubagent.services
 
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Installation
+import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import org.slf4j.LoggerFactory
@@ -45,6 +46,11 @@ class GitHubScanningService(
     private fun fetchAndSendOrganisationsData(
         installations: List<Installation>
     ) {
+        if (installations.isEmpty()) {
+            logger.warn("No installations found, please install the GitHub App on an organization")
+            webSocketService.sendMessage("${cachingService.get("runId")}/organizations", emptyList<Organization>())
+            return
+        }
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
         val organizations = gitHubClient.getOrganizations("Bearer $installationToken")
             .map { organization ->
