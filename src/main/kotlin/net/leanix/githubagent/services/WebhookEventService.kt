@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class WebhookService(
+class WebhookEventService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
@@ -19,7 +19,7 @@ class WebhookService(
     private val gitHubAuthenticationService: GitHubAuthenticationService
 ) {
 
-    private val logger = LoggerFactory.getLogger(WebhookService::class.java)
+    private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
     private val objectMapper = jacksonObjectMapper()
 
     fun consumeWebhookEvent(eventType: String, payload: String) {

@@ -1,6 +1,6 @@
 package net.leanix.githubagent.controllers
 
-import net.leanix.githubagent.services.GitHubWebhookService
+import net.leanix.githubagent.services.GitHubWebhookHandler
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("github")
-class GitHubWebhookController(private val gitHubWebhookService: GitHubWebhookService) {
+class GitHubWebhookController(private val gitHubWebhookHandler: GitHubWebhookHandler) {
 
     @PostMapping("/webhook")
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -21,6 +21,6 @@ class GitHubWebhookController(private val gitHubWebhookService: GitHubWebhookSer
         @RequestHeader("X-Hub-Signature-256", required = false) signature256: String?,
         @RequestBody payload: String
     ) {
-        gitHubWebhookService.processWebhookEvent(eventType, host, signature256, payload)
+        gitHubWebhookHandler.handleWebhookEvent(eventType, host, signature256, payload)
     }
 }

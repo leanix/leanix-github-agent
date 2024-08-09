@@ -10,15 +10,15 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class GitHubWebhookService(
-    private val webhookService: WebhookService,
+class GitHubWebhookHandler(
+    private val webhookEventService: WebhookEventService,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
 
-    private val logger = LoggerFactory.getLogger(GitHubWebhookService::class.java)
+    private val logger = LoggerFactory.getLogger(GitHubWebhookHandler::class.java)
     private var isWebhookProcessingEnabled = true
 
-    fun processWebhookEvent(eventType: String, host: String, signature256: String?, payload: String) {
+    fun handleWebhookEvent(eventType: String, host: String, signature256: String?, payload: String) {
         if (!isWebhookProcessingEnabled) {
             throw WebhookSecretNotSetException()
         }
@@ -42,7 +42,7 @@ class GitHubWebhookService(
             logger.warn("Webhook secret is not set, Skipping signature verification")
         }
         if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
-            webhookService.consumeWebhookEvent(eventType, payload)
+            webhookEventService.consumeWebhookEvent(eventType, payload)
         } else {
             logger.warn("Received an unsupported event of type: $eventType")
         }

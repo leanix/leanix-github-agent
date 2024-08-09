@@ -3,7 +3,7 @@ package net.leanix.githubagent.controllers
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
-import net.leanix.githubagent.services.GitHubWebhookService
+import net.leanix.githubagent.services.GitHubWebhookHandler
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -18,7 +18,7 @@ class GitHubWebhookControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var gitHubWebhookService: GitHubWebhookService
+    private lateinit var gitHubWebhookHandler: GitHubWebhookHandler
 
     @Test
     fun `should return 202 if webhook event is processed successfully`() {
@@ -26,7 +26,7 @@ class GitHubWebhookControllerTest {
         val payload = "{}"
         val host = "valid.host"
 
-        every { gitHubWebhookService.processWebhookEvent(any(), any(), any(), any()) } returns Unit
+        every { gitHubWebhookHandler.handleWebhookEvent(any(), any(), any(), any()) } returns Unit
 
         mockMvc.perform(
             MockMvcRequestBuilders.post("/github/webhook")
@@ -45,7 +45,7 @@ class GitHubWebhookControllerTest {
         val signature256 = "sha256=invalidsignature"
 
         every {
-            gitHubWebhookService.processWebhookEvent(
+            gitHubWebhookHandler.handleWebhookEvent(
                 eventType, host, signature256, payload
             )
         } throws WebhookSecretNotSetException()
