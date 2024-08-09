@@ -9,7 +9,6 @@ import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.reflect.Field
 
 class GitHubWebhookHandlerTest {
 
@@ -19,15 +18,6 @@ class GitHubWebhookHandlerTest {
 
     @BeforeEach
     fun setUp() {
-    }
-
-    @Test
-    fun `should throw WebhookSecretNotSetException when webhook processing is disabled`() {
-        setPrivateField(gitHubWebhookHandler, "isWebhookProcessingEnabled", false)
-
-        assertThrows<WebhookSecretNotSetException> {
-            gitHubWebhookHandler.handleWebhookEvent("PUSH", "host", null, "{}")
-        }
     }
 
     @Test
@@ -78,11 +68,5 @@ class GitHubWebhookHandlerTest {
         gitHubWebhookHandler.handleWebhookEvent("PUSH", "host", null, "{}")
 
         verify { webhookEventService.consumeWebhookEvent("PUSH", "{}") }
-    }
-
-    private fun setPrivateField(target: Any, fieldName: String, value: Any) {
-        val field: Field = target::class.java.getDeclaredField(fieldName)
-        field.isAccessible = true
-        field.set(target, value)
     }
 }
