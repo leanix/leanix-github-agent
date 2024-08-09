@@ -60,6 +60,18 @@ class GitHubScanningServiceTest {
     }
 
     @Test
+    fun `scanGitHubResources should handle empty installations`() {
+        val runId = UUID.randomUUID()
+
+        every { cachingService.get("runId") } returns runId
+        every { gitHubClient.getInstallations(any()) } returns emptyList()
+
+        gitHubScanningService.scanGitHubResources()
+
+        verify { webSocketService.sendMessage(eq("$runId/organizations"), eq(emptyList<Organization>())) }
+    }
+
+    @Test
     fun `scanGitHubResources should throw JwtTokenNotFound when jwtToken is expired`() {
         every { cachingService.get("jwtToken") } returns null
         assertThrows<JwtTokenNotFound> {
