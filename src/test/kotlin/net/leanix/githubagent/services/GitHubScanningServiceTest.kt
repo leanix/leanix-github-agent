@@ -98,13 +98,7 @@ class GitHubScanningServiceTest {
                     topics = listOf("test", "example"),
                     manifestFile = ManifestFileDto(
                         "leanix.yaml",
-                        "version: 1\n" +
-                            "services:\n" +
-                            "  - name: disputes-service-v1\n" +
-                            "    externalId: disputes-service-v1\n" +
-                            "    description: |\n" +
-                            "      A microservice responsible for payment disputes.\n" +
-                            "      This service handles payment transactions."
+                        "content"
                     )
                 )
             ),

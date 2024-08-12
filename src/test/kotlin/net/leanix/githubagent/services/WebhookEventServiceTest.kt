@@ -119,4 +119,52 @@ class WebhookEventServiceTest {
 
         verify(exactly = 1) { webSocketService.sendMessage("/events/other", payload) }
     }
+
+    @Test
+    fun `should send updates for yaml manifest file`() {
+        val manifestFilePath = "leanix.yaml"
+        val payload = createPushEventPayload(manifestFilePath)
+        every { cachingService.get(any()) } returns "token"
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), manifestFilePath, any()) } returns "content"
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
+    }
+
+    @Test
+    fun `should send updates for yml manifest file`() {
+        val manifestFilePath = "leanix.yml"
+        val payload = createPushEventPayload(manifestFilePath)
+        every { cachingService.get(any()) } returns "token"
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), manifestFilePath, any()) } returns "content"
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
+    }
+
+    private fun createPushEventPayload(manifestFileName: String): String {
+        return """
+            {
+                "ref": "refs/heads/main",
+                "repository": {
+                    "name": "repo",
+                    "full_name": "org/repo",
+                    "default_branch": "main",
+                    "owner": {
+                        "name": "org"
+                    }
+                },
+                "head_commit": {
+                    "added": ["$manifestFileName"],
+                    "modified": [],
+                    "removed": []
+                },
+                "installation": {
+                    "id": 1
+                }
+            }
+        """
+    }
 }
