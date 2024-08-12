@@ -27,7 +27,6 @@ class GitHubScanningService(
             val installations = getInstallations(jwtToken.toString())
             fetchAndSendOrganisationsData(installations)
             installations.forEach { installation ->
-                logger.info("Fetching repositories for organisation ${installation.account.login}")
                 fetchAndSendRepositoriesData(installation)
             }
         }.onFailure {
@@ -74,7 +73,6 @@ class GitHubScanningService(
                 token = installationToken,
                 cursor = cursor
             )
-            logger.info("Sending page $page of repositories")
             webSocketService.sendMessage(
                 "${cachingService.get("runId")}/repositories",
                 repositoriesPage.repositories
@@ -83,6 +81,6 @@ class GitHubScanningService(
             totalRepos += repositoriesPage.repositories.size
             page++
         } while (repositoriesPage.hasNextPage)
-        logger.info("Fetched $totalRepos repositories")
+        logger.info("Fetched $totalRepos repositories data from organisation ${installation.account.login}")
     }
 }

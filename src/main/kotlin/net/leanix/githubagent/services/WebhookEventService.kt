@@ -4,9 +4,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.ManifestFileAction
+import net.leanix.githubagent.dto.ManifestFileDto
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
+import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -47,39 +49,67 @@ class WebhookEventService(
         }
 
         if (pushEventPayload.ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
-            when {
-                MANIFEST_FILE_NAME in headCommit.added -> {
-                    logger.info("Manifest file added to repository $repositoryFullName")
-                    val fileContent = getManifestFileContent(organizationName, repositoryName, installationToken)
-                    sendManifestData(repositoryFullName, ManifestFileAction.ADDED, fileContent)
-                }
-                MANIFEST_FILE_NAME in headCommit.modified -> {
-                    logger.info("Manifest file modified in repository $repositoryFullName")
-                    val fileContent = getManifestFileContent(organizationName, repositoryName, installationToken)
-                    sendManifestData(repositoryFullName, ManifestFileAction.MODIFIED, fileContent)
-                }
-                MANIFEST_FILE_NAME in headCommit.removed -> {
-                    logger.info("Manifest file removed from repository $repositoryFullName")
-                    sendManifestData(repositoryFullName, ManifestFileAction.REMOVED, null)
-                }
-            }
+            handleManifestFileChanges(
+                "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}",
+                headCommit,
+                repositoryFullName,
+                organizationName,
+                repositoryName,
+                installationToken
+            )
+            handleManifestFileChanges(
+                "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}",
+                headCommit,
+                repositoryFullName,
+                organizationName,
+                repositoryName,
+                installationToken
+            )
         }
     }
 
-    private fun getManifestFileContent(organizationName: String, repositoryName: String, token: String): String {
-        return gitHubGraphQLService.getManifestFileContent(
-            owner = organizationName,
-            repositoryName,
-            "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}$MANIFEST_FILE_NAME",
-            token
-        )
-    }
-
-    private fun sendManifestData(repositoryFullName: String, action: ManifestFileAction, manifestContent: String?) {
-        logger.info("Sending manifest file update event for repository $repositoryFullName")
-        webSocketService.sendMessage(
-            "/events/manifestFile",
-            ManifestFileUpdateDto(repositoryFullName, action, manifestContent)
-        )
+    @SuppressWarnings("LongParameterList")
+    private fun handleManifestFileChanges(
+        manifestFilePath: String,
+        headCommit: PushEventCommit,
+        repositoryFullName: String,
+        organizationName: String,
+        repositoryName: String,
+        installationToken: String
+    ) {
+        when (manifestFilePath) {
+            in headCommit.added, in headCommit.modified -> {
+                val action = when (manifestFilePath) {
+                    in headCommit.added -> ManifestFileAction.ADDED
+                    else -> ManifestFileAction.MODIFIED
+                }
+                logger.info("Manifest file $action in repository $repositoryFullName")
+                val fileContent = gitHubGraphQLService.getManifestFileContent(
+                    organizationName,
+                    repositoryName,
+                    manifestFilePath,
+                    installationToken
+                )
+                webSocketService.sendMessage(
+                    "/events/manifestFile",
+                    ManifestFileUpdateDto(
+                        repositoryFullName,
+                        action,
+                        ManifestFileDto(manifestFilePath, fileContent)
+                    )
+                )
+            }
+            in headCommit.removed -> {
+                logger.info("Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName")
+                webSocketService.sendMessage(
+                    "/events/manifestFile",
+                    ManifestFileUpdateDto(
+                        repositoryFullName,
+                        ManifestFileAction.REMOVED,
+                        ManifestFileDto(null, null)
+                    )
+                )
+            }
+        }
     }
 }

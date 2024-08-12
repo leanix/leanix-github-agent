@@ -1,4 +1,4 @@
-query GetRepositories($pageCount: Int!, $cursor: String, $expression: String!) {
+query GetRepositories($pageCount: Int!, $cursor: String, $manifestYamlPath: String!, $manifestYmlPath: String!) {
     viewer {
         repositories(first: $pageCount, after: $cursor) {
             pageInfo {
@@ -28,7 +28,13 @@ query GetRepositories($pageCount: Int!, $cursor: String, $expression: String!) {
                         }
                     }
                 }
-                object(expression: $expression) {
+                manifestYaml: object(expression: $manifestYamlPath) {
+                    __typename
+                    ... on Blob {
+                        text
+                    }
+                }
+                manifestYml: object(expression: $manifestYmlPath) {
                     __typename
                     ... on Blob {
                         text

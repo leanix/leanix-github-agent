@@ -2,7 +2,10 @@ package net.leanix.githubagent.shared
 
 const val TOPIC_PREFIX = "/app/ghe/"
 
-const val MANIFEST_FILE_NAME = "leanix.yaml"
+enum class ManifestFileName(val fileName: String) {
+    YAML("leanix.yaml"),
+    YML("leanix.yml")
+}
 
 val SUPPORTED_EVENT_TYPES = listOf(
     "REPOSITORY",

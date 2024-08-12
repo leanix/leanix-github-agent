@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import io.mockk.verify
 import net.leanix.githubagent.dto.ManifestFileAction
+import net.leanix.githubagent.dto.ManifestFileDto
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -90,7 +91,7 @@ class WebhookEventServiceTest {
                 ManifestFileUpdateDto(
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
-                    "content"
+                    ManifestFileDto("leanix.yaml", "content")
                 )
             )
         }
