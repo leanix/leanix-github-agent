@@ -40,12 +40,7 @@ class WebhookEventService(
         val headCommit = pushEventPayload.headCommit
         val owner = pushEventPayload.repository.owner.name
 
-        var installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
-        if (installationToken == null) {
-            gitHubAuthenticationService.refreshTokens()
-            installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
-            require(installationToken != null) { "Installation token not found/ expired" }
-        }
+        val installationToken = getInstallationToken(pushEventPayload.installation.id)
 
         if (pushEventPayload.ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
             handleManifestFileChanges(
@@ -72,7 +67,6 @@ class WebhookEventService(
         val isYAMLFileUpdated = isManifestFileUpdated(headCommit, yamlFileName)
         val isYMLFileUpdated = isManifestFileUpdated(headCommit, ymlFileName)
 
-        // ignore updates on YML file if YAML file exists
         if (!isYAMLFileUpdated && isYMLFileUpdated) {
             val yamlFileContent = gitHubGraphQLService.getManifestFileContent(
                 owner,
@@ -83,35 +77,53 @@ class WebhookEventService(
             if (yamlFileContent != null) return
         }
 
-        val manifestFilePath = if (isYAMLFileUpdated) {
-            yamlFileName
-        } else if (isYMLFileUpdated) {
-            ymlFileName
-        } else {
-            return
+        val manifestFilePath = determineManifestFilePath(isYAMLFileUpdated, isYMLFileUpdated, yamlFileName, ymlFileName)
+        manifestFilePath?.let {
+            when (it) {
+                in headCommit.added, in headCommit.modified -> {
+                    handleAddedOrModifiedManifestFile(
+                        headCommit,
+                        repositoryFullName,
+                        owner,
+                        repositoryName,
+                        installationToken,
+                        it
+                    )
+                }
+                in headCommit.removed -> {
+                    handleRemovedManifestFile(repositoryFullName)
+                }
+            }
         }
+    }
 
-        when (manifestFilePath) {
-            in headCommit.added, in headCommit.modified -> {
-                handleAddedOrModifiedManifestFile(
-                    headCommit,
-                    repositoryFullName,
-                    owner,
-                    repositoryName,
-                    installationToken,
-                    manifestFilePath
-                )
-            }
-            in headCommit.removed -> {
-                handleRemovedManifestFile(repositoryFullName)
-            }
+    private fun getInstallationToken(installationId: Int): String {
+        var installationToken = cachingService.get("installationToken:$installationId")?.toString()
+        if (installationToken == null) {
+            gitHubAuthenticationService.refreshTokens()
+            installationToken = cachingService.get("installationToken:$installationId")?.toString()
+            require(installationToken != null) { "Installation token not found/ expired" }
         }
+        return installationToken
     }
 
     private fun isManifestFileUpdated(headCommit: PushEventCommit, fileName: String): Boolean {
         return headCommit.added.any { it == fileName } ||
             headCommit.modified.any { it == fileName } ||
             headCommit.removed.any { it == fileName }
+    }
+
+    private fun determineManifestFilePath(
+        isYAMLFileUpdated: Boolean,
+        isYMLFileUpdated: Boolean,
+        yamlFileName: String,
+        ymlFileName: String
+    ): String? {
+        return when {
+            isYAMLFileUpdated -> yamlFileName
+            isYMLFileUpdated -> ymlFileName
+            else -> null
+        }
     }
 
     @SuppressWarnings("LongParameterList")
