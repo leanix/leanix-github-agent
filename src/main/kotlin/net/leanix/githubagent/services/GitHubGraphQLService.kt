@@ -78,7 +78,7 @@ class GitHubGraphQLService(
     fun getManifestFileContent(
         owner: String,
         repositoryName: String,
-        fileName: String,
+        filePath: String,
         token: String
     ): String? {
         val client = buildGitHubGraphQLClient(token)
@@ -87,7 +87,7 @@ class GitHubGraphQLService(
             GetRepositoryManifestContent.Variables(
                 owner = owner,
                 repositoryName = repositoryName,
-                manifestFilePath = "HEAD:$fileName"
+                manifestFilePath = "HEAD:$filePath"
             )
         )
 
