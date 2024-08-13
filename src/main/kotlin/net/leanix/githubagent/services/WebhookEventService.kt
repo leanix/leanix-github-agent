@@ -66,32 +66,27 @@ class WebhookEventService(
         repositoryName: String,
         installationToken: String
     ) {
-        val isYAMLFileUpdated =
-            isManifestFileUpdated(
-                headCommit,
-                "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}"
-            )
-        val isYMLFileUpdated =
-            isManifestFileUpdated(
-                headCommit,
-                "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
-            )
+        val yamlFileName = "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}"
+        val ymlFileName = "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
+
+        val isYAMLFileUpdated = isManifestFileUpdated(headCommit, yamlFileName)
+        val isYMLFileUpdated = isManifestFileUpdated(headCommit, ymlFileName)
 
         // ignore updates on YML file if YAML file exists
         if (!isYAMLFileUpdated && isYMLFileUpdated) {
             val yamlFileContent = gitHubGraphQLService.getManifestFileContent(
                 owner,
                 repositoryName,
-                "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}",
+                yamlFileName,
                 installationToken
             )
             if (yamlFileContent != null) return
         }
 
         val manifestFilePath = if (isYAMLFileUpdated) {
-            "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}"
+            yamlFileName
         } else if (isYMLFileUpdated) {
-            "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
+            ymlFileName
         } else {
             return
         }
