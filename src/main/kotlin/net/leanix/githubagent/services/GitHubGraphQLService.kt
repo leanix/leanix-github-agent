@@ -3,7 +3,6 @@ package net.leanix.githubagent.services
 import com.expediagroup.graphql.client.spring.GraphQLWebClient
 import kotlinx.coroutines.runBlocking
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
-import net.leanix.githubagent.dto.ManifestFileDto
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
@@ -63,16 +62,10 @@ class GitHubGraphQLService(
                         updatedAt = it.updatedAt,
                         languages = it.languages!!.nodes!!.map { language -> language!!.name },
                         topics = it.repositoryTopics.nodes!!.map { topic -> topic!!.topic.name },
-                        manifestFile = if (it.manifestYaml != null) {
-                            ManifestFileDto(
-                                path = ManifestFileName.YAML.fileName,
-                                content = (it.manifestYaml as Blob).text.toString()
-                            )
+                        manifestFileContent = if (it.manifestYaml != null) {
+                            (it.manifestYaml as Blob).text.toString()
                         } else if (it.manifestYml != null) {
-                            ManifestFileDto(
-                                path = ManifestFileName.YML.fileName,
-                                content = (it.manifestYml as Blob).text.toString()
-                            )
+                            (it.manifestYml as Blob).text.toString()
                         } else {
                             null
                         }
@@ -87,7 +80,7 @@ class GitHubGraphQLService(
         repositoryName: String,
         fileName: String,
         token: String
-    ): String {
+    ): String? {
         val client = buildGitHubGraphQLClient(token)
 
         val query = GetRepositoryManifestContent(

@@ -7,7 +7,6 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
-import net.leanix.githubagent.dto.ManifestFileDto
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
@@ -96,10 +95,7 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                    manifestFile = ManifestFileDto(
-                        "leanix.yaml",
-                        "content"
-                    )
+                    manifestFileContent = "content"
                 )
             ),
             hasNextPage = false,

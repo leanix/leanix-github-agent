@@ -3,7 +3,7 @@ package net.leanix.githubagent.dto
 data class ManifestFileUpdateDto(
     val repositoryFullName: String,
     val action: ManifestFileAction,
-    val manifestFile: ManifestFileDto
+    val manifestFileContent: String?
 )
 
 enum class ManifestFileAction {
