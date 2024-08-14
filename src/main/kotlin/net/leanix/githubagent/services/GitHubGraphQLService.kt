@@ -57,7 +57,7 @@ class GitHubGraphQLService(
                         organizationName = it.owner.login,
                         description = it.description,
                         url = it.url,
-                        isArchived = it.isArchived,
+                        archived = it.isArchived,
                         visibility = it.visibility,
                         updatedAt = it.updatedAt,
                         languages = it.languages!!.nodes!!.map { language -> language!!.name },

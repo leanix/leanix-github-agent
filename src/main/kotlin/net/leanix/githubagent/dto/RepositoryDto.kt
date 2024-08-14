@@ -8,7 +8,7 @@ data class RepositoryDto(
     val organizationName: String,
     val description: String?,
     val url: String,
-    val isArchived: Boolean,
+    val archived: Boolean,
     val visibility: RepositoryVisibility,
     val updatedAt: String,
     val languages: List<String>,
