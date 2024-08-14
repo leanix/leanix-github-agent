@@ -34,6 +34,8 @@ class WebhookEventServiceTest {
     fun setUp() {
         every { gitHubAuthenticationService.refreshTokens() } returns Unit
         every { webSocketService.sendMessage(any(), any()) } returns Unit
+        every { cachingService.get(any()) } returns "token"
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
     }
 
     @Test
@@ -63,9 +65,6 @@ class WebhookEventServiceTest {
 
     @Test
     fun `should process push event`() {
-        every { cachingService.get(any()) } returns "token"
-        every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
-
         val payload = """{
             "repository": {
                 "name": "repo",
@@ -117,5 +116,65 @@ class WebhookEventServiceTest {
         webhookEventService.consumeWebhookEvent("OTHER", payload)
 
         verify(exactly = 1) { webSocketService.sendMessage("/events/other", payload) }
+    }
+
+    @Test
+    fun `should send updates for yaml manifest file`() {
+        val manifestFilePath = "leanix.yaml"
+        val payload = createPushEventPayload(manifestFilePath)
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
+    }
+
+    @Test
+    fun `should send updates for yml manifest file`() {
+        val manifestFilePath = "leanix.yml"
+        val payload = createPushEventPayload(manifestFilePath)
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), "leanix.yaml", any()) } returns null
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), manifestFilePath, any()) } returns "content"
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
+    }
+
+    @Test
+    fun `should ignore yml file changes if yaml file exist in repository`() {
+        val manifestFilePath = "leanix.yml"
+        val payload = createPushEventPayload(manifestFilePath)
+
+        every {
+            gitHubGraphQLService.getManifestFileContent("test-owner", "test-repo", "manifest.yaml", "token")
+        } returns "content"
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 0) { webSocketService.sendMessage(any(), any()) }
+    }
+
+    private fun createPushEventPayload(manifestFileName: String): String {
+        return """
+            {
+                "ref": "refs/heads/main",
+                "repository": {
+                    "name": "repo",
+                    "full_name": "org/repo",
+                    "default_branch": "main",
+                    "owner": {
+                        "name": "org"
+                    }
+                },
+                "head_commit": {
+                    "added": ["$manifestFileName"],
+                    "modified": [],
+                    "removed": []
+                },
+                "installation": {
+                    "id": 1
+                }
+            }
+        """
     }
 }

@@ -9,7 +9,7 @@ import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
 import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
 import net.leanix.githubagent.graphql.data.getrepositories.Blob
-import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -34,7 +34,8 @@ class GitHubGraphQLService(
             GetRepositories.Variables(
                 pageCount = PAGE_COUNT,
                 cursor = cursor,
-                expression = "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}$MANIFEST_FILE_NAME"
+                "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}",
+                "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
             )
         )
 
@@ -61,7 +62,13 @@ class GitHubGraphQLService(
                         updatedAt = it.updatedAt,
                         languages = it.languages!!.nodes!!.map { language -> language!!.name },
                         topics = it.repositoryTopics.nodes!!.map { topic -> topic!!.topic.name },
-                        manifestFileContent = (it.`object` as Blob?)?.text
+                        manifestFileContent = if (it.manifestYaml != null) {
+                            (it.manifestYaml as Blob).text.toString()
+                        } else if (it.manifestYml != null) {
+                            (it.manifestYml as Blob).text.toString()
+                        } else {
+                            null
+                        }
                     )
                 }
             )
@@ -73,14 +80,14 @@ class GitHubGraphQLService(
         repositoryName: String,
         filePath: String,
         token: String
-    ): String {
+    ): String? {
         val client = buildGitHubGraphQLClient(token)
 
         val query = GetRepositoryManifestContent(
             GetRepositoryManifestContent.Variables(
                 owner = owner,
                 repositoryName = repositoryName,
-                filePath = filePath
+                manifestFilePath = "HEAD:$filePath"
             )
         )
 
@@ -93,7 +100,7 @@ class GitHubGraphQLService(
             throw GraphQLApiException(result.errors!!)
         } else {
             (
-                result.data!!.repository!!.`object`
+                result.data!!.repository!!.manifestFile
                     as net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
                 ).text.toString()
         }

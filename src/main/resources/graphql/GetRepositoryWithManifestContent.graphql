@@ -1,6 +1,6 @@
-query GetRepositoryManifestContent($owner: String!, $repositoryName: String!, $filePath: String!) {
+query GetRepositoryManifestContent($owner: String!, $repositoryName: String!, $manifestFilePath: String!) {
    repository(owner: $owner, name: $repositoryName) {
-        object(expression: $filePath) {
+        manifestFile: object(expression: $manifestFilePath) {
             __typename
             ... on Blob {
                 text

@@ -5,8 +5,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
+import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -37,49 +38,130 @@ class WebhookEventService(
         val repositoryName = pushEventPayload.repository.name
         val repositoryFullName = pushEventPayload.repository.fullName
         val headCommit = pushEventPayload.headCommit
-        val organizationName = pushEventPayload.repository.owner.name
+        val owner = pushEventPayload.repository.owner.name
 
-        var installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
-        if (installationToken == null) {
-            gitHubAuthenticationService.refreshTokens()
-            installationToken = cachingService.get("installationToken:${pushEventPayload.installation.id}")?.toString()
-            require(installationToken != null) { "Installation token not found/ expired" }
-        }
+        val installationToken = getInstallationToken(pushEventPayload.installation.id)
 
         if (pushEventPayload.ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
-            when {
-                MANIFEST_FILE_NAME in headCommit.added -> {
-                    logger.info("Manifest file added to repository $repositoryFullName")
-                    val fileContent = getManifestFileContent(organizationName, repositoryName, installationToken)
-                    sendManifestData(repositoryFullName, ManifestFileAction.ADDED, fileContent)
+            handleManifestFileChanges(
+                headCommit,
+                repositoryFullName,
+                owner,
+                repositoryName,
+                installationToken
+            )
+        }
+    }
+
+    @SuppressWarnings("LongParameterList")
+    private fun handleManifestFileChanges(
+        headCommit: PushEventCommit,
+        repositoryFullName: String,
+        owner: String,
+        repositoryName: String,
+        installationToken: String
+    ) {
+        val yamlFileName = "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}"
+        val ymlFileName = "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
+
+        val isYAMLFileUpdated = isManifestFileUpdated(headCommit, yamlFileName)
+        val isYMLFileUpdated = isManifestFileUpdated(headCommit, ymlFileName)
+
+        if (!isYAMLFileUpdated && isYMLFileUpdated) {
+            val yamlFileContent = gitHubGraphQLService.getManifestFileContent(
+                owner,
+                repositoryName,
+                yamlFileName,
+                installationToken
+            )
+            if (yamlFileContent != null) return
+        }
+
+        val manifestFilePath = determineManifestFilePath(isYAMLFileUpdated, isYMLFileUpdated, yamlFileName, ymlFileName)
+        manifestFilePath?.let {
+            when (it) {
+                in headCommit.added, in headCommit.modified -> {
+                    handleAddedOrModifiedManifestFile(
+                        headCommit,
+                        repositoryFullName,
+                        owner,
+                        repositoryName,
+                        installationToken,
+                        it
+                    )
                 }
-                MANIFEST_FILE_NAME in headCommit.modified -> {
-                    logger.info("Manifest file modified in repository $repositoryFullName")
-                    val fileContent = getManifestFileContent(organizationName, repositoryName, installationToken)
-                    sendManifestData(repositoryFullName, ManifestFileAction.MODIFIED, fileContent)
-                }
-                MANIFEST_FILE_NAME in headCommit.removed -> {
-                    logger.info("Manifest file removed from repository $repositoryFullName")
-                    sendManifestData(repositoryFullName, ManifestFileAction.REMOVED, null)
+                in headCommit.removed -> {
+                    handleRemovedManifestFile(repositoryFullName)
                 }
             }
         }
     }
 
-    private fun getManifestFileContent(organizationName: String, repositoryName: String, token: String): String {
-        return gitHubGraphQLService.getManifestFileContent(
-            owner = organizationName,
+    private fun getInstallationToken(installationId: Int): String {
+        var installationToken = cachingService.get("installationToken:$installationId")?.toString()
+        if (installationToken == null) {
+            gitHubAuthenticationService.refreshTokens()
+            installationToken = cachingService.get("installationToken:$installationId")?.toString()
+            require(installationToken != null) { "Installation token not found/ expired" }
+        }
+        return installationToken
+    }
+
+    private fun isManifestFileUpdated(headCommit: PushEventCommit, fileName: String): Boolean {
+        return headCommit.added.any { it == fileName } ||
+            headCommit.modified.any { it == fileName } ||
+            headCommit.removed.any { it == fileName }
+    }
+
+    private fun determineManifestFilePath(
+        isYAMLFileUpdated: Boolean,
+        isYMLFileUpdated: Boolean,
+        yamlFileName: String,
+        ymlFileName: String
+    ): String? {
+        return when {
+            isYAMLFileUpdated -> yamlFileName
+            isYMLFileUpdated -> ymlFileName
+            else -> null
+        }
+    }
+
+    @SuppressWarnings("LongParameterList")
+    private fun handleAddedOrModifiedManifestFile(
+        headCommit: PushEventCommit,
+        repositoryFullName: String,
+        owner: String,
+        repositoryName: String,
+        installationToken: String,
+        manifestFilePath: String
+    ) {
+        val action = if (manifestFilePath in headCommit.added) ManifestFileAction.ADDED else ManifestFileAction.MODIFIED
+        logger.info("Manifest file $action in repository $repositoryFullName")
+        val fileContent = gitHubGraphQLService.getManifestFileContent(
+            owner,
             repositoryName,
-            "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}$MANIFEST_FILE_NAME",
-            token
+            manifestFilePath,
+            installationToken
+        )
+        webSocketService.sendMessage(
+            "/events/manifestFile",
+            ManifestFileUpdateDto(
+                repositoryFullName,
+                action,
+                fileContent
+            )
         )
     }
 
-    private fun sendManifestData(repositoryFullName: String, action: ManifestFileAction, manifestContent: String?) {
-        logger.info("Sending manifest file update event for repository $repositoryFullName")
+    private fun handleRemovedManifestFile(repositoryFullName: String) {
+        logger.info("Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName")
         webSocketService.sendMessage(
             "/events/manifestFile",
-            ManifestFileUpdateDto(repositoryFullName, action, manifestContent)
+            ManifestFileUpdateDto(
+                repositoryFullName,
+                ManifestFileAction.REMOVED,
+                null
+            )
         )
     }
 }

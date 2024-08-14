@@ -95,7 +95,7 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                    manifestFileContent = "dependencies { implementation 'com.example:example-lib:1.0.0' }"
+                    manifestFileContent = "content"
                 )
             ),
             hasNextPage = false,
