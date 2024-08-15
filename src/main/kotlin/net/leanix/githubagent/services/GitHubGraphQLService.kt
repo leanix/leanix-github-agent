@@ -103,7 +103,7 @@ class GitHubGraphQLService(
         return (
             result.data?.repository?.manifestFile as?
                 net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
-            )?.text.toString()
+            )?.text
     }
 
     private fun buildGitHubGraphQLClient(
