@@ -90,7 +90,7 @@ class GitHubScanningServiceTest {
                     organizationName = "testOrg",
                     description = "A test repository",
                     url = "https://github.com/testRepo",
-                    isArchived = false,
+                    archived = false,
                     visibility = RepositoryVisibility.PUBLIC,
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
