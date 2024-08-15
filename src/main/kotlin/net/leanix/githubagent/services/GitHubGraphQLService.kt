@@ -95,15 +95,15 @@ class GitHubGraphQLService(
             client.execute(query)
         }
 
-        return if (result.errors != null && result.errors!!.isNotEmpty()) {
+        if (result.errors != null && result.errors!!.isNotEmpty()) {
             logger.error("Error getting file content: ${result.errors}")
             throw GraphQLApiException(result.errors!!)
-        } else {
-            (
-                result.data!!.repository!!.manifestFile
-                    as net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
-                ).text.toString()
         }
+
+        return (
+            result.data?.repository?.manifestFile as?
+                net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
+            )?.text.toString()
     }
 
     private fun buildGitHubGraphQLClient(
