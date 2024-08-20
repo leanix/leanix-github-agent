@@ -95,7 +95,7 @@ class GitHubGraphQLService(
             client.execute(query)
         }
 
-        if (result.errors != null && result.errors!!.isNotEmpty()) {
+        if (!result.errors.isNullOrEmpty()) {
             logger.error("Error getting file content: ${result.errors}")
             throw GraphQLApiException(result.errors!!)
         }
