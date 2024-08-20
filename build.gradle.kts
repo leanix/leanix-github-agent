@@ -1,7 +1,7 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "3.2.5"
+    id("org.springframework.boot") version "3.2.7"
     id("io.spring.dependency-management") version "1.1.5"
     id("com.expediagroup.graphql") version "7.0.2"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
@@ -63,6 +63,9 @@ configurations.all {
         eachDependency {
             when (requested.module.toString()) {
                 "org.bouncycastle:bcprov-jdk18on" -> useVersion("1.78")
+                "com.graphql-java:graphql-java" -> useVersion("21.5")
+                "com.expediagroup:graphql-kotlin-graalvm-metadata-generator" -> useVersion("7.1.0")
+                "org.springframework:spring-web" -> useVersion("6.1.12")
             }
         }
     }
