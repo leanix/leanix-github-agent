@@ -100,10 +100,7 @@ class GitHubGraphQLService(
             throw GraphQLApiException(result.errors!!)
         }
 
-        return (
-            result.data?.repository?.manifestFile as?
-                net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
-            )?.text
+        return (result.data?.repository?.manifestFile as? RepositoryManifestBlob)?.text
     }
 
     private fun buildGitHubGraphQLClient(
@@ -114,3 +111,5 @@ class GitHubGraphQLService(
             builder = WebClient.builder().defaultHeaders { it.setBearerAuth(token) }
         )
 }
+
+typealias RepositoryManifestBlob = net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob
