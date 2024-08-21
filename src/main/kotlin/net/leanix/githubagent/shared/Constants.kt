@@ -1,6 +1,7 @@
 package net.leanix.githubagent.shared
 
 const val TOPIC_PREFIX = "/app/ghe/"
+const val AGENT_METADATA_TOPIC = "ghe/agent"
 
 enum class ManifestFileName(val fileName: String) {
     YAML("leanix.yaml"),
