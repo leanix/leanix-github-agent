@@ -48,7 +48,7 @@ class PostStartupRunnerTest {
     @Test
     fun `should send GitHub App name`() {
         val gitHubAppName = "appName"
-        every { gitHubEnterpriseService.getGitHubAppData("jwt") } returns
+        every { gitHubEnterpriseService.getGitHubApp("jwt") } returns
             GitHubAppResponse(
                 gitHubAppName, mapOf(), listOf()
             )

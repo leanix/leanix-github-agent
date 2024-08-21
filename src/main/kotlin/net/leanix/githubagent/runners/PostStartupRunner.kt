@@ -27,7 +27,7 @@ class PostStartupRunner(
         val jwt = cachingService.get("jwt") as String
         webSocketService.sendMessage(
             AGENT_METADATA_TOPIC,
-            gitHubEnterpriseService.getGitHubAppData(jwt).name
+            gitHubEnterpriseService.getGitHubApp(jwt).name
         )
         gitHubScanningService.scanGitHubResources()
     }

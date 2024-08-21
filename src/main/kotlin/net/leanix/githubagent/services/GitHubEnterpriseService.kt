@@ -18,7 +18,7 @@ class GitHubEnterpriseService(private val githubClient: GitHubClient) {
 
     fun verifyJwt(jwt: String) {
         runCatching {
-            val githubApp = getGitHubAppData(jwt)
+            val githubApp = getGitHubApp(jwt)
             validateGithubAppResponse(githubApp)
             logger.info("Authenticated as GitHub App: '${githubApp.name}'")
         }.onFailure {
@@ -49,5 +49,5 @@ class GitHubEnterpriseService(private val githubClient: GitHubClient) {
         }
     }
 
-    fun getGitHubAppData(jwt: String) = githubClient.getApp("Bearer $jwt")
+    fun getGitHubApp(jwt: String) = githubClient.getApp("Bearer $jwt")
 }
