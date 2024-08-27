@@ -18,7 +18,7 @@ class GitHubEnterpriseService(private val githubClient: GitHubClient) {
 
     fun verifyJwt(jwt: String) {
         runCatching {
-            val githubApp = githubClient.getApp("Bearer $jwt")
+            val githubApp = getGitHubApp(jwt)
             validateGithubAppResponse(githubApp)
             logger.info("Authenticated as GitHub App: '${githubApp.name}'")
         }.onFailure {
@@ -48,4 +48,6 @@ class GitHubEnterpriseService(private val githubClient: GitHubClient) {
             throw GitHubAppInsufficientPermissionsException(message)
         }
     }
+
+    fun getGitHubApp(jwt: String) = githubClient.getApp("Bearer $jwt")
 }
