@@ -2,8 +2,10 @@ package net.leanix.githubagent.services
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
+import net.leanix.githubagent.exceptions.UnableToConnectToGitHubEnterpriseException
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -53,5 +55,19 @@ class GitHubAuthenticationServiceTest {
         every { resourceLoader.getResource(any()) } returns ClassPathResource("invalid-private-key.pem")
 
         assertThrows(IllegalArgumentException::class.java) { githubAuthenticationService.generateAndCacheJwtToken() }
+    }
+
+    @Test
+    fun `generateJwtToken should send error log when throwing an exception`() {
+        every { cachingService.get(any()) } returns "dummy-value"
+        every { cachingService.set(any(), any(), any()) } returns Unit
+        every { githubEnterpriseProperties.pemFile } returns "valid-private-key.pem"
+        every { resourceLoader.getResource(any()) } returns ClassPathResource("valid-private-key.pem")
+        every { gitHubEnterpriseService.verifyJwt(any()) } throws UnableToConnectToGitHubEnterpriseException("")
+
+        assertThrows(UnableToConnectToGitHubEnterpriseException::class.java) {
+            githubAuthenticationService.generateAndCacheJwtToken()
+        }
+        verify(exactly = 1) { syncLogService.sendErrorLog("Failed to generate/validate JWT token") }
     }
 }
