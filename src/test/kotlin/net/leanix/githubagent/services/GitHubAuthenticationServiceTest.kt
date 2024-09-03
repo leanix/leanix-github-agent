@@ -6,6 +6,7 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.core.io.ClassPathResource
@@ -18,13 +19,20 @@ class GitHubAuthenticationServiceTest {
     private val resourceLoader = mockk<ResourceLoader>()
     private val gitHubEnterpriseService = mockk<GitHubEnterpriseService>()
     private val gitHubClient = mockk<GitHubClient>()
+    private val syncLogService = mockk<SyncLogService>()
     private val githubAuthenticationService = GitHubAuthenticationService(
         cachingService,
         githubEnterpriseProperties,
         resourceLoader,
         gitHubEnterpriseService,
-        gitHubClient
+        gitHubClient,
+        syncLogService
     )
+
+    @BeforeEach
+    fun setUp() {
+        every { syncLogService.sendErrorLog(any()) } returns Unit
+    }
 
     @Test
     fun `generateJwtToken with valid data should not throw exception`() {
