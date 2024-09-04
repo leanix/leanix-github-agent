@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
+import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -43,7 +44,10 @@ class GitHubAuthenticationServiceTest {
         every { cachingService.get(any()) } returns "dummy-value"
         every { githubEnterpriseProperties.pemFile } returns "invalid-private-key.pem"
         every { resourceLoader.getResource(any()) } returns ClassPathResource("invalid-private-key.pem")
+        every { gitHubEnterpriseService.verifyJwt(any()) } throws GitHubAppInsufficientPermissionsException("")
 
-        assertThrows(IllegalArgumentException::class.java) { githubAuthenticationService.generateAndCacheJwtToken() }
+        assertThrows(GitHubAppInsufficientPermissionsException::class.java) {
+            githubAuthenticationService.generateAndCacheJwtToken()
+        }
     }
 }

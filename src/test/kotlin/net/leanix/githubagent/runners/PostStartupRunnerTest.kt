@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import net.leanix.githubagent.dto.GitHubAppResponse
+import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubEnterpriseService
@@ -21,6 +22,7 @@ class PostStartupRunnerTest {
     private lateinit var gitHubEnterpriseService: GitHubEnterpriseService
     private lateinit var cachingService: CachingService
     private lateinit var postStartupRunner: PostStartupRunner
+    private lateinit var brokerStompSessionHandler: BrokerStompSessionHandler
 
     @BeforeEach
     fun setUp() {
@@ -29,20 +31,23 @@ class PostStartupRunnerTest {
         gitHubScanningService = mockk()
         gitHubEnterpriseService = mockk()
         cachingService = mockk()
+        brokerStompSessionHandler = mockk()
 
         postStartupRunner = PostStartupRunner(
             githubAuthenticationService,
             webSocketService,
             gitHubScanningService,
             gitHubEnterpriseService,
-            cachingService
+            cachingService,
+            brokerStompSessionHandler
         )
 
         every { webSocketService.initSession() } returns Unit
         every { webSocketService.sendMessage(any(), any()) } returns Unit
         every { githubAuthenticationService.generateAndCacheJwtToken() } returns Unit
-        every { cachingService.get("jwt") } returns "jwt"
+        every { cachingService.get("jwtToken") } returns "jwt"
         every { gitHubScanningService.scanGitHubResources() } returns Unit
+        every { brokerStompSessionHandler.isConnected() } returns true
     }
 
     @Test
