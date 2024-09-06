@@ -4,6 +4,8 @@ import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
 import net.leanix.githubagent.services.GitHubWebhookHandler
+import net.leanix.githubagent.services.SyncLogService
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -19,6 +21,14 @@ class GitHubWebhookControllerTest {
 
     @MockkBean
     private lateinit var gitHubWebhookHandler: GitHubWebhookHandler
+
+    @MockkBean
+    private lateinit var syncLogService: SyncLogService
+
+    @BeforeEach
+    fun setUp() {
+        every { syncLogService.sendErrorLog(any()) } returns Unit
+    }
 
     @Test
     fun `should return 202 if webhook event is processed successfully`() {

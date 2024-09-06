@@ -15,7 +15,8 @@ class GitHubScanningService(
     private val cachingService: CachingService,
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
-    private val gitHubAuthenticationService: GitHubAuthenticationService
+    private val gitHubAuthenticationService: GitHubAuthenticationService,
+    private val syncLogService: SyncLogService
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -30,8 +31,10 @@ class GitHubScanningService(
                 fetchAndSendRepositoriesData(installation)
             }
         }.onFailure {
+            val message = "Error while scanning GitHub resources"
+            syncLogService.sendErrorLog(message)
             cachingService.remove("runId")
-            logger.error("Error while scanning GitHub resources")
+            logger.error(message)
             throw it
         }
     }

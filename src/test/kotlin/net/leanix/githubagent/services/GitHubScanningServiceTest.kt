@@ -24,12 +24,14 @@ class GitHubScanningServiceTest {
     private val webSocketService = mockk<WebSocketService>(relaxUnitFun = true)
     private val gitHubGraphQLService = mockk<GitHubGraphQLService>()
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
+    private val syncLogService = mockk<SyncLogService>()
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
         webSocketService,
         gitHubGraphQLService,
-        gitHubAuthenticationService
+        gitHubAuthenticationService,
+        syncLogService
     )
     private val runId = UUID.randomUUID()
 
@@ -50,6 +52,7 @@ class GitHubScanningServiceTest {
         )
         every { cachingService.remove(any()) } returns Unit
         every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
+        every { syncLogService.sendErrorLog(any()) } returns Unit
     }
 
     @Test
