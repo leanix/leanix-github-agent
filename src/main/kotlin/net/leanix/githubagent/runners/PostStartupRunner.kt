@@ -5,7 +5,7 @@ import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubEnterpriseService
 import net.leanix.githubagent.services.GitHubScanningService
 import net.leanix.githubagent.services.WebSocketService
-import net.leanix.githubagent.shared.AGENT_METADATA_TOPIC
+import net.leanix.githubagent.shared.APP_NAME_TOPIC
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
@@ -26,7 +26,7 @@ class PostStartupRunner(
         githubAuthenticationService.generateAndCacheJwtToken()
         val jwt = cachingService.get("jwt") as String
         webSocketService.sendMessage(
-            AGENT_METADATA_TOPIC,
+            APP_NAME_TOPIC,
             gitHubEnterpriseService.getGitHubApp(jwt).name
         )
         gitHubScanningService.scanGitHubResources()
