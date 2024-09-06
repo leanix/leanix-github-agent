@@ -6,6 +6,7 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.exceptions.FailedToCreateJWTException
+import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ResourceLoader
@@ -28,6 +29,7 @@ class GitHubAuthenticationService(
     private val resourceLoader: ResourceLoader,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
     private val gitHubClient: GitHubClient,
+    private val syncLogService: SyncLogService,
 ) {
 
     companion object {
@@ -58,6 +60,11 @@ class GitHubAuthenticationService(
             cachingService.set("jwtToken", jwt.getOrThrow(), JWT_EXPIRATION_DURATION)
         }.onFailure {
             logger.error("Failed to generate/validate JWT token", it)
+            if (it is GitHubAppInsufficientPermissionsException) {
+                syncLogService.sendErrorLog(it.message.toString())
+            } else {
+                syncLogService.sendErrorLog("Failed to generate/validate JWT token")
+            }
             if (it is InvalidKeySpecException) {
                 throw IllegalArgumentException("The provided private key is not in a valid PKCS8 format.", it)
             } else {
