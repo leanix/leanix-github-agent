@@ -15,8 +15,12 @@ class WebSocketService(
     var stompSession: StompSession? = null
 
     fun initSession() {
-        logger.info("init session")
-        stompSession = webSocketClientConfig.initSession()
+        logger.info("Initializing websocket session")
+        kotlin.runCatching {
+            stompSession = webSocketClientConfig.initSession()
+        }.onFailure {
+            logger.error("Failed to initialize WebSocket session")
+        }
     }
 
     fun sendMessage(topic: String, data: Any) {
