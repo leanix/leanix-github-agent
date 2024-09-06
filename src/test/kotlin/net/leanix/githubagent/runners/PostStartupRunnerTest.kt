@@ -10,7 +10,7 @@ import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubEnterpriseService
 import net.leanix.githubagent.services.GitHubScanningService
 import net.leanix.githubagent.services.WebSocketService
-import net.leanix.githubagent.shared.AGENT_METADATA_TOPIC
+import net.leanix.githubagent.shared.APP_NAME_TOPIC
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -60,6 +60,6 @@ class PostStartupRunnerTest {
 
         postStartupRunner.run(mockk())
 
-        verify { webSocketService.sendMessage(AGENT_METADATA_TOPIC, gitHubAppName) }
+        verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
     }
 }
