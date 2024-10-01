@@ -16,28 +16,16 @@ query GetRepositories($pageCount: Int!, $cursor: String, $manifestYamlPath: Stri
                 owner{
                     login
                 }
-                languages(first: 10) {
+                languages(first: 25) {
                     nodes {
                         name
                     }
                 }
-                repositoryTopics(first:10) {
+                repositoryTopics(first:25) {
                     nodes {
                         topic {
                             name
                         }
-                    }
-                }
-                manifestYaml: object(expression: $manifestYamlPath) {
-                    __typename
-                    ... on Blob {
-                        text
-                    }
-                }
-                manifestYml: object(expression: $manifestYmlPath) {
-                    __typename
-                    ... on Blob {
-                        text
                     }
                 }
             }

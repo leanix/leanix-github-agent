@@ -8,7 +8,6 @@ import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
 import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
-import net.leanix.githubagent.graphql.data.getrepositories.Blob
 import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -62,13 +61,6 @@ class GitHubGraphQLService(
                         updatedAt = it.updatedAt,
                         languages = it.languages!!.nodes!!.map { language -> language!!.name },
                         topics = it.repositoryTopics.nodes!!.map { topic -> topic!!.topic.name },
-                        manifestFileContent = if (it.manifestYaml != null) {
-                            (it.manifestYaml as Blob).text.toString()
-                        } else if (it.manifestYml != null) {
-                            (it.manifestYml as Blob).text.toString()
-                        } else {
-                            null
-                        }
                     )
                 }
             )

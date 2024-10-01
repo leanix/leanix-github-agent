@@ -98,7 +98,6 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                    manifestFileContent = "content"
                 )
             ),
             hasNextPage = false,
