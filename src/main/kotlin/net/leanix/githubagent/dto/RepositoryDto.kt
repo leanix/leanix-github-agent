@@ -13,5 +13,4 @@ data class RepositoryDto(
     val updatedAt: String,
     val languages: List<String>,
     val topics: List<String>,
-    val manifestFileContent: String?,
 )
