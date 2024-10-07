@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GitHubAppResponse(
-    @JsonProperty("name") val name: String,
+    @JsonProperty("slug") val slug: String,
     @JsonProperty("permissions") val permissions: Map<String, String>,
     @JsonProperty("events") val events: List<String>
 )

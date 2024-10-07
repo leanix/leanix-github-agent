@@ -19,7 +19,7 @@ class GitHubEnterpriseServiceTest {
     fun `verifyJwt with valid jwt should not throw exception`() {
         val jwt = "validJwt"
         val githubApp = GitHubAppResponse(
-            name = "validApp",
+            slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
             events = listOf("label", "public", "repository")
         )
@@ -39,7 +39,7 @@ class GitHubEnterpriseServiceTest {
     @Test
     fun `validateGithubAppResponse with correct permissions should not throw exception`() {
         val response = GitHubAppResponse(
-            name = "validApp",
+            slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
             events = listOf("label", "public", "repository")
         )
@@ -50,7 +50,7 @@ class GitHubEnterpriseServiceTest {
     @Test
     fun `validateGithubAppResponse with missing permissions should throw exception`() {
         val response = GitHubAppResponse(
-            name = "validApp",
+            slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read"),
             events = listOf("label", "public", "repository")
         )
@@ -63,7 +63,7 @@ class GitHubEnterpriseServiceTest {
     @Test
     fun `validateGithubAppResponse with missing events should throw exception`() {
         val response = GitHubAppResponse(
-            name = "validApp",
+            slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
             events = listOf("label", "public")
         )

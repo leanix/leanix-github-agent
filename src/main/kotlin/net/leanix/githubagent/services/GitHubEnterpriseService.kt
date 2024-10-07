@@ -20,7 +20,7 @@ class GitHubEnterpriseService(private val githubClient: GitHubClient) {
         runCatching {
             val githubApp = getGitHubApp(jwt)
             validateGithubAppResponse(githubApp)
-            logger.info("Authenticated as GitHub App: '${githubApp.name}'")
+            logger.info("Authenticated as GitHub App: '${githubApp.slug}'")
         }.onFailure {
             logger.error("Failed to verify JWT token", it)
             when (it) {
