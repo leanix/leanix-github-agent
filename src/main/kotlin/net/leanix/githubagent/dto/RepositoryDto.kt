@@ -13,4 +13,6 @@ data class RepositoryDto(
     val updatedAt: String,
     val languages: List<String>,
     val topics: List<String>,
-)
+) {
+    val fullName: String = "$organizationName/$name"
+}
