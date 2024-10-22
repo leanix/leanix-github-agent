@@ -1,6 +1,7 @@
 package net.leanix.githubagent.client
 
 import net.leanix.githubagent.dto.GitHubAppResponse
+import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
 import net.leanix.githubagent.dto.Organization
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestParam
 
 @FeignClient(name = "githubClient", url = "\${github-enterprise.baseUrl}")
 interface GitHubClient {
@@ -37,4 +39,10 @@ interface GitHubClient {
         @PathVariable("org") org: String,
         @RequestHeader("Authorization") token: String
     ): List<Repository>
+
+    @GetMapping("/api/v3/search/code")
+    fun searchManifestFiles(
+        @RequestHeader("Authorization") token: String,
+        @RequestParam("q") query: String,
+    ): GitHubSearchResponse
 }

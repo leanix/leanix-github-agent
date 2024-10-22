@@ -1,4 +1,4 @@
-query GetRepositories($pageCount: Int!, $cursor: String, $manifestYamlPath: String!, $manifestYmlPath: String!) {
+query GetRepositories($pageCount: Int!, $cursor: String) {
     viewer {
         repositories(first: $pageCount, after: $cursor) {
             pageInfo {
