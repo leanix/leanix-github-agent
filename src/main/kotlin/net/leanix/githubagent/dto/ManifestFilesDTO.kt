@@ -8,5 +8,5 @@ data class ManifestFilesDTO(
 
 data class ManifestFileDTO(
     val path: String,
-    val content: String?,
+    val content: String,
 )

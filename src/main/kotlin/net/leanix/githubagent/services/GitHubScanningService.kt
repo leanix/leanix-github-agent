@@ -11,6 +11,7 @@ import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.Trigger
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -147,10 +148,14 @@ class GitHubScanningService(
                 filePath = manifestFile.path,
                 token = installationToken
             )
-            ManifestFileDTO(
-                path = manifestFile.path.replace("/${ManifestFileName.YAML.fileName}", ""),
-                content = content
-            )
+            if (content != null) {
+                ManifestFileDTO(
+                    path = manifestFile.path.replace("/${ManifestFileName.YAML.fileName}", ""),
+                    content = content
+                )
+            } else {
+                throw ManifestFileNotFoundException()
+            }
         }
     }
 }
