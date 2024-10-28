@@ -11,6 +11,7 @@ import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.Trigger
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -130,7 +131,7 @@ class GitHubScanningService(
         gitHubClient.searchManifestFiles(
             "Bearer $installationToken",
             "" +
-                "repo:${installation.account.login}/$repositoryName filename:leanix.yaml"
+                "repo:${installation.account.login}/$repositoryName filename:${ManifestFileName.YAML.fileName}"
         )
     }
     private fun fetchManifestContents(
@@ -147,7 +148,7 @@ class GitHubScanningService(
                 token = installationToken
             )
             ManifestFileDTO(
-                path = manifestFile.path.replace("/leanix.yaml", ""),
+                path = manifestFile.path.replace("/${ManifestFileName.YAML.fileName}", ""),
                 content = content
             )
         }
