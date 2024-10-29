@@ -6,7 +6,7 @@ data class SyncLogDto(
     val runId: UUID?,
     val trigger: Trigger,
     val logLevel: LogLevel,
-    val message: String
+    val message: String?
 )
 
 enum class Trigger {

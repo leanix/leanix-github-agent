@@ -5,11 +5,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
+import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
+import net.leanix.githubagent.dto.ItemResponse
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
+import net.leanix.githubagent.dto.RepositoryItemResponse
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
 import org.junit.jupiter.api.BeforeEach
@@ -19,12 +22,12 @@ import java.util.UUID
 
 class GitHubScanningServiceTest {
 
-    private val gitHubClient = mockk<GitHubClient>()
+    private val gitHubClient = mockk<GitHubClient>(relaxUnitFun = true)
     private val cachingService = mockk<CachingService>()
     private val webSocketService = mockk<WebSocketService>(relaxUnitFun = true)
     private val gitHubGraphQLService = mockk<GitHubGraphQLService>()
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
-    private val syncLogService = mockk<SyncLogService>()
+    private val syncLogService = mockk<SyncLogService>(relaxUnitFun = true)
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
@@ -105,7 +108,53 @@ class GitHubScanningServiceTest {
             hasNextPage = false,
             cursor = null
         )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(0, emptyList())
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/repositories"), any()) }
+    }
+
+    @Test
+    fun `scanGitHubResources should send repositories and manifest files over WebSocket`() {
+        // given
+        every { cachingService.get("runId") } returns runId
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    organizationName = "testOrg",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    archived = false,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
+            1,
+            listOf(
+                ItemResponse(
+                    name = "leanix.yaml",
+                    path = "dir/leanix.yaml",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                )
+            )
+        )
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), "dir/leanix.yaml", any()) } returns "content"
+
+        // when
+        gitHubScanningService.scanGitHubResources()
+
+        // then
+        verify { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
     }
 }

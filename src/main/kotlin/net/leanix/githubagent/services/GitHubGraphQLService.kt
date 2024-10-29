@@ -2,13 +2,11 @@ package net.leanix.githubagent.services
 
 import com.expediagroup.graphql.client.spring.GraphQLWebClient
 import kotlinx.coroutines.runBlocking
-import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
 import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
-import net.leanix.githubagent.shared.ManifestFileName
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -16,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient
 @Component
 class GitHubGraphQLService(
     private val cachingService: CachingService,
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
     companion object {
         private val logger = LoggerFactory.getLogger(GitHubGraphQLService::class.java)
@@ -33,8 +30,6 @@ class GitHubGraphQLService(
             GetRepositories.Variables(
                 pageCount = PAGE_COUNT,
                 cursor = cursor,
-                "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}",
-                "HEAD:${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
             )
         )
 

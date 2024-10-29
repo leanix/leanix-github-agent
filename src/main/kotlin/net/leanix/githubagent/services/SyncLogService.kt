@@ -20,7 +20,7 @@ class SyncLogService(
         sendSyncLog(message, LOGS_TOPIC, null, LogLevel.INFO)
     }
 
-    fun sendSyncLog(message: String, topic: String, trigger: Trigger?, logLevel: LogLevel) {
+    fun sendSyncLog(message: String? = null, topic: String = LOGS_TOPIC, trigger: Trigger?, logLevel: LogLevel) {
         val runId = cachingService.get("runId") as UUID
         val syncLogDto = SyncLogDto(
             runId = runId,
@@ -32,6 +32,6 @@ class SyncLogService(
     }
 
     private fun constructTopic(topic: String): String {
-        return "${cachingService.get("runId")}/$topic"
+        return topic
     }
 }
