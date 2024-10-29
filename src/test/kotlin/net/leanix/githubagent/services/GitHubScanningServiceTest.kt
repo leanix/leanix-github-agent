@@ -64,6 +64,7 @@ class GitHubScanningServiceTest {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
+        verify { syncLogService.sendInfoLog("The connector found 0 organizations with GitHub application installed.") }
         verify { syncLogService.sendInfoLog("The connector found 1 available organizations.") }
     }
 

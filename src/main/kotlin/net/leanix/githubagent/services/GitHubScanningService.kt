@@ -90,6 +90,10 @@ class GitHubScanningService(
                 }
             }
         logger.info("Sending organizations data")
+        syncLogService.sendInfoLog(
+            "The connector found ${organizations.filter { it.installed }.size} " +
+                "organizations with GitHub application installed."
+        )
         syncLogService.sendInfoLog("The connector found ${organizations.size} available organizations.")
         webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
