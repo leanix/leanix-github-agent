@@ -159,5 +159,7 @@ class GitHubScanningServiceTest {
         verify { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files") }
         verify { syncLogService.sendInfoLog("Fetched manifest file dir/leanix.yaml from repository TestRepo") }
         verify { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo") }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation") }
+        verify { syncLogService.sendInfoLog("Finished full scan for all available organizations") }
     }
 }

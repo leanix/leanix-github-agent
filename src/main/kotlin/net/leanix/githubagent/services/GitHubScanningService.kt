@@ -44,7 +44,11 @@ class GitHubScanningService(
                     .forEach { repository ->
                         fetchManifestFilesAndSend(installation, repository)
                     }
+                syncLogService.sendInfoLog(
+                    "Finished initial full scan for organization ${installation.account.login}"
+                )
             }
+            syncLogService.sendInfoLog("Finished full scan for all available organizations")
             syncLogService.sendSyncLog(
                 trigger = Trigger.FINISH_FULL_SYNC,
                 logLevel = LogLevel.INFO,
