@@ -63,6 +63,7 @@ class GitHubScanningService(
                 }
             }
         logger.info("Sending organizations data")
+        syncLogService.sendInfoLog("The connector found ${organizations.size} available organizations.")
         webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
 
@@ -85,5 +86,8 @@ class GitHubScanningService(
             page++
         } while (repositoriesPage.hasNextPage)
         logger.info("Fetched $totalRepos repositories data from organisation ${installation.account.login}")
+        syncLogService.sendInfoLog(
+            "Fetched $totalRepos repositories data from organisation ${installation.account.login}"
+        )
     }
 }

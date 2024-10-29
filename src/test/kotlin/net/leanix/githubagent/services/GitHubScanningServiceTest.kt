@@ -53,6 +53,7 @@ class GitHubScanningServiceTest {
         every { cachingService.remove(any()) } returns Unit
         every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
         every { syncLogService.sendErrorLog(any()) } returns Unit
+        every { syncLogService.sendInfoLog(any()) } returns Unit
     }
 
     @Test
@@ -60,6 +61,7 @@ class GitHubScanningServiceTest {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
+        verify(exactly = 2) { syncLogService.sendInfoLog(any()) }
     }
 
     @Test

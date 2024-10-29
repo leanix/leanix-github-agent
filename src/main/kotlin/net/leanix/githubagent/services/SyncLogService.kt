@@ -16,6 +16,10 @@ class SyncLogService(
         sendSyncLog(message, LOGS_TOPIC, null, LogLevel.ERROR)
     }
 
+    fun sendInfoLog(message: String) {
+        sendSyncLog(message, LOGS_TOPIC, null, LogLevel.INFO)
+    }
+
     fun sendSyncLog(message: String, topic: String, trigger: Trigger?, logLevel: LogLevel) {
         val runId = cachingService.get("runId") as UUID
         val syncLogDto = SyncLogDto(
