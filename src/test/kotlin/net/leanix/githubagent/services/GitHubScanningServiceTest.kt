@@ -64,7 +64,7 @@ class GitHubScanningServiceTest {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
-        verify(exactly = 2) { syncLogService.sendInfoLog(any()) }
+        verify { syncLogService.sendInfoLog("The connector found 1 available organizations.") }
     }
 
     @Test
@@ -156,5 +156,8 @@ class GitHubScanningServiceTest {
 
         // then
         verify { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
+        verify { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files") }
+        verify { syncLogService.sendInfoLog("Fetched manifest file dir/leanix.yaml from repository TestRepo") }
+        verify { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo") }
     }
 }

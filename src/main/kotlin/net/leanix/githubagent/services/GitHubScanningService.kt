@@ -142,6 +142,8 @@ class GitHubScanningService(
         repositoryName: String
     ) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
+        syncLogService.sendInfoLog("Scanning repository $repositoryName for manifest files")
+        var numOfManifestFilesFound = 0
         items.map { manifestFile ->
             val content = gitHubGraphQLService.getManifestFileContent(
                 owner = installation.account.login,
@@ -150,6 +152,8 @@ class GitHubScanningService(
                 token = installationToken
             )
             if (content != null) {
+                numOfManifestFilesFound++
+                syncLogService.sendInfoLog("Fetched manifest file ${manifestFile.path} from repository $repositoryName")
                 ManifestFileDTO(
                     path = manifestFile.path.replace("/${ManifestFileName.YAML.fileName}", ""),
                     content = content
@@ -157,9 +161,8 @@ class GitHubScanningService(
             } else {
                 throw ManifestFileNotFoundException()
             }
+        }.also {
+            syncLogService.sendInfoLog("Found $numOfManifestFilesFound manifest files in repository $repositoryName")
         }
-        syncLogService.sendInfoLog(
-            "Fetched $totalRepos repositories data from organisation ${installation.account.login}"
-        )
     }
 }
