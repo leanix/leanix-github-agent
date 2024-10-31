@@ -108,7 +108,14 @@ class WebhookEventService(
         manifestFilePath: String,
         action: ManifestFileAction
     ) {
-        logger.info("Manifest file $action in repository $repositoryFullName")
+        val location = if ('/' in manifestFilePath) {
+            "directory '/${manifestFilePath.substringBeforeLast('/')}'"
+        } else {
+            "root folder"
+        }
+
+        logger.info("Manifest file {} in repository {} under {}", action, repositoryFullName, location)
+
         val fileContent = gitHubGraphQLService.getManifestFileContent(
             owner,
             repositoryName,
