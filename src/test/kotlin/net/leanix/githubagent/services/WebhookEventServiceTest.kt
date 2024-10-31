@@ -213,9 +213,6 @@ class WebhookEventServiceTest {
                     "custom/path/added1/$MANIFEST_FILE_NAME"
                 )
             )
-        }
-
-        verify(exactly = 1) {
             webSocketService.sendMessage(
                 "/events/manifestFile",
                 ManifestFileUpdateDto(
@@ -225,9 +222,6 @@ class WebhookEventServiceTest {
                     "custom/path/added2/$MANIFEST_FILE_NAME"
                 )
             )
-        }
-
-        verify(exactly = 1) {
             webSocketService.sendMessage(
                 "/events/manifestFile",
                 ManifestFileUpdateDto(
