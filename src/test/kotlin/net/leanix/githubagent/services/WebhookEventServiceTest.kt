@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.verify
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
+import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,7 +75,7 @@ class WebhookEventServiceTest {
             },
             "head_commit": {
                 "added": [],
-                "modified": ["leanix.yaml"],
+                "modified": ["$MANIFEST_FILE_NAME"],
                 "removed": []
             },
             "installation": {"id": 1},
@@ -89,7 +90,8 @@ class WebhookEventServiceTest {
                 ManifestFileUpdateDto(
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
-                    "content"
+                    "content",
+                    MANIFEST_FILE_NAME
                 )
             )
         }
@@ -119,43 +121,8 @@ class WebhookEventServiceTest {
     }
 
     @Test
-    fun `should send updates for yaml manifest file`() {
-        val manifestFilePath = "leanix.yaml"
-        val payload = createPushEventPayload(manifestFilePath)
-
-        webhookEventService.consumeWebhookEvent("PUSH", payload)
-
-        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
-    }
-
-    @Test
     fun `should send updates for yml manifest file`() {
-        val manifestFilePath = "leanix.yml"
-        val payload = createPushEventPayload(manifestFilePath)
-        every { gitHubGraphQLService.getManifestFileContent(any(), any(), "leanix.yaml", any()) } returns null
-        every { gitHubGraphQLService.getManifestFileContent(any(), any(), manifestFilePath, any()) } returns "content"
-
-        webhookEventService.consumeWebhookEvent("PUSH", payload)
-
-        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
-    }
-
-    @Test
-    fun `should ignore yml file changes if yaml file exist in repository`() {
-        val manifestFilePath = "leanix.yml"
-        val payload = createPushEventPayload(manifestFilePath)
-
-        every {
-            gitHubGraphQLService.getManifestFileContent("test-owner", "test-repo", "manifest.yaml", "token")
-        } returns "content"
-
-        webhookEventService.consumeWebhookEvent("PUSH", payload)
-
-        verify(exactly = 0) { webSocketService.sendMessage(any(), any()) }
-    }
-
-    private fun createPushEventPayload(manifestFileName: String): String {
-        return """
+        val payload = """
             {
                 "ref": "refs/heads/main",
                 "repository": {
@@ -167,7 +134,7 @@ class WebhookEventServiceTest {
                     }
                 },
                 "head_commit": {
-                    "added": ["$manifestFileName"],
+                    "added": ["$MANIFEST_FILE_NAME"],
                     "modified": [],
                     "removed": []
                 },
@@ -176,5 +143,100 @@ class WebhookEventServiceTest {
                 }
             }
         """
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), MANIFEST_FILE_NAME, any()) } returns "content"
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify { webSocketService.sendMessage(any(), any<ManifestFileUpdateDto>()) }
+    }
+
+    @Test
+    fun `should handle manifest file in subdirectory`() {
+        val payload = """{
+            "repository": {
+                "name": "repo",
+                "full_name": "owner/repo",
+                "owner": {"name": "owner"},
+                "default_branch": "main"
+            },
+            "head_commit": {
+                "added": ["a/b/c/$MANIFEST_FILE_NAME"],
+                "modified": [],
+                "removed": []
+            },
+            "installation": {"id": 1},
+            "ref": "refs/heads/main"
+        }"""
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.ADDED,
+                    "content",
+                    "a/b/c/$MANIFEST_FILE_NAME"
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `should handle push event with multiple added and modified files`() {
+        val payload = """{
+            "repository": {
+                "name": "repo",
+                "full_name": "owner/repo",
+                "owner": {"name": "owner"},
+                "default_branch": "main"
+            },
+            "head_commit": {
+                "added": ["custom/path/added1/$MANIFEST_FILE_NAME", "custom/path/added2/$MANIFEST_FILE_NAME"],
+                "modified": ["custom/path/modified/$MANIFEST_FILE_NAME"],
+                "removed": []
+            },
+            "installation": {"id": 1},
+            "ref": "refs/heads/main"
+        }"""
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.ADDED,
+                    "content",
+                    "custom/path/added1/$MANIFEST_FILE_NAME"
+                )
+            )
+        }
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.ADDED,
+                    "content",
+                    "custom/path/added2/$MANIFEST_FILE_NAME"
+                )
+            )
+        }
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.MODIFIED,
+                    "content",
+                    "custom/path/modified/$MANIFEST_FILE_NAME"
+                )
+            )
+        }
     }
 }

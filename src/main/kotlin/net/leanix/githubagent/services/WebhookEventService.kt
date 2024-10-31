@@ -2,12 +2,11 @@ package net.leanix.githubagent.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.shared.ManifestFileName
+import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service
 class WebhookEventService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
     private val cachingService: CachingService,
     private val gitHubAuthenticationService: GitHubAuthenticationService
 ) {
@@ -53,7 +51,6 @@ class WebhookEventService(
         }
     }
 
-    @SuppressWarnings("LongParameterList")
     private fun handleManifestFileChanges(
         headCommit: PushEventCommit,
         repositoryFullName: String,
@@ -61,39 +58,34 @@ class WebhookEventService(
         repositoryName: String,
         installationToken: String
     ) {
-        val yamlFileName = "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YAML.fileName}"
-        val ymlFileName = "${gitHubEnterpriseProperties.manifestFileDirectory}${ManifestFileName.YML.fileName}"
+        val addedManifestFiles = headCommit.added.filter { it.contains(MANIFEST_FILE_NAME) }
+        val modifiedManifestFiles = headCommit.modified.filter { it.contains(MANIFEST_FILE_NAME) }
+        val removedManifestFiles = headCommit.removed.filter { it.contains(MANIFEST_FILE_NAME) }
 
-        val isYAMLFileUpdated = isManifestFileUpdated(headCommit, yamlFileName)
-        val isYMLFileUpdated = isManifestFileUpdated(headCommit, ymlFileName)
-
-        if (!isYAMLFileUpdated && isYMLFileUpdated) {
-            val yamlFileContent = gitHubGraphQLService.getManifestFileContent(
+        addedManifestFiles.forEach { filePath ->
+            handleAddedOrModifiedManifestFile(
+                repositoryFullName,
                 owner,
                 repositoryName,
-                yamlFileName,
-                installationToken
+                installationToken,
+                filePath,
+                ManifestFileAction.ADDED
             )
-            if (yamlFileContent != null) return
         }
 
-        val manifestFilePath = determineManifestFilePath(isYAMLFileUpdated, isYMLFileUpdated, yamlFileName, ymlFileName)
-        manifestFilePath?.let {
-            when (it) {
-                in headCommit.added, in headCommit.modified -> {
-                    handleAddedOrModifiedManifestFile(
-                        headCommit,
-                        repositoryFullName,
-                        owner,
-                        repositoryName,
-                        installationToken,
-                        it
-                    )
-                }
-                in headCommit.removed -> {
-                    handleRemovedManifestFile(repositoryFullName)
-                }
-            }
+        modifiedManifestFiles.forEach { filePath ->
+            handleAddedOrModifiedManifestFile(
+                repositoryFullName,
+                owner,
+                repositoryName,
+                installationToken,
+                filePath,
+                ManifestFileAction.MODIFIED
+            )
+        }
+
+        removedManifestFiles.forEach { filePath ->
+            handleRemovedManifestFile(repositoryFullName)
         }
     }
 
@@ -107,35 +99,15 @@ class WebhookEventService(
         return installationToken
     }
 
-    private fun isManifestFileUpdated(headCommit: PushEventCommit, fileName: String): Boolean {
-        return headCommit.added.any { it == fileName } ||
-            headCommit.modified.any { it == fileName } ||
-            headCommit.removed.any { it == fileName }
-    }
-
-    private fun determineManifestFilePath(
-        isYAMLFileUpdated: Boolean,
-        isYMLFileUpdated: Boolean,
-        yamlFileName: String,
-        ymlFileName: String
-    ): String? {
-        return when {
-            isYAMLFileUpdated -> yamlFileName
-            isYMLFileUpdated -> ymlFileName
-            else -> null
-        }
-    }
-
     @SuppressWarnings("LongParameterList")
     private fun handleAddedOrModifiedManifestFile(
-        headCommit: PushEventCommit,
         repositoryFullName: String,
         owner: String,
         repositoryName: String,
         installationToken: String,
-        manifestFilePath: String
+        manifestFilePath: String,
+        action: ManifestFileAction
     ) {
-        val action = if (manifestFilePath in headCommit.added) ManifestFileAction.ADDED else ManifestFileAction.MODIFIED
         logger.info("Manifest file $action in repository $repositoryFullName")
         val fileContent = gitHubGraphQLService.getManifestFileContent(
             owner,
@@ -148,7 +120,8 @@ class WebhookEventService(
             ManifestFileUpdateDto(
                 repositoryFullName,
                 action,
-                fileContent
+                fileContent,
+                manifestFilePath
             )
         )
     }
@@ -160,6 +133,7 @@ class WebhookEventService(
             ManifestFileUpdateDto(
                 repositoryFullName,
                 ManifestFileAction.REMOVED,
+                null,
                 null
             )
         )
