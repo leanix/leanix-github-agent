@@ -16,6 +16,10 @@ class SyncLogService(
         sendSyncLog(message, LOGS_TOPIC, Trigger.PROGRESS_FULL_SYNC, LogLevel.ERROR)
     }
 
+    fun sendSystemErrorLog(message: String) {
+        sendSyncLog(message, LOGS_TOPIC, Trigger.SYSTEM, LogLevel.ERROR)
+    }
+
     fun sendInfoLog(message: String) {
         sendSyncLog(message, LOGS_TOPIC, Trigger.PROGRESS_FULL_SYNC, LogLevel.INFO)
     }

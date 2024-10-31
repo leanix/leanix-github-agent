@@ -61,9 +61,9 @@ class GitHubAuthenticationService(
         }.onFailure {
             logger.error("Failed to generate/validate JWT token", it)
             if (it is GitHubAppInsufficientPermissionsException) {
-                syncLogService.sendErrorLog(it.message.toString())
+                syncLogService.sendSystemErrorLog(it.message.toString())
             } else {
-                syncLogService.sendErrorLog("Failed to generate/validate JWT token")
+                syncLogService.sendSystemErrorLog("Failed to generate/validate JWT token")
             }
             if (it is InvalidKeySpecException) {
                 throw IllegalArgumentException("The provided private key is not in a valid PKCS8 format.", it)
