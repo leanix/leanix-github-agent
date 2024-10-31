@@ -56,6 +56,7 @@ class GitHubScanningServiceTest {
         every { cachingService.remove(any()) } returns Unit
         every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
         every { syncLogService.sendErrorLog(any()) } returns Unit
+        every { syncLogService.sendInfoLog(any()) } returns Unit
     }
 
     @Test
@@ -63,6 +64,8 @@ class GitHubScanningServiceTest {
         every { cachingService.get("runId") } returns runId
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
+        verify { syncLogService.sendInfoLog("The connector found 0 organizations with GitHub application installed.") }
+        verify { syncLogService.sendInfoLog("The connector found 1 available organizations.") }
     }
 
     @Test
@@ -154,5 +157,10 @@ class GitHubScanningServiceTest {
 
         // then
         verify { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
+        verify { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files") }
+        verify { syncLogService.sendInfoLog("Fetched manifest file dir/leanix.yaml from repository TestRepo") }
+        verify { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo") }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation") }
+        verify { syncLogService.sendInfoLog("Finished full scan for all available organizations") }
     }
 }

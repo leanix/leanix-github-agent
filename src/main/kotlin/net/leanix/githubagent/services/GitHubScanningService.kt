@@ -44,7 +44,11 @@ class GitHubScanningService(
                     .forEach { repository ->
                         fetchManifestFilesAndSend(installation, repository)
                     }
+                syncLogService.sendInfoLog(
+                    "Finished initial full scan for organization ${installation.account.login}"
+                )
             }
+            syncLogService.sendInfoLog("Finished full scan for all available organizations")
             syncLogService.sendSyncLog(
                 trigger = Trigger.FINISH_FULL_SYNC,
                 logLevel = LogLevel.INFO,
@@ -86,6 +90,11 @@ class GitHubScanningService(
                 }
             }
         logger.info("Sending organizations data")
+        syncLogService.sendInfoLog(
+            "The connector found ${organizations.filter { it.installed }.size} " +
+                "organizations with GitHub application installed."
+        )
+        syncLogService.sendInfoLog("The connector found ${organizations.size} available organizations.")
         webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
 
@@ -141,6 +150,8 @@ class GitHubScanningService(
         repositoryName: String
     ) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
+        syncLogService.sendInfoLog("Scanning repository $repositoryName for manifest files")
+        var numOfManifestFilesFound = 0
         items.map { manifestFile ->
             val content = gitHubGraphQLService.getManifestFileContent(
                 owner = installation.account.login,
@@ -149,6 +160,8 @@ class GitHubScanningService(
                 token = installationToken
             )
             if (content != null) {
+                numOfManifestFilesFound++
+                syncLogService.sendInfoLog("Fetched manifest file ${manifestFile.path} from repository $repositoryName")
                 ManifestFileDTO(
                     path = manifestFile.path.replace("/${ManifestFileName.YAML.fileName}", ""),
                     content = content
@@ -156,6 +169,8 @@ class GitHubScanningService(
             } else {
                 throw ManifestFileNotFoundException()
             }
+        }.also {
+            syncLogService.sendInfoLog("Found $numOfManifestFilesFound manifest files in repository $repositoryName")
         }
     }
 }

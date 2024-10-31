@@ -33,7 +33,7 @@ class GitHubAuthenticationServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { syncLogService.sendErrorLog(any()) } returns Unit
+        every { syncLogService.sendSystemErrorLog(any()) } returns Unit
     }
 
     @Test
@@ -68,6 +68,6 @@ class GitHubAuthenticationServiceTest {
         assertThrows(UnableToConnectToGitHubEnterpriseException::class.java) {
             githubAuthenticationService.generateAndCacheJwtToken()
         }
-        verify(exactly = 1) { syncLogService.sendErrorLog("Failed to generate/validate JWT token") }
+        verify(exactly = 1) { syncLogService.sendSystemErrorLog("Failed to generate/validate JWT token") }
     }
 }
