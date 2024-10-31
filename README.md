@@ -27,7 +27,6 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     - `GITHUB_ENTERPRISE_BASE_URL`: The base URL of your GitHub Enterprise Server instance.
     - `GITHUB_APP_ID`: The ID of your GitHub App.
     - `PEM_FILE`: The path to your GitHub App's PEM file inside the Docker container.
-    - `MANIFEST_FILE_DIRECTORY`: The directory path where the manifest files are stored in each repository. Manifest files are crucial for microservice discovery as they provide essential information about the service. For more information, see [Microservice Discovery Through a Manifest File](https://docs-eam.leanix.net/reference/microservice-discovery-manifest-file) in our documentation. **If both .yaml and .yml files exist in a repository, only the .yaml file will be used.**
     - `WEBHOOK_SECRET`: The secret used to validate incoming webhook events from GitHub. (Optional, but recommended. [Needs to be set in the GitHub App settings first](https://docs.github.com/en/enterprise-server@3.8/webhooks/using-webhooks/validating-webhook-deliveries).)
 
 5. **Start the agent**: To start the agent, run the following Docker command. Replace the variables in angle brackets with your actual values.
@@ -38,7 +37,6 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     -e GITHUB_ENTERPRISE_BASE_URL=<github_enterprise_base_url> \
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
-    -e MANIFEST_FILE_DIRECTORY=<manifest_file_directory> \
     -e WEBHOOK_SECRET=<webhook_secret> \
     leanix-github-agent
     ```
