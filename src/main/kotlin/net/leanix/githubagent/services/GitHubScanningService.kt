@@ -12,7 +12,7 @@ import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.Trigger
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
-import net.leanix.githubagent.shared.ManifestFileName
+import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -141,7 +141,7 @@ class GitHubScanningService(
         gitHubClient.searchManifestFiles(
             "Bearer $installationToken",
             "" +
-                "repo:${installation.account.login}/$repositoryName filename:${ManifestFileName.YAML.fileName}"
+                "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME"
         )
     }
     private fun fetchManifestContents(
@@ -163,7 +163,7 @@ class GitHubScanningService(
                 numOfManifestFilesFound++
                 syncLogService.sendInfoLog("Fetched manifest file ${manifestFile.path} from repository $repositoryName")
                 ManifestFileDTO(
-                    path = manifestFile.path.replace("/${ManifestFileName.YAML.fileName}", ""),
+                    path = manifestFile.path.replace("/$MANIFEST_FILE_NAME", ""),
                     content = content
                 )
             } else {
