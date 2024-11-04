@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 
+const val UNSUPPORTED_MANIFEST_EXTENSION = "leanix.yml"
+
 @SpringBootTest
 @ActiveProfiles("test")
 class WebhookEventServiceTest {
@@ -262,6 +264,39 @@ class WebhookEventServiceTest {
                     ManifestFileAction.MODIFIED,
                     "content",
                     "custom/path/modified/$MANIFEST_FILE_NAME"
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `should handle push event with supported YAML extension`() {
+        val payload = """{
+            "repository": {
+                "name": "repo",
+                "full_name": "owner/repo",
+                "owner": {"name": "owner"},
+                "default_branch": "main"
+            },
+            "head_commit": {
+                "added": ["custom/path/added1/leanix.yml", "custom/path/added2/$MANIFEST_FILE_NAME"],
+                "modified": [],
+                "removed": []
+            },
+            "installation": {"id": 1},
+            "ref": "refs/heads/main"
+        }"""
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.ADDED,
+                    "content",
+                    "custom/path/added2/$MANIFEST_FILE_NAME"
                 )
             )
         }
