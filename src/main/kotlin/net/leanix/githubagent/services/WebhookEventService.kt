@@ -85,7 +85,7 @@ class WebhookEventService(
         }
 
         removedManifestFiles.forEach { filePath ->
-            handleRemovedManifestFile(repositoryFullName)
+            handleRemovedManifestFile(repositoryFullName, filePath)
         }
     }
 
@@ -108,11 +108,7 @@ class WebhookEventService(
         manifestFilePath: String,
         action: ManifestFileAction
     ) {
-        val location = if ('/' in manifestFilePath) {
-            "directory '/${manifestFilePath.substringBeforeLast('/')}'"
-        } else {
-            "root folder"
-        }
+        val location = getManifestFileLocation(manifestFilePath)
 
         logger.info("Manifest file {} in repository {} under {}", action, repositoryFullName, location)
 
@@ -133,16 +129,25 @@ class WebhookEventService(
         )
     }
 
-    private fun handleRemovedManifestFile(repositoryFullName: String) {
-        logger.info("Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName")
+    private fun handleRemovedManifestFile(repositoryFullName: String, manifestFilePath: String) {
+        val location = getManifestFileLocation(manifestFilePath)
+        logger.info("Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName under $location")
         webSocketService.sendMessage(
             "/events/manifestFile",
             ManifestFileUpdateDto(
                 repositoryFullName,
                 ManifestFileAction.REMOVED,
                 null,
-                null
+                manifestFilePath
             )
         )
+    }
+
+    private fun getManifestFileLocation(manifestFilePath: String): String {
+        return if (manifestFilePath.contains('/')) {
+            "directory '/${manifestFilePath.substringBeforeLast('/')}'"
+        } else {
+            "root folder"
+        }
     }
 }
