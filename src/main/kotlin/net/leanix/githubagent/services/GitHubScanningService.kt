@@ -26,6 +26,7 @@ class GitHubScanningService(
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val syncLogService: SyncLogService
 ) {
+    val fileNameMatchRegex = Regex("/?$MANIFEST_FILE_NAME\$")
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
 
@@ -163,7 +164,7 @@ class GitHubScanningService(
                 numOfManifestFilesFound++
                 syncLogService.sendInfoLog("Fetched manifest file ${manifestFile.path} from repository $repositoryName")
                 ManifestFileDTO(
-                    path = manifestFile.path.replace("/$MANIFEST_FILE_NAME", ""),
+                    path = fileNameMatchRegex.replace(manifestFile.path, ""),
                     content = content
                 )
             } else {
