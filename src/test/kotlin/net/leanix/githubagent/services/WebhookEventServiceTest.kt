@@ -279,7 +279,7 @@ class WebhookEventServiceTest {
                 "default_branch": "main"
             },
             "head_commit": {
-                "added": ["custom/path/added1/leanix.yml", "custom/path/added2/$MANIFEST_FILE_NAME"],
+                "added": ["custom/path/added1/$UNSUPPORTED_MANIFEST_EXTENSION", "custom/path/added2/$MANIFEST_FILE_NAME"],
                 "modified": [],
                 "removed": []
             },
