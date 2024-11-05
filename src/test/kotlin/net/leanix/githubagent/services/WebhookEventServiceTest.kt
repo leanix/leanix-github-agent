@@ -301,4 +301,37 @@ class WebhookEventServiceTest {
             )
         }
     }
+
+    @Test
+    fun `should not handle push event with unsupported YAML extension`() {
+        val payload = """{
+            "repository": {
+                "name": "repo",
+                "full_name": "owner/repo",
+                "owner": {"name": "owner"},
+                "default_branch": "main"
+            },
+            "head_commit": {
+                "added": ["custom/path/added1/$UNSUPPORTED_MANIFEST_EXTENSION"],
+                "modified": [],
+                "removed": []
+            },
+            "installation": {"id": 1},
+            "ref": "refs/heads/main"
+        }"""
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 0) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.ADDED,
+                    "content",
+                    "custom/path/added1/$MANIFEST_FILE_NAME"
+                )
+            )
+        }
+    }
 }
