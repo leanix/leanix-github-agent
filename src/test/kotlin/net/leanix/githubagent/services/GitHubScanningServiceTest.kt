@@ -2,6 +2,7 @@ package net.leanix.githubagent.services
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
@@ -9,12 +10,15 @@ import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
 import net.leanix.githubagent.dto.ItemResponse
+import net.leanix.githubagent.dto.ManifestFilesDTO
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.RepositoryItemResponse
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
+import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -162,5 +166,52 @@ class GitHubScanningServiceTest {
         verify { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo") }
         verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation") }
         verify { syncLogService.sendInfoLog("Finished full scan for all available organizations") }
+    }
+
+    @Test
+    fun `scanGitHubResources should send manifest files with empty path if the file is in the root directory`() {
+        // given
+        every { cachingService.get("runId") } returns runId
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    organizationName = "testOrg",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    archived = false,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
+            1,
+            listOf(
+                ItemResponse(
+                    name = "leanix.yaml",
+                    path = MANIFEST_FILE_NAME,
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                )
+            )
+        )
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), MANIFEST_FILE_NAME, any()) } returns "content"
+        val fileSlot = slot<ManifestFilesDTO>()
+
+        // when
+        gitHubScanningService.scanGitHubResources()
+
+        // then
+        verify { webSocketService.sendMessage(eq("$runId/manifestFiles"), capture(fileSlot)) }
+        assertEquals(fileSlot.captured.manifestFiles[0].path, "")
     }
 }
