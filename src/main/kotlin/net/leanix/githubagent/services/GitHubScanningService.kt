@@ -13,6 +13,7 @@ import net.leanix.githubagent.dto.Trigger
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.fileNameMatchRegex
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -26,7 +27,6 @@ class GitHubScanningService(
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val syncLogService: SyncLogService
 ) {
-    val fileNameMatchRegex = Regex("/?$MANIFEST_FILE_NAME\$")
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
 
