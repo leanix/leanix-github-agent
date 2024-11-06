@@ -7,6 +7,7 @@ import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.fileNameMatchRegex
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -124,7 +125,7 @@ class WebhookEventService(
                 repositoryFullName,
                 action,
                 fileContent,
-                manifestFilePath
+                fileNameMatchRegex.replace(manifestFilePath, "")
             )
         )
     }
@@ -138,7 +139,7 @@ class WebhookEventService(
                 repositoryFullName,
                 ManifestFileAction.REMOVED,
                 null,
-                manifestFilePath
+                fileNameMatchRegex.replace(manifestFilePath, "")
             )
         )
     }

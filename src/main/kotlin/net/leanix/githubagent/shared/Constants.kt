@@ -11,3 +11,5 @@ val SUPPORTED_EVENT_TYPES = listOf(
     "ORGANIZATION",
     "INSTALLATION",
 )
+
+val fileNameMatchRegex = Regex("/?$MANIFEST_FILE_NAME\$")

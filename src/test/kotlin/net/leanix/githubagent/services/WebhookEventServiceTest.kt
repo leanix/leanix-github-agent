@@ -93,7 +93,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    MANIFEST_FILE_NAME
+                    ""
                 )
             )
         }
@@ -179,7 +179,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.REMOVED,
                     null,
-                    "a/b/c/$MANIFEST_FILE_NAME"
+                    "a/b/c"
                 )
             )
         }
@@ -212,7 +212,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "a/b/c/$MANIFEST_FILE_NAME"
+                    "a/b/c"
                 )
             )
         }
@@ -245,7 +245,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added1/$MANIFEST_FILE_NAME"
+                    "custom/path/added1"
                 )
             )
             webSocketService.sendMessage(
@@ -254,7 +254,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added2/$MANIFEST_FILE_NAME"
+                    "custom/path/added2"
                 )
             )
             webSocketService.sendMessage(
@@ -263,7 +263,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    "custom/path/modified/$MANIFEST_FILE_NAME"
+                    "custom/path/modified"
                 )
             )
         }
@@ -296,7 +296,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added2/$MANIFEST_FILE_NAME"
+                    "custom/path/added2"
                 )
             )
         }
