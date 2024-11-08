@@ -8,6 +8,7 @@ data class RepositoryDto(
     val organizationName: String,
     val description: String?,
     val url: String,
+    val defaultBranch: String?,
     val archived: Boolean,
     val visibility: RepositoryVisibility,
     val updatedAt: String,
