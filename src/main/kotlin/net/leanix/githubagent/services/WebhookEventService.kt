@@ -8,6 +8,7 @@ import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
+import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -38,11 +39,13 @@ class WebhookEventService(
         val repositoryFullName = pushEventPayload.repository.fullName
         val headCommit = pushEventPayload.headCommit
         val owner = pushEventPayload.repository.owner.name
+        val defaultBranch = pushEventPayload.repository.defaultBranch
 
         val installationToken = getInstallationToken(pushEventPayload.installation.id)
 
-        if (pushEventPayload.ref == "refs/heads/${pushEventPayload.repository.defaultBranch}") {
+        if (pushEventPayload.ref == "refs/heads/$defaultBranch") {
             handleManifestFileChanges(
+                defaultBranch,
                 headCommit,
                 repositoryFullName,
                 owner,
@@ -53,6 +56,7 @@ class WebhookEventService(
     }
 
     private fun handleManifestFileChanges(
+        defaultBranch: String,
         headCommit: PushEventCommit,
         repositoryFullName: String,
         owner: String,
@@ -70,7 +74,8 @@ class WebhookEventService(
                 repositoryName,
                 installationToken,
                 filePath,
-                ManifestFileAction.ADDED
+                ManifestFileAction.ADDED,
+                defaultBranch
             )
         }
 
@@ -81,12 +86,13 @@ class WebhookEventService(
                 repositoryName,
                 installationToken,
                 filePath,
-                ManifestFileAction.MODIFIED
+                ManifestFileAction.MODIFIED,
+                defaultBranch
             )
         }
 
         removedManifestFiles.forEach { filePath ->
-            handleRemovedManifestFile(repositoryFullName, filePath)
+            handleRemovedManifestFile(repositoryFullName, filePath, defaultBranch)
         }
     }
 
@@ -107,7 +113,8 @@ class WebhookEventService(
         repositoryName: String,
         installationToken: String,
         manifestFilePath: String,
-        action: ManifestFileAction
+        action: ManifestFileAction,
+        defaultBranch: String?
     ) {
         val location = getManifestFileLocation(manifestFilePath)
 
@@ -125,12 +132,16 @@ class WebhookEventService(
                 repositoryFullName,
                 action,
                 fileContent,
-                fileNameMatchRegex.replace(manifestFilePath, "")
+                generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFilePath, ""))
             )
         )
     }
 
-    private fun handleRemovedManifestFile(repositoryFullName: String, manifestFilePath: String) {
+    private fun handleRemovedManifestFile(
+        repositoryFullName: String,
+        manifestFilePath: String,
+        defaultBranch: String?
+    ) {
         val location = getManifestFileLocation(manifestFilePath)
         logger.info("Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName under $location")
         webSocketService.sendMessage(
@@ -139,7 +150,7 @@ class WebhookEventService(
                 repositoryFullName,
                 ManifestFileAction.REMOVED,
                 null,
-                fileNameMatchRegex.replace(manifestFilePath, "")
+                generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFilePath, ""))
             )
         )
     }

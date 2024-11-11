@@ -14,6 +14,7 @@ import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
+import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -125,7 +126,12 @@ class GitHubScanningService(
 
     private fun fetchManifestFilesAndSend(installation: Installation, repository: RepositoryDto) {
         val manifestFiles = fetchManifestFiles(installation, repository.name).getOrThrow().items
-        val manifestFilesContents = fetchManifestContents(installation, manifestFiles, repository.name).getOrThrow()
+        val manifestFilesContents = fetchManifestContents(
+            installation,
+            manifestFiles,
+            repository.name,
+            repository.defaultBranch
+        ).getOrThrow()
 
         webSocketService.sendMessage(
             "${cachingService.get("runId")}/manifestFiles",
@@ -148,7 +154,8 @@ class GitHubScanningService(
     private fun fetchManifestContents(
         installation: Installation,
         items: List<ItemResponse>,
-        repositoryName: String
+        repositoryName: String,
+        defaultBranch: String?
     ) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
         syncLogService.sendInfoLog("Scanning repository $repositoryName for manifest files")
@@ -164,7 +171,7 @@ class GitHubScanningService(
                 numOfManifestFilesFound++
                 syncLogService.sendInfoLog("Fetched manifest file ${manifestFile.path} from repository $repositoryName")
                 ManifestFileDTO(
-                    path = fileNameMatchRegex.replace(manifestFile.path, ""),
+                    path = generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFile.path, "")),
                     content = content
                 )
             } else {

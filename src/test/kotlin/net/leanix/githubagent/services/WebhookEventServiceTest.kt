@@ -179,7 +179,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.REMOVED,
                     null,
-                    "a/b/c"
+                    "tree/main/a/b/c"
                 )
             )
         }
@@ -212,7 +212,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "a/b/c"
+                    "tree/main/a/b/c"
                 )
             )
         }
@@ -245,7 +245,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added1"
+                    "tree/main/custom/path/added1"
                 )
             )
             webSocketService.sendMessage(
@@ -254,7 +254,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added2"
+                    "tree/main/custom/path/added2"
                 )
             )
             webSocketService.sendMessage(
@@ -263,7 +263,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    "custom/path/modified"
+                    "tree/main/custom/path/modified"
                 )
             )
         }
@@ -296,7 +296,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added2"
+                    "tree/main/custom/path/added2"
                 )
             )
         }
@@ -308,7 +308,7 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "custom/path/added1/$UNSUPPORTED_MANIFEST_EXTENSION"
+                    "tree/main/custom/path/added1/$UNSUPPORTED_MANIFEST_EXTENSION"
                 )
             )
         }
