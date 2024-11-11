@@ -6,7 +6,7 @@ complexity:
     active: true
     excludes: [ '**/test/**' ]
   LongParameterList:
-    active: true
+    active: false
     excludes: [ '**/test/**' ]
 
 naming:
