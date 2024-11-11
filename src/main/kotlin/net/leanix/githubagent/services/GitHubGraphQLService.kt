@@ -51,6 +51,7 @@ class GitHubGraphQLService(
                         organizationName = it.owner.login,
                         description = it.description,
                         url = it.url,
+                        defaultBranch = it.defaultBranchRef?.name,
                         archived = it.isArchived,
                         visibility = it.visibility,
                         updatedAt = it.updatedAt,
