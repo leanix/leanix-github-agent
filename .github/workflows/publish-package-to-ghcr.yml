@@ -32,18 +32,18 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        if: (steps.tag-action.outputs.tag != '')
+        if: (steps.extract_tag.outputs.tag != '')
 
       - name: Setup Java
         uses: actions/setup-java@v3
-        if: (steps.tag-action.outputs.tag != '')
+        if: (steps.extract_tag.outputs.tag != '')
         with:
           distribution: 'temurin'
           java-version: '21'
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
-        if: (steps.tag-action.outputs.tag != '')
+        if: (steps.extract_tag.outputs.tag != '')
         continue-on-error: false
         with:
           arguments: build
