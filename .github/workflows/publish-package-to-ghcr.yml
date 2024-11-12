@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       packages: write
       attestations: write
       id-token: write
@@ -47,7 +47,7 @@ jobs:
         uses: actions/github-script@v6.4.1
         if: (steps.tag-action.outputs.tag != '')
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const tag = "${{ steps.tag-action.outputs.tag }}";
             const { data: releases } = await github.rest.repos.listReleases({
@@ -65,7 +65,7 @@ jobs:
               release_id: draftRelease.id,
               draft: false
             });
-            console.log(`Published draft release for tag ${tag}`);     
+            console.log(`Published draft release for tag ${tag}`);
 
       - name: Checkout
         uses: actions/checkout@v3
