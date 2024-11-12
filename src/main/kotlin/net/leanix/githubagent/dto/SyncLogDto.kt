@@ -13,6 +13,7 @@ enum class Trigger {
     START_FULL_SYNC,
     PROGRESS_FULL_SYNC,
     FINISH_FULL_SYNC,
+    ABORTED_FULL_SYNC,
     SYSTEM
 }
 

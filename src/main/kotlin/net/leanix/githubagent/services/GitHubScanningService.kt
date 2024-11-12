@@ -31,12 +31,7 @@ class GitHubScanningService(
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
 
     fun scanGitHubResources() {
-        cachingService.set("runId", UUID.randomUUID(), null)
         runCatching {
-            syncLogService.sendSyncLog(
-                trigger = Trigger.START_FULL_SYNC,
-                logLevel = LogLevel.INFO,
-            )
             val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
             val installations = getInstallations(jwtToken.toString())
             fetchAndSendOrganisationsData(installations)
@@ -46,24 +41,14 @@ class GitHubScanningService(
                         fetchManifestFilesAndSend(installation, repository)
                     }
                 syncLogService.sendInfoLog(
-                    "Finished initial full scan for organization ${installation.account.login}"
+                    "Finished initial full scan for organization ${installation.account.login}."
                 )
             }
-            syncLogService.sendInfoLog("Finished full scan for all available organizations")
+            syncLogService.sendInfoLog("Finished full scan for all available organizations.")
             syncLogService.sendSyncLog(
                 trigger = Trigger.FINISH_FULL_SYNC,
                 logLevel = LogLevel.INFO,
             )
-        }.onFailure {
-            val message = "Error while scanning GitHub resources"
-            syncLogService.sendSyncLog(
-                trigger = Trigger.FINISH_FULL_SYNC,
-                logLevel = LogLevel.ERROR,
-                message = message
-            )
-            cachingService.remove("runId")
-            logger.error(message)
-            throw it
         }
     }
 
@@ -93,9 +78,8 @@ class GitHubScanningService(
         logger.info("Sending organizations data")
         syncLogService.sendInfoLog(
             "The connector found ${organizations.filter { it.installed }.size} " +
-                "organizations with GitHub application installed."
+                "organizations with GitHub application installed, out of possible ${organizations.size}."
         )
-        syncLogService.sendInfoLog("The connector found ${organizations.size} available organizations.")
         webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
 
@@ -151,7 +135,7 @@ class GitHubScanningService(
         repositoryName: String
     ) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
-        syncLogService.sendInfoLog("Scanning repository $repositoryName for manifest files")
+        syncLogService.sendInfoLog("Scanning repository $repositoryName for manifest files.")
         var numOfManifestFilesFound = 0
         items.map { manifestFile ->
             val content = gitHubGraphQLService.getManifestFileContent(
@@ -162,7 +146,7 @@ class GitHubScanningService(
             )
             if (content != null) {
                 numOfManifestFilesFound++
-                syncLogService.sendInfoLog("Fetched manifest file ${manifestFile.path} from repository $repositoryName")
+                syncLogService.sendInfoLog("Fetched manifest file '${manifestFile.path}' from repository '$repositoryName'.")
                 ManifestFileDTO(
                     path = fileNameMatchRegex.replace(manifestFile.path, ""),
                     content = content
@@ -171,7 +155,7 @@ class GitHubScanningService(
                 throw ManifestFileNotFoundException()
             }
         }.also {
-            syncLogService.sendInfoLog("Found $numOfManifestFilesFound manifest files in repository $repositoryName")
+            syncLogService.sendInfoLog("Found $numOfManifestFilesFound manifest files in repository $repositoryName.")
         }
     }
 }

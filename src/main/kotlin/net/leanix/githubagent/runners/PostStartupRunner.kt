@@ -1,10 +1,13 @@
 package net.leanix.githubagent.runners
 
+import net.leanix.githubagent.dto.LogLevel
+import net.leanix.githubagent.dto.Trigger
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubEnterpriseService
 import net.leanix.githubagent.services.GitHubScanningService
+import net.leanix.githubagent.services.SyncLogService
 import net.leanix.githubagent.services.WebSocketService
 import net.leanix.githubagent.shared.APP_NAME_TOPIC
 import org.slf4j.LoggerFactory
@@ -12,6 +15,7 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 @Profile("!test")
@@ -21,7 +25,8 @@ class PostStartupRunner(
     private val gitHubScanningService: GitHubScanningService,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
     private val cachingService: CachingService,
-    private val brokerStompSessionHandler: BrokerStompSessionHandler
+    private val brokerStompSessionHandler: BrokerStompSessionHandler,
+    private val syncLogService: SyncLogService
 ) : ApplicationRunner {
 
     private val logger = LoggerFactory.getLogger(PostStartupRunner::class.java)
@@ -32,12 +37,29 @@ class PostStartupRunner(
             logger.error("Stopping the application as the WebSocket connection could not be established.")
             return
         }
-        githubAuthenticationService.generateAndCacheJwtToken()
-        val jwt = cachingService.get("jwtToken") as String
-        webSocketService.sendMessage(
-            APP_NAME_TOPIC,
-            gitHubEnterpriseService.getGitHubApp(jwt).slug
+        cachingService.set("runId", UUID.randomUUID(), null)
+        syncLogService.sendSyncLog(
+            trigger = Trigger.START_FULL_SYNC,
+            logLevel = LogLevel.INFO,
         )
-        gitHubScanningService.scanGitHubResources()
+        kotlin.runCatching {
+            githubAuthenticationService.generateAndCacheJwtToken()
+            val jwt = cachingService.get("jwtToken") as String
+            webSocketService.sendMessage(
+                APP_NAME_TOPIC,
+                gitHubEnterpriseService.getGitHubApp(jwt).slug
+            )
+            gitHubScanningService.scanGitHubResources()
+        }.onFailure {
+            val message = "Error while scanning GitHub resources"
+            syncLogService.sendSyncLog(
+                trigger = Trigger.ABORTED_FULL_SYNC,
+                logLevel = LogLevel.ERROR,
+                message = message
+            )
+            cachingService.remove("runId")
+            logger.error(message)
+            throw it
+        }
     }
 }
