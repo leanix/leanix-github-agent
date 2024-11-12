@@ -5,6 +5,10 @@ on:
     types: [closed]
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   release_draft:
     permissions:
@@ -72,7 +76,7 @@ jobs:
         if: (steps.tag-action.outputs.tag != '')
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
