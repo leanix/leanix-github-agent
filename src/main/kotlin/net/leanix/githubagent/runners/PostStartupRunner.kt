@@ -1,7 +1,7 @@
 package net.leanix.githubagent.runners
 
 import net.leanix.githubagent.dto.LogLevel
-import net.leanix.githubagent.dto.Trigger
+import net.leanix.githubagent.dto.SynchronizationProgress
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubAuthenticationService
@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.util.*
 
+@SuppressWarnings("LongParameterList")
 @Component
 @Profile("!test")
 class PostStartupRunner(
@@ -38,9 +39,10 @@ class PostStartupRunner(
             return
         }
         cachingService.set("runId", UUID.randomUUID(), null)
+        logger.info("Starting full sync")
         syncLogService.sendSyncLog(
-            trigger = Trigger.START_FULL_SYNC,
             logLevel = LogLevel.INFO,
+            synchronizationProgress = SynchronizationProgress.PENDING,
         )
         kotlin.runCatching {
             githubAuthenticationService.generateAndCacheJwtToken()
@@ -53,8 +55,8 @@ class PostStartupRunner(
         }.onFailure {
             val message = "Error while scanning GitHub resources"
             syncLogService.sendSyncLog(
-                trigger = Trigger.ABORTED_FULL_SYNC,
                 logLevel = LogLevel.ERROR,
+                synchronizationProgress = SynchronizationProgress.ABORTED,
                 message = message
             )
             cachingService.remove("runId")

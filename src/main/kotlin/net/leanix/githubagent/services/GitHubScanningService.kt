@@ -9,14 +9,13 @@ import net.leanix.githubagent.dto.ManifestFilesDTO
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RepositoryDto
-import net.leanix.githubagent.dto.Trigger
+import net.leanix.githubagent.dto.SynchronizationProgress
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.UUID
 
 @Service
 class GitHubScanningService(
@@ -31,25 +30,23 @@ class GitHubScanningService(
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
 
     fun scanGitHubResources() {
-        runCatching {
-            val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
-            val installations = getInstallations(jwtToken.toString())
-            fetchAndSendOrganisationsData(installations)
-            installations.forEach { installation ->
-                fetchAndSendRepositoriesData(installation)
-                    .forEach { repository ->
-                        fetchManifestFilesAndSend(installation, repository)
-                    }
-                syncLogService.sendInfoLog(
-                    "Finished initial full scan for organization ${installation.account.login}."
-                )
-            }
-            syncLogService.sendInfoLog("Finished full scan for all available organizations.")
-            syncLogService.sendSyncLog(
-                trigger = Trigger.FINISH_FULL_SYNC,
-                logLevel = LogLevel.INFO,
+        val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
+        val installations = getInstallations(jwtToken.toString())
+        fetchAndSendOrganisationsData(installations)
+        installations.forEach { installation ->
+            fetchAndSendRepositoriesData(installation)
+                .forEach { repository ->
+                    fetchManifestFilesAndSend(installation, repository)
+                }
+            syncLogService.sendInfoLog(
+                "Finished initial full scan for organization ${installation.account.login}."
             )
         }
+        syncLogService.sendInfoLog("Finished full scan for all available organizations.")
+        syncLogService.sendSyncLog(
+            logLevel = LogLevel.INFO,
+            synchronizationProgress = SynchronizationProgress.FINISHED
+        )
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
@@ -146,7 +143,9 @@ class GitHubScanningService(
             )
             if (content != null) {
                 numOfManifestFilesFound++
-                syncLogService.sendInfoLog("Fetched manifest file '${manifestFile.path}' from repository '$repositoryName'.")
+                syncLogService.sendInfoLog(
+                    "Fetched manifest file '${manifestFile.path}' from repository '$repositoryName'."
+                )
                 ManifestFileDTO(
                     path = fileNameMatchRegex.replace(manifestFile.path, ""),
                     content = content
