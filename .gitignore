@@ -56,3 +56,4 @@ build/
 **/application-local.yml
 **/bom.json
 **/bom.xml
+.env

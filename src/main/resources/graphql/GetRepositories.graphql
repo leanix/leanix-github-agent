@@ -10,6 +10,9 @@ query GetRepositories($pageCount: Int!, $cursor: String) {
                 name
                 description
                 url
+                defaultBranchRef{
+                    name
+                }
                 isArchived
                 visibility
                 updatedAt
