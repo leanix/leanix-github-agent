@@ -43,6 +43,7 @@ class PostStartupRunner(
         syncLogService.sendSyncLog(
             logLevel = LogLevel.INFO,
             synchronizationProgress = SynchronizationProgress.PENDING,
+            message = "Starting synchronization"
         )
         kotlin.runCatching {
             githubAuthenticationService.generateAndCacheJwtToken()

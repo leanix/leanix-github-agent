@@ -7,11 +7,11 @@ data class SyncLogDto(
     val trigger: Trigger,
     val logLevel: LogLevel,
     val synchronizationProgress: SynchronizationProgress,
-    val message: String?
+    val message: String
 )
 
 enum class Trigger {
-    FULL_SYNC,
+    FULL_SCAN,
     WEB_HOOK
 }
 

@@ -70,6 +70,6 @@ class PostStartupRunnerTest {
         postStartupRunner.run(mockk())
 
         verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
-        verify { syncLogService.sendSyncLog(null, LOGS_TOPIC, LogLevel.INFO, SynchronizationProgress.PENDING) }
+        verify { syncLogService.sendSyncLog(any(), LOGS_TOPIC, LogLevel.INFO, SynchronizationProgress.PENDING) }
     }
 }

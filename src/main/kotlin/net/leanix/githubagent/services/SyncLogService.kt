@@ -26,7 +26,7 @@ class SyncLogService(
     }
 
     fun sendSyncLog(
-        message: String? = null,
+        message: String,
         topic: String = LOGS_TOPIC,
         logLevel: LogLevel,
         synchronizationProgress: SynchronizationProgress
@@ -34,7 +34,7 @@ class SyncLogService(
         val runId = cachingService.get("runId")?.let { it as UUID }
         val syncLogDto = SyncLogDto(
             runId = runId,
-            trigger = if (runId != null) Trigger.FULL_SYNC else Trigger.WEB_HOOK,
+            trigger = if (runId != null) Trigger.FULL_SCAN else Trigger.WEB_HOOK,
             logLevel = logLevel,
             synchronizationProgress = synchronizationProgress,
             message = message

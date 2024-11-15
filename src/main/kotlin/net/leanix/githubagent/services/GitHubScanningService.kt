@@ -45,7 +45,8 @@ class GitHubScanningService(
         syncLogService.sendInfoLog("Finished full scan for all available organizations.")
         syncLogService.sendSyncLog(
             logLevel = LogLevel.INFO,
-            synchronizationProgress = SynchronizationProgress.FINISHED
+            synchronizationProgress = SynchronizationProgress.FINISHED,
+            message = "Synchronization finished."
         )
     }
 
