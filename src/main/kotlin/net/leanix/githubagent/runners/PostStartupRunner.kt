@@ -54,7 +54,7 @@ class PostStartupRunner(
             gitHubScanningService.scanGitHubResources()
         }.onFailure {
             val message = "Synchronization aborted " +
-                    "An error occurred while scanning GitHub resources. Error: ${it.message}"
+                "An error occurred while scanning GitHub resources. Error: ${it.message}"
             syncLogService.sendSyncLog(
                 logLevel = LogLevel.ERROR,
                 synchronizationProgress = SynchronizationProgress.ABORTED,

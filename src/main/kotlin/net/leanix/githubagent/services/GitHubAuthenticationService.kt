@@ -6,7 +6,6 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.exceptions.FailedToCreateJWTException
-import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ResourceLoader
@@ -28,8 +27,7 @@ class GitHubAuthenticationService(
     private val githubEnterpriseProperties: GitHubEnterpriseProperties,
     private val resourceLoader: ResourceLoader,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
-    private val gitHubClient: GitHubClient,
-    private val syncLogService: SyncLogService,
+    private val gitHubClient: GitHubClient
 ) {
 
     companion object {
