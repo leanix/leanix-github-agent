@@ -2,7 +2,6 @@ package net.leanix.githubagent.services
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.exceptions.UnableToConnectToGitHubEnterpriseException
@@ -27,8 +26,7 @@ class GitHubAuthenticationServiceTest {
         githubEnterpriseProperties,
         resourceLoader,
         gitHubEnterpriseService,
-        gitHubClient,
-        syncLogService
+        gitHubClient
     )
 
     @BeforeEach
@@ -68,6 +66,5 @@ class GitHubAuthenticationServiceTest {
         assertThrows(UnableToConnectToGitHubEnterpriseException::class.java) {
             githubAuthenticationService.generateAndCacheJwtToken()
         }
-        verify(exactly = 1) { syncLogService.sendSystemErrorLog("Failed to generate/validate JWT token") }
     }
 }
