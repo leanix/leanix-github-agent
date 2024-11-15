@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch
 @Component
 class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
 
-    companion object{
+    companion object {
         private const val RETRY_INTERVAL = 10000L
         private const val MAX_RETRY_TIME = 600000L
     }
@@ -64,21 +64,25 @@ class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
     private fun retryConnection() {
         val timer = Timer()
         val startTime = System.currentTimeMillis()
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-                if (System.currentTimeMillis() - startTime > MAX_RETRY_TIME) {
-                    logger.error("Failed to reconnect after ${MAX_RETRY_TIME / 60000} minutes. Stopping retries.")
-                    timer.cancel()
-                    return
+        timer.schedule(
+            object : TimerTask() {
+                override fun run() {
+                    if (System.currentTimeMillis() - startTime > MAX_RETRY_TIME) {
+                        logger.error("Failed to reconnect after ${MAX_RETRY_TIME / 60000} minutes. Stopping retries.")
+                        timer.cancel()
+                        return
+                    }
+                    logger.info("Attempting to reconnect...")
+                    webSocketService.initSession()
+                    if (isConnected) {
+                        logger.info("Reconnected successfully.")
+                        timer.cancel()
+                    }
                 }
-                logger.info("Attempting to reconnect...")
-                webSocketService.initSession()
-                if (isConnected) {
-                    logger.info("Reconnected successfully.")
-                    timer.cancel()
-                }
-            }
-        }, 0, RETRY_INTERVAL) // Retry every 10 seconds
+            },
+            0,
+            RETRY_INTERVAL
+        ) // Retry every 10 seconds
     }
 
     fun isConnected(): Boolean {
