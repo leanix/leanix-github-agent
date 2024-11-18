@@ -36,11 +36,11 @@ class GitHubAgentApplication(
         val synchronizationProgress = if (cachingService.get("runId") != null) {
             SynchronizationProgress.ABORTED
         } else {
-            SynchronizationProgress.PENDING
+            SynchronizationProgress.FINISHED
         }
         syncLogService.sendSyncLog(
             message = message,
-            logLevel = LogLevel.ERROR,
+            logLevel = LogLevel.INFO,
             synchronizationProgress = synchronizationProgress
         )
         logger.error(message)

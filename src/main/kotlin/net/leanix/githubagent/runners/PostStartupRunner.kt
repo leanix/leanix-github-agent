@@ -75,6 +75,7 @@ class PostStartupRunner(
             message = "Synchronization finished."
         )
         cachingService.remove("runId")
+        logger.info("Full sync finished")
     }
 
     private fun fullScanFailure(errorMessage: String?): String {
