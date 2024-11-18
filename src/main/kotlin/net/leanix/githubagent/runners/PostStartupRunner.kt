@@ -78,7 +78,7 @@ class PostStartupRunner(
         logger.info("Full sync finished")
     }
 
-    private fun fullScanFailure(errorMessage: String?): String {
+    private fun fullScanFailure(errorMessage: String?) {
         val message = "Synchronization aborted. " +
             "An error occurred while scanning GitHub resources. Error: $errorMessage"
         syncLogService.sendSyncLog(
@@ -88,6 +88,5 @@ class PostStartupRunner(
         )
         cachingService.remove("runId")
         logger.error(message)
-        return message
     }
 }
