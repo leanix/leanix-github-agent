@@ -45,7 +45,6 @@ class PostStartupRunner(
             fullScanSuccess()
         }.onFailure {
             fullScanFailure(it.message)
-            throw it
         }
     }
 
