@@ -17,10 +17,6 @@ class SyncLogService(
         sendSyncLog(message, LOGS_TOPIC, LogLevel.ERROR, SynchronizationProgress.RUNNING)
     }
 
-    fun sendSystemErrorLog(message: String) {
-        sendSyncLog(message, LOGS_TOPIC, LogLevel.ERROR, SynchronizationProgress.RUNNING)
-    }
-
     fun sendInfoLog(message: String) {
         sendSyncLog(message, LOGS_TOPIC, LogLevel.INFO, SynchronizationProgress.RUNNING)
     }

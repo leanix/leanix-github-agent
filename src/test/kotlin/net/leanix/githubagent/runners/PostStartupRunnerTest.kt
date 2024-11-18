@@ -54,6 +54,7 @@ class PostStartupRunnerTest {
         every { githubAuthenticationService.generateAndCacheJwtToken() } returns Unit
         every { cachingService.get("jwtToken") } returns "jwt"
         every { cachingService.set("runId", any(), any()) } returns Unit
+        every { cachingService.remove("runId") } returns Unit
         every { gitHubScanningService.scanGitHubResources() } returns Unit
         every { brokerStompSessionHandler.isConnected() } returns true
         every { syncLogService.sendSyncLog(any(), any(), any(), any()) } returns Unit

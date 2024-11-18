@@ -38,6 +38,18 @@ class PostStartupRunner(
             logger.error("Stopping the application as the WebSocket connection could not be established.")
             return
         }
+        kotlin.runCatching {
+            startFullScan()
+            scanResources()
+        }.onSuccess {
+            fullScanSuccess()
+        }.onFailure {
+            fullScanFailure(it.message)
+            throw it
+        }
+    }
+
+    private fun startFullScan() {
         cachingService.set("runId", UUID.randomUUID(), null)
         logger.info("Starting full sync")
         syncLogService.sendSyncLog(
@@ -45,25 +57,37 @@ class PostStartupRunner(
             synchronizationProgress = SynchronizationProgress.PENDING,
             message = "Starting synchronization"
         )
-        kotlin.runCatching {
-            githubAuthenticationService.generateAndCacheJwtToken()
-            val jwt = cachingService.get("jwtToken") as String
-            webSocketService.sendMessage(
-                APP_NAME_TOPIC,
-                gitHubEnterpriseService.getGitHubApp(jwt).slug
-            )
-            gitHubScanningService.scanGitHubResources()
-        }.onFailure {
-            val message = "Synchronization aborted " +
-                "An error occurred while scanning GitHub resources. Error: ${it.message}"
-            syncLogService.sendSyncLog(
-                logLevel = LogLevel.ERROR,
-                synchronizationProgress = SynchronizationProgress.ABORTED,
-                message = message
-            )
-            cachingService.remove("runId")
-            logger.error(message)
-            throw it
-        }
+    }
+
+    private fun scanResources() {
+        githubAuthenticationService.generateAndCacheJwtToken()
+        val jwt = cachingService.get("jwtToken") as String
+        webSocketService.sendMessage(
+            APP_NAME_TOPIC,
+            gitHubEnterpriseService.getGitHubApp(jwt).slug
+        )
+        gitHubScanningService.scanGitHubResources()
+    }
+
+    private fun fullScanSuccess() {
+        syncLogService.sendSyncLog(
+            logLevel = LogLevel.INFO,
+            synchronizationProgress = SynchronizationProgress.FINISHED,
+            message = "Synchronization finished."
+        )
+        cachingService.remove("runId")
+    }
+
+    private fun fullScanFailure(errorMessage: String?): String {
+        val message = "Synchronization aborted. " +
+            "An error occurred while scanning GitHub resources. Error: $errorMessage"
+        syncLogService.sendSyncLog(
+            logLevel = LogLevel.ERROR,
+            synchronizationProgress = SynchronizationProgress.ABORTED,
+            message = message
+        )
+        cachingService.remove("runId")
+        logger.error(message)
+        return message
     }
 }

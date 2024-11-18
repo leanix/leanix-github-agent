@@ -31,7 +31,7 @@ class GitHubAuthenticationServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { syncLogService.sendSystemErrorLog(any()) } returns Unit
+        every { syncLogService.sendErrorLog(any()) } returns Unit
     }
 
     @Test

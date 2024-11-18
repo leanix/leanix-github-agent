@@ -3,13 +3,11 @@ package net.leanix.githubagent.services
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.ItemResponse
-import net.leanix.githubagent.dto.LogLevel
 import net.leanix.githubagent.dto.ManifestFileDTO
 import net.leanix.githubagent.dto.ManifestFilesDTO
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RepositoryDto
-import net.leanix.githubagent.dto.SynchronizationProgress
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
@@ -38,16 +36,9 @@ class GitHubScanningService(
                 .forEach { repository ->
                     fetchManifestFilesAndSend(installation, repository)
                 }
-            syncLogService.sendInfoLog(
-                "Finished initial full scan for organization ${installation.account.login}."
-            )
+            syncLogService.sendInfoLog("Finished initial full scan for organization ${installation.account.login}.")
         }
         syncLogService.sendInfoLog("Finished full scan for all available organizations.")
-        syncLogService.sendSyncLog(
-            logLevel = LogLevel.INFO,
-            synchronizationProgress = SynchronizationProgress.FINISHED,
-            message = "Synchronization finished."
-        )
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
