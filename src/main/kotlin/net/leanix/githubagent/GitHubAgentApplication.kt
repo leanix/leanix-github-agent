@@ -43,7 +43,7 @@ class GitHubAgentApplication(
             logLevel = LogLevel.INFO,
             synchronizationProgress = synchronizationProgress
         )
-        logger.error(message)
+        logger.info(message)
     }
 }
 
