@@ -52,7 +52,7 @@ class GitHubAuthenticationService(
             val jwt = createJwtToken(privateKey)
             verifyAndCacheJwtToken(jwt)
         }.onFailure {
-            logger.error("Failed to generate a valid jwt token", it)
+            logger.error("Failed to generate a valid jwt token")
             throw it
         }
     }
