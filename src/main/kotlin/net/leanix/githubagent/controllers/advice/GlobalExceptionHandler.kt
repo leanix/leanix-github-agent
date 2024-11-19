@@ -19,7 +19,7 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(InvalidEventSignatureException::class)
     fun handleInvalidEventSignatureException(exception: InvalidEventSignatureException): ProblemDetail {
-        val detail = "Received event with an invalid signature"
+        val detail = "Received an event with an invalid signature."
         val problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, detail)
         problemDetail.title = exception.message
         exceptionLogger.warn(exception.message)
@@ -29,9 +29,20 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(WebhookSecretNotSetException::class)
     fun handleWebhookSecretNotSetException(exception: WebhookSecretNotSetException): ProblemDetail {
-        val detail = "Unable to process GitHub event. Webhook secret not set"
+        val detail = "Unable to process GitHub event. Webhook secret is not set. " +
+            "Please configure the webhook secret in the agent settings."
         val problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail)
         problemDetail.title = exception.message
+        syncLogService.sendErrorLog(detail)
+        return problemDetail
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleUncaughtException(exception: Exception): ProblemDetail {
+        val detail = "An unexpected error occurred ${exception.message}"
+        val problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, detail)
+        problemDetail.title = exception.message
+        exceptionLogger.error("Uncaught exception: ${exception.message}", exception)
         syncLogService.sendErrorLog(detail)
         return problemDetail
     }

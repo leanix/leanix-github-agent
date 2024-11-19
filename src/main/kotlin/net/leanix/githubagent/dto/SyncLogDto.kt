@@ -6,14 +6,13 @@ data class SyncLogDto(
     val runId: UUID?,
     val trigger: Trigger,
     val logLevel: LogLevel,
-    val message: String?
+    val synchronizationProgress: SynchronizationProgress,
+    val message: String
 )
 
 enum class Trigger {
-    START_FULL_SYNC,
-    PROGRESS_FULL_SYNC,
-    FINISH_FULL_SYNC,
-    SYSTEM
+    FULL_SCAN,
+    WEB_HOOK
 }
 
 enum class LogLevel {
@@ -21,4 +20,12 @@ enum class LogLevel {
     WARNING,
     INFO,
     ERROR
+}
+
+enum class SynchronizationProgress {
+    PENDING,
+    RUNNING,
+    ABORTION_PENDING,
+    ABORTED,
+    FINISHED
 }
