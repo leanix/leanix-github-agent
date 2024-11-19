@@ -17,7 +17,6 @@ import java.nio.file.Files
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.Security
-import java.security.spec.InvalidKeySpecException
 import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 
@@ -49,23 +48,31 @@ class GitHubAuthenticationService(
     fun generateAndCacheJwtToken() {
         runCatching {
             logger.info("Generating JWT token")
-            Security.addProvider(BouncyCastleProvider())
-            val rsaPrivateKey: String = readPrivateKey()
-            val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
-            val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+            val privateKey = loadPrivateKey()
             val jwt = createJwtToken(privateKey)
-            gitHubEnterpriseService.verifyJwt(jwt.getOrThrow())
-            cachingService.set("jwtToken", jwt.getOrThrow(), JWT_EXPIRATION_DURATION)
+            verifyAndCacheJwtToken(jwt)
         }.onFailure {
-            if (it is InvalidKeySpecException) {
-                throw IllegalArgumentException("The provided private key is not in a valid PKCS8 format.", it)
-            } else {
-                throw it
-            }
+            logger.error("Failed to generate a valid jwt token", it)
+            throw it
         }
     }
 
-    private fun createJwtToken(privateKey: PrivateKey): Result<String> {
+    private fun loadPrivateKey(): PrivateKey {
+        return runCatching {
+            Security.addProvider(BouncyCastleProvider())
+            val rsaPrivateKey: String = readPrivateKey()
+            val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
+            KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+        }.getOrElse {
+            logger.error("Failed to load private key", it)
+            throw IllegalArgumentException(
+                "Failed to load private key, " +
+                    "the provided private key is not a valid PKCS8 key."
+            )
+        }
+    }
+
+    private fun createJwtToken(privateKey: PrivateKey): String {
         return runCatching {
             Jwts.builder()
                 .setIssuedAt(Date())
@@ -73,8 +80,20 @@ class GitHubAuthenticationService(
                 .setIssuer(cachingService.get("githubAppId").toString())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact()
+        }.getOrElse {
+            logger.error("Failed to generate a JWT token", it)
+            throw FailedToCreateJWTException("Failed to generate a JWT token")
+        }
+    }
+
+    private fun verifyAndCacheJwtToken(jwt: String) {
+        runCatching {
+            gitHubEnterpriseService.verifyJwt(jwt)
+            cachingService.set("jwtToken", jwt, JWT_EXPIRATION_DURATION)
+            logger.info("JWT token generated and cached successfully")
         }.onFailure {
-            throw FailedToCreateJWTException("Failed to generate a valid JWT token")
+            logger.error("Failed to verify and cache JWT token", it)
+            throw it
         }
     }
 

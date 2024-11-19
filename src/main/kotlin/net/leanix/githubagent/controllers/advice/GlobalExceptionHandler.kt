@@ -39,7 +39,7 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(Exception::class)
     fun handleUncaughtException(exception: Exception): ProblemDetail {
-        val detail = "An unexpected error occurred ${exception.message}"
+        val detail = "An unexpected error occurred. ${exception.message}"
         val problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, detail)
         problemDetail.title = exception.message
         exceptionLogger.error("Uncaught exception: ${exception.message}", exception)
