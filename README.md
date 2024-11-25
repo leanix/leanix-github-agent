@@ -28,6 +28,7 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     - `GITHUB_APP_ID`: The ID of your GitHub App.
     - `PEM_FILE`: The path to your GitHub App's PEM file inside the Docker container.
     - `WEBHOOK_SECRET`: The secret used to validate incoming webhook events from GitHub. (Optional, but recommended. [Needs to be set in the GitHub App settings first](https://docs.github.com/en/enterprise-server@3.8/webhooks/using-webhooks/validating-webhook-deliveries).)
+    - `JAVA_OPTS`: Java options for the agent. Use this to set proxy settings if required.
 
 5. **Start the agent**: To start the agent, run the following Docker command. Replace the variables in angle brackets with your actual values.
 
@@ -38,6 +39,7 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
     -e WEBHOOK_SECRET=<webhook_secret> \
+    -e JAVA_OPTS="-Dhttp.proxyHost=<proxy_host> -Dhttp.proxyPort=<proxy_port> -Dhttps.proxyHost=<proxy_host> -Dhttps.proxyPort=<proxy_port>" \
     leanix-github-agent
     ```
 
