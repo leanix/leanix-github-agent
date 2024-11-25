@@ -43,6 +43,10 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
 
    This command starts the agent and exposes it on port 8000. The agent starts scanning your organizations and repositories.
 
+
+6. The container hosts a live service that runs continuously.
+   - It provides a health endpoint at `/actuator/health`, which can be used to monitor the service's health.
+
 **Note**: The Docker image for the agent is currently unavailable. It will become available for download once a new version is released. Please check the [Releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
 
 ## Support and Feedback
