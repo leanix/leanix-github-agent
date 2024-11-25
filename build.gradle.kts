@@ -33,6 +33,7 @@ dependencyManagement {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.8.8")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
@@ -41,6 +42,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
     implementation("com.expediagroup:graphql-kotlin-spring-client:7.0.2")
+
+    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.1.85.Final") {
+        artifact {
+            classifier = "osx-aarch_64"
+        }
+    }
 
     // Dependencies for generating JWT token
     implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
