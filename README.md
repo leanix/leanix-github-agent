@@ -6,7 +6,7 @@
 
 The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterprise setups and communicates this information to an SAP LeanIX workspace.
 
-## Prerequisites and Installation
+## Prerequisites, Installation, and Troubleshooting
 
 ### Prerequisites
 
