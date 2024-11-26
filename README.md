@@ -39,8 +39,7 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
     -e WEBHOOK_SECRET=<webhook_secret> \
-    -e JAVA_OPTS="-Dhttp.proxyHost=<proxy_host> -Dhttp.proxyPort=<proxy_port> -Dhttps.proxyHost=<proxy_host> -Dhttps.proxyPort=<proxy_port>" \
-    leanix-github-agent
+    ghcr.io/leanix/leanix-github-agent:dev
     ```
 
    This command starts the agent and exposes it on port 8000. The agent starts scanning your organizations and repositories.
@@ -50,6 +49,50 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
    - It provides a health endpoint at `/actuator/health`, which can be used to monitor the service's health.
 
 **Note**: The Docker image for the agent is currently unavailable. It will become available for download once a new version is released. Please check the [Releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
+
+### Troubleshooting
+
+#### Using over a http proxy system
+
+Add the following properties on the command:
+
+```console
+docker run 
+           ...
+           -e JAVA_OPTS="-Dhttp.proxyHost=<HTTP_HOST> -Dhttp.proxyPort=<HTTP_PORT> -Dhttps.proxyHost=<HTTPS_HOST> -Dhttps.proxyPort=<HTTPS_PORT>" \
+        ghcr.io/leanix/leanix-github-agent:dev
+```
+> Note: Basic authentication is not currently supported.
+
+#### Using over SSL Intercepting proxy
+
+Build your own docker image adding the certificate:
+
+```console
+FROM ghcr.io/leanix/leanix-github-agent:dev
+
+
+USER root
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+COPY YOUR-CERTIFICATE-HERE /usr/local/share/ca-certificates/YOUR-CERTIFICATE-HERE
+RUN update-ca-certificates 
+RUN keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts  -storepass changeit -noprompt -alias YOUR-CERTIFICATE-HERE -file /usr/local/share/ca-certificates/YOUR-CERTIFICATE-HERE
+
+```
+
+> Note: You should add an additional COPY and the final RUN for each certificate you need to insert into the image.
+
+#### Using amd64 images on Apple M1
+
+Just run the container by providing the following command:
+
+```console
+
+docker run --platform linux/amd64 \
+           ...
+        ghcr.io/leanix/leanix-github-agent:dev
+```
 
 ## Support and Feedback
 
