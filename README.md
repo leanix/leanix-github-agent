@@ -62,7 +62,7 @@ docker run
            -e JAVA_OPTS="-Dhttp.proxyHost=<HTTP_HOST> -Dhttp.proxyPort=<HTTP_PORT> -Dhttps.proxyHost=<HTTPS_HOST> -Dhttps.proxyPort=<HTTPS_PORT>" \
         ghcr.io/leanix/leanix-github-agent:dev
 ```
-> Note: Basic authentication is not currently supported.
+> **Note:** Basic authentication is not currently supported.
 
 #### Using over SSL Intercepting proxy
 
