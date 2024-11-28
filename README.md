@@ -83,9 +83,9 @@ RUN keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts  -st
 
 > **Note:** Add an additional COPY and the final RUN for each certificate you need to insert into the image.
 
-#### Using amd64 images on Apple M1
+#### Using AMD64 Images on Apple M1
 
-Just run the container by providing the following command:
+Run the container by providing the following command:
 
 ```console
 
