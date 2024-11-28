@@ -66,7 +66,7 @@ docker run
 
 #### Using an SSL Intercepting Proxy
 
-Build your own docker image adding the certificate:
+Build your own Docker image by adding the certificate:
 
 ```console
 FROM ghcr.io/leanix/leanix-github-agent:dev
