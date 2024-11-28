@@ -52,9 +52,9 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
 
 ### Troubleshooting
 
-#### Using over a http proxy system
+#### Using an HTTP Proxy System
 
-Add the following properties on the command:
+Add the following properties to the command:
 
 ```console
 docker run 
