@@ -64,7 +64,7 @@ docker run
 ```
 > **Note:** Basic authentication is not currently supported.
 
-#### Using over SSL Intercepting proxy
+#### Using an SSL Intercepting Proxy
 
 Build your own docker image adding the certificate:
 
