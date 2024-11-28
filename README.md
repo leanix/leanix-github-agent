@@ -62,6 +62,7 @@ docker run
            -e JAVA_OPTS="-Dhttp.proxyHost=<HTTP_HOST> -Dhttp.proxyPort=<HTTP_PORT> -Dhttps.proxyHost=<HTTPS_HOST> -Dhttps.proxyPort=<HTTPS_PORT>" \
         ghcr.io/leanix/leanix-github-agent:dev
 ```
+
 > **Note:** Basic authentication is not currently supported.
 
 #### Using an SSL Intercepting Proxy
@@ -81,7 +82,7 @@ RUN keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts  -st
 
 ```
 
-> **Note:** Add an additional COPY and the final RUN for each certificate you need to insert into the image.
+> **Note:** For each certificate you need to insert into the image, add a `COPY` command and a final `RUN` command.
 
 #### Using AMD64 Images on Apple M1
 
