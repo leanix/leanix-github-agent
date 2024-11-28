@@ -81,7 +81,7 @@ RUN keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts  -st
 
 ```
 
-> Note: You should add an additional COPY and the final RUN for each certificate you need to insert into the image.
+> **Note:** Add an additional COPY and the final RUN for each certificate you need to insert into the image.
 
 #### Using amd64 images on Apple M1
 
