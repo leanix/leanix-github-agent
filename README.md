@@ -6,7 +6,7 @@
 
 The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterprise setups and communicates this information to an SAP LeanIX workspace.
 
-## Prerequisites and Installation
+## Prerequisites, Installation, and Troubleshooting
 
 ### Prerequisites
 
@@ -28,6 +28,7 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     - `GITHUB_APP_ID`: The ID of your GitHub App.
     - `PEM_FILE`: The path to your GitHub App's PEM file inside the Docker container.
     - `WEBHOOK_SECRET`: The secret used to validate incoming webhook events from GitHub. (Optional, but recommended. [Needs to be set in the GitHub App settings first](https://docs.github.com/en/enterprise-server@3.8/webhooks/using-webhooks/validating-webhook-deliveries).)
+    - `JAVA_OPTS`: Java options for the agent. Use this to set proxy settings if required.
 
 5. **Start the agent**: To start the agent, run the following Docker command. Replace the variables in angle brackets with your actual values.
 
@@ -38,7 +39,7 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
     -e WEBHOOK_SECRET=<webhook_secret> \
-    leanix-github-agent
+    ghcr.io/leanix/leanix-github-agent:dev
     ```
 
    This command starts the agent and exposes it on port 8000. The agent starts scanning your organizations and repositories.
@@ -48,6 +49,51 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
    - It provides a health endpoint at `/actuator/health`, which can be used to monitor the service's health.
 
 **Note**: The Docker image for the agent is currently unavailable. It will become available for download once a new version is released. Please check the [Releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
+
+### Troubleshooting
+
+#### Using an HTTP Proxy System
+
+Add the following properties to the command:
+
+```console
+docker run 
+           ...
+           -e JAVA_OPTS="-Dhttp.proxyHost=<HTTP_HOST> -Dhttp.proxyPort=<HTTP_PORT> -Dhttps.proxyHost=<HTTPS_HOST> -Dhttps.proxyPort=<HTTPS_PORT>" \
+        ghcr.io/leanix/leanix-github-agent:dev
+```
+
+> **Note:** Basic authentication is not currently supported.
+
+#### Using an SSL Intercepting Proxy
+
+Build your own Docker image by adding the certificate:
+
+```console
+FROM ghcr.io/leanix/leanix-github-agent:dev
+
+
+USER root
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+COPY YOUR-CERTIFICATE-HERE /usr/local/share/ca-certificates/YOUR-CERTIFICATE-HERE
+RUN update-ca-certificates 
+RUN keytool -import -trustcacerts -keystore $JAVA_HOME/lib/security/cacerts  -storepass changeit -noprompt -alias YOUR-CERTIFICATE-HERE -file /usr/local/share/ca-certificates/YOUR-CERTIFICATE-HERE
+
+```
+
+> **Note:** For each certificate you need to insert into the image, add a `COPY` command and a final `RUN` command.
+
+#### Using AMD64 Images on Apple M1
+
+Run the container by providing the following command:
+
+```console
+
+docker run --platform linux/amd64 \
+           ...
+        ghcr.io/leanix/leanix-github-agent:dev
+```
 
 ## Support and Feedback
 
