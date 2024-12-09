@@ -7,6 +7,7 @@ import net.leanix.githubagent.shared.SUPPORTED_EVENT_TYPES
 import net.leanix.githubagent.shared.hmacSHA256
 import net.leanix.githubagent.shared.timingSafeEqual
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,6 +18,7 @@ class GitHubWebhookHandler(
 
     private val logger = LoggerFactory.getLogger(GitHubWebhookHandler::class.java)
 
+    @Async
     fun handleWebhookEvent(eventType: String, host: String, signature256: String?, payload: String) {
         if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
             if (!gitHubEnterpriseProperties.baseUrl.contains(host)) {

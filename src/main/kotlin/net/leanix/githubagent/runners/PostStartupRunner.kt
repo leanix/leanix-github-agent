@@ -1,7 +1,5 @@
 package net.leanix.githubagent.runners
 
-import net.leanix.githubagent.dto.LogLevel
-import net.leanix.githubagent.dto.SynchronizationProgress
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubAuthenticationService
@@ -15,7 +13,6 @@ import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.util.*
 
 @Component
 @Profile("!test")
@@ -38,23 +35,13 @@ class PostStartupRunner(
             return
         }
         kotlin.runCatching {
-            startFullScan()
+            syncLogService.sendFullScanStart()
             scanResources()
         }.onSuccess {
-            fullScanSuccess()
+            syncLogService.sendFullScanSuccess()
         }.onFailure {
-            fullScanFailure(it.message)
+            syncLogService.sendFullScanFailure(it.message)
         }
-    }
-
-    private fun startFullScan() {
-        cachingService.set("runId", UUID.randomUUID(), null)
-        logger.info("Starting full sync")
-        syncLogService.sendSyncLog(
-            logLevel = LogLevel.INFO,
-            synchronizationProgress = SynchronizationProgress.PENDING,
-            message = "Starting synchronization"
-        )
     }
 
     private fun scanResources() {
@@ -65,27 +52,5 @@ class PostStartupRunner(
             gitHubEnterpriseService.getGitHubApp(jwt).slug
         )
         gitHubScanningService.scanGitHubResources()
-    }
-
-    private fun fullScanSuccess() {
-        syncLogService.sendSyncLog(
-            logLevel = LogLevel.INFO,
-            synchronizationProgress = SynchronizationProgress.FINISHED,
-            message = "Synchronization finished."
-        )
-        cachingService.remove("runId")
-        logger.info("Full sync finished")
-    }
-
-    private fun fullScanFailure(errorMessage: String?) {
-        val message = "Synchronization aborted. " +
-            "An error occurred while scanning GitHub resources. Error: $errorMessage"
-        syncLogService.sendSyncLog(
-            logLevel = LogLevel.ERROR,
-            synchronizationProgress = SynchronizationProgress.ABORTED,
-            message = message
-        )
-        cachingService.remove("runId")
-        logger.error(message)
     }
 }

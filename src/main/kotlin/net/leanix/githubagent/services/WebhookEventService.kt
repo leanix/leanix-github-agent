@@ -2,6 +2,9 @@ package net.leanix.githubagent.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import net.leanix.githubagent.dto.Account
+import net.leanix.githubagent.dto.Installation
+import net.leanix.githubagent.dto.InstallationEventPayload
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
@@ -17,8 +20,13 @@ class WebhookEventService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
     private val cachingService: CachingService,
-    private val gitHubAuthenticationService: GitHubAuthenticationService
+    private val gitHubAuthenticationService: GitHubAuthenticationService,
+    private val gitHubScanningService: GitHubScanningService,
+    private val syncLogService: SyncLogService
 ) {
+    companion object {
+        private const val WAITING_TIME = 10000L
+    }
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
     private val objectMapper = jacksonObjectMapper()
@@ -26,6 +34,7 @@ class WebhookEventService(
     fun consumeWebhookEvent(eventType: String, payload: String) {
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
+            "INSTALLATION" -> handleInstallationEvent(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other", payload)
@@ -52,6 +61,35 @@ class WebhookEventService(
                 repositoryName,
                 installationToken
             )
+        }
+    }
+
+    private fun handleInstallationEvent(payload: String) {
+        val installationEventPayload: InstallationEventPayload = objectMapper.readValue(payload)
+        if (installationEventPayload.action == "created") {
+            handleInstallationCreated(installationEventPayload)
+        }
+    }
+
+    private fun handleInstallationCreated(installationEventPayload: InstallationEventPayload) {
+        while (cachingService.get("runId") != null) {
+            logger.info("A full scan is already in progress, waiting for it to finish.")
+            Thread.sleep(WAITING_TIME)
+        }
+        syncLogService.sendFullScanStart()
+        kotlin.runCatching {
+            val installation = Installation(
+                installationEventPayload.installation.id.toLong(),
+                Account(installationEventPayload.installation.account.login)
+            )
+            gitHubAuthenticationService.refreshTokens()
+            gitHubScanningService.fetchAndSendRepositoriesData(installation).forEach { repository ->
+                gitHubScanningService.fetchManifestFilesAndSend(installation, repository)
+            }
+        }.onSuccess {
+            syncLogService.sendFullScanSuccess()
+        }.onFailure {
+            syncLogService.sendFullScanFailure(it.message)
         }
     }
 
