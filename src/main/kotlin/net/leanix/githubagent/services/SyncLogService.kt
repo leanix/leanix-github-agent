@@ -16,13 +16,18 @@ class SyncLogService(
 ) {
     private val logger = LoggerFactory.getLogger(SyncLogService::class.java)
 
-    fun sendFullScanStart() {
+    fun sendFullScanStart(orgName: String?) {
         cachingService.set("runId", UUID.randomUUID(), null)
-        logger.info("Starting full sync")
+        val message = if (orgName != null) {
+            "Starting synchronization for organization $orgName"
+        } else {
+            "Starting synchronization"
+        }
+        logger.info(message)
         sendSyncLog(
             logLevel = LogLevel.INFO,
             synchronizationProgress = SynchronizationProgress.PENDING,
-            message = "Starting synchronization"
+            message = message
         )
     }
 

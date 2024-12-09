@@ -13,6 +13,7 @@ import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,11 +23,9 @@ class WebhookEventService(
     private val cachingService: CachingService,
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val gitHubScanningService: GitHubScanningService,
-    private val syncLogService: SyncLogService
+    private val syncLogService: SyncLogService,
+    @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long
 ) {
-    companion object {
-        private const val WAITING_TIME = 10000L
-    }
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
     private val objectMapper = jacksonObjectMapper()
@@ -74,9 +73,9 @@ class WebhookEventService(
     private fun handleInstallationCreated(installationEventPayload: InstallationEventPayload) {
         while (cachingService.get("runId") != null) {
             logger.info("A full scan is already in progress, waiting for it to finish.")
-            Thread.sleep(WAITING_TIME)
+            Thread.sleep(waitingTime)
         }
-        syncLogService.sendFullScanStart()
+        syncLogService.sendFullScanStart(installationEventPayload.installation.account.login)
         kotlin.runCatching {
             val installation = Installation(
                 installationEventPayload.installation.id.toLong(),

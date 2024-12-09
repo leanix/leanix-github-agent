@@ -35,7 +35,7 @@ class PostStartupRunner(
             return
         }
         kotlin.runCatching {
-            syncLogService.sendFullScanStart()
+            syncLogService.sendFullScanStart(null)
             scanResources()
         }.onSuccess {
             syncLogService.sendFullScanSuccess()

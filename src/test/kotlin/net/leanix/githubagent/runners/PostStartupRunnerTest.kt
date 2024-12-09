@@ -55,7 +55,7 @@ class PostStartupRunnerTest {
         every { gitHubScanningService.scanGitHubResources() } returns Unit
         every { brokerStompSessionHandler.isConnected() } returns true
         every { syncLogService.sendSyncLog(any(), any(), any(), any()) } returns Unit
-        every { syncLogService.sendFullScanStart() } returns Unit
+        every { syncLogService.sendFullScanStart(any()) } returns Unit
         every { syncLogService.sendFullScanSuccess() } returns Unit
     }
 
@@ -70,6 +70,6 @@ class PostStartupRunnerTest {
         postStartupRunner.run(mockk())
 
         verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
-        verify { syncLogService.sendFullScanStart() }
+        verify { syncLogService.sendFullScanStart(any()) }
     }
 }
