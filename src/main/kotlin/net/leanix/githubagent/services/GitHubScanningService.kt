@@ -73,7 +73,7 @@ class GitHubScanningService(
         webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
 
-    private fun fetchAndSendRepositoriesData(installation: Installation): List<RepositoryDto> {
+    fun fetchAndSendRepositoriesData(installation: Installation): List<RepositoryDto> {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
         var cursor: String? = null
         var totalRepos = 0
@@ -97,7 +97,7 @@ class GitHubScanningService(
         return repositories
     }
 
-    private fun fetchManifestFilesAndSend(installation: Installation, repository: RepositoryDto) {
+    fun fetchManifestFilesAndSend(installation: Installation, repository: RepositoryDto) {
         val manifestFiles = fetchManifestFiles(installation, repository.name).getOrThrow().items
         val manifestFilesContents = fetchManifestContents(
             installation,

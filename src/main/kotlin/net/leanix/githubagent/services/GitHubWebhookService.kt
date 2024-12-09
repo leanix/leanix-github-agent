@@ -7,16 +7,18 @@ import net.leanix.githubagent.shared.SUPPORTED_EVENT_TYPES
 import net.leanix.githubagent.shared.hmacSHA256
 import net.leanix.githubagent.shared.timingSafeEqual
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
 @Service
-class GitHubWebhookHandler(
+class GitHubWebhookService(
     private val webhookEventService: WebhookEventService,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
 
-    private val logger = LoggerFactory.getLogger(GitHubWebhookHandler::class.java)
+    private val logger = LoggerFactory.getLogger(GitHubWebhookService::class.java)
 
+    @Async
     fun handleWebhookEvent(eventType: String, host: String, signature256: String?, payload: String) {
         if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
             if (!gitHubEnterpriseProperties.baseUrl.contains(host)) {
@@ -38,6 +40,7 @@ class GitHubWebhookHandler(
             } else {
                 logger.warn("Webhook secret is not set, Skipping signature verification")
             }
+            logger.info("Received a webhook event of type: $eventType")
             webhookEventService.consumeWebhookEvent(eventType, payload)
         } else {
             logger.warn("Received an unsupported event of type: $eventType")

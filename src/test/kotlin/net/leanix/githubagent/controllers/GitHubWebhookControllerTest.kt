@@ -1,11 +1,14 @@
 package net.leanix.githubagent.controllers
 
 import com.ninjasquad.springmockk.MockkBean
+import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
+import io.mockk.verify
 import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
 import net.leanix.githubagent.services.CachingService
-import net.leanix.githubagent.services.GitHubWebhookHandler
+import net.leanix.githubagent.services.GitHubWebhookService
 import net.leanix.githubagent.services.SyncLogService
+import net.leanix.githubagent.services.WebhookEventService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +24,10 @@ class GitHubWebhookControllerTest {
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
-    private lateinit var gitHubWebhookHandler: GitHubWebhookHandler
+    private lateinit var webhookEventService: WebhookEventService
+
+    @SpykBean
+    private lateinit var gitHubWebhookService: GitHubWebhookService
 
     @MockkBean
     private lateinit var syncLogService: SyncLogService
@@ -42,7 +48,8 @@ class GitHubWebhookControllerTest {
         val payload = "{}"
         val host = "valid.host"
 
-        every { gitHubWebhookHandler.handleWebhookEvent(any(), any(), any(), any()) } returns Unit
+        every { gitHubWebhookService.handleWebhookEvent(any(), any(), any(), any()) } returns Unit
+        every { webhookEventService.consumeWebhookEvent(any(), any()) } returns Unit
 
         mockMvc.perform(
             MockMvcRequestBuilders.post("/github/webhook")
@@ -61,7 +68,7 @@ class GitHubWebhookControllerTest {
         val signature256 = "sha256=invalidsignature"
 
         every {
-            gitHubWebhookHandler.handleWebhookEvent(
+            gitHubWebhookService.handleWebhookEvent(
                 eventType, host, signature256, payload
             )
         } throws WebhookSecretNotSetException()
@@ -74,5 +81,33 @@ class GitHubWebhookControllerTest {
                 .content(payload)
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
+    }
+
+    @Test
+    fun `should process installation created event successfully`() {
+        val eventType = "INSTALLATION"
+        val payload = """{
+          "action": "created",
+          "installation": {
+            "id": 30,
+            "account": {
+              "login": "test-org",
+              "id": 20
+            }
+          }
+        }"""
+        val host = "dummy"
+
+        every { webhookEventService.consumeWebhookEvent(any(), any()) } returns Unit
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/github/webhook")
+                .header("X-GitHub-Event", eventType)
+                .header("X-GitHub-Enterprise-Host", host)
+                .content(payload)
+        )
+            .andExpect(MockMvcResultMatchers.status().isAccepted)
+
+        verify(exactly = 1) { webhookEventService.consumeWebhookEvent(any(), any()) }
     }
 }

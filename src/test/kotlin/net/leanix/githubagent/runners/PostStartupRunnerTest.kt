@@ -4,8 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import net.leanix.githubagent.dto.GitHubAppResponse
-import net.leanix.githubagent.dto.LogLevel
-import net.leanix.githubagent.dto.SynchronizationProgress
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubAuthenticationService
@@ -14,7 +12,6 @@ import net.leanix.githubagent.services.GitHubScanningService
 import net.leanix.githubagent.services.SyncLogService
 import net.leanix.githubagent.services.WebSocketService
 import net.leanix.githubagent.shared.APP_NAME_TOPIC
-import net.leanix.githubagent.shared.LOGS_TOPIC
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -58,6 +55,8 @@ class PostStartupRunnerTest {
         every { gitHubScanningService.scanGitHubResources() } returns Unit
         every { brokerStompSessionHandler.isConnected() } returns true
         every { syncLogService.sendSyncLog(any(), any(), any(), any()) } returns Unit
+        every { syncLogService.sendFullScanStart(any()) } returns Unit
+        every { syncLogService.sendFullScanSuccess() } returns Unit
     }
 
     @Test
@@ -71,6 +70,6 @@ class PostStartupRunnerTest {
         postStartupRunner.run(mockk())
 
         verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
-        verify { syncLogService.sendSyncLog(any(), LOGS_TOPIC, LogLevel.INFO, SynchronizationProgress.PENDING) }
+        verify { syncLogService.sendFullScanStart(any()) }
     }
 }
