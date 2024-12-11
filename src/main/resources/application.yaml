@@ -10,3 +10,9 @@ leanix:
   auth:
     access-token-uri: ${leanix.base-url}/mtm/v1
     technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN}
+
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 3
+      waitDuration: 1000
