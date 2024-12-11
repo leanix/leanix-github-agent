@@ -27,7 +27,7 @@ style:
   ReturnCount:
     active: false
   UnusedPrivateMember:
-    active: false
+    active: true
   ThrowsCount:
     active: false
 

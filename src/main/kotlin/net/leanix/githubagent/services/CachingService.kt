@@ -58,6 +58,7 @@ class CachingService(
     }
 
     @PostConstruct
+    @Suppress("UnusedPrivateMember")
     private fun init() {
         set("baseUrl", gitHubEnterpriseProperties.baseUrl, null)
         set("githubAppId", gitHubEnterpriseProperties.gitHubAppId, null)
