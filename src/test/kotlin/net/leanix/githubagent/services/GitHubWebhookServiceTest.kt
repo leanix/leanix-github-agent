@@ -10,11 +10,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class GitHubWebhookHandlerTest {
+class GitHubWebhookServiceTest {
 
     private val webhookEventService = mockk<WebhookEventService>()
     private val gitHubEnterpriseProperties = mockk<GitHubEnterpriseProperties>()
-    private val gitHubWebhookHandler = GitHubWebhookHandler(webhookEventService, gitHubEnterpriseProperties)
+    private val gitHubWebhookService = GitHubWebhookService(webhookEventService, gitHubEnterpriseProperties)
 
     @BeforeEach
     fun setUp() {
@@ -24,7 +24,7 @@ class GitHubWebhookHandlerTest {
     fun `should not process event if unknown host`() {
         every { gitHubEnterpriseProperties.baseUrl } returns "known.host"
 
-        gitHubWebhookHandler.handleWebhookEvent("PUSH", "unknown.host", null, "{}")
+        gitHubWebhookService.handleWebhookEvent("PUSH", "unknown.host", null, "{}")
 
         verify(exactly = 0) { webhookEventService.consumeWebhookEvent(any(), any()) }
     }
@@ -35,7 +35,7 @@ class GitHubWebhookHandlerTest {
         every { gitHubEnterpriseProperties.webhookSecret } returns ""
 
         assertThrows<WebhookSecretNotSetException> {
-            gitHubWebhookHandler.handleWebhookEvent("PUSH", "known.host", "sha256=signature", "{}")
+            gitHubWebhookService.handleWebhookEvent("PUSH", "known.host", "sha256=signature", "{}")
         }
     }
 
@@ -45,7 +45,7 @@ class GitHubWebhookHandlerTest {
         every { gitHubEnterpriseProperties.webhookSecret } returns "secret"
 
         assertThrows<InvalidEventSignatureException> {
-            gitHubWebhookHandler.handleWebhookEvent("PUSH", "known.host", "sha256=signature", "{}")
+            gitHubWebhookService.handleWebhookEvent("PUSH", "known.host", "sha256=signature", "{}")
         }
     }
 
@@ -54,7 +54,7 @@ class GitHubWebhookHandlerTest {
         every { gitHubEnterpriseProperties.baseUrl } returns "known.host"
         every { gitHubEnterpriseProperties.webhookSecret } returns ""
 
-        gitHubWebhookHandler.handleWebhookEvent("UNSUPPORTED_EVENT", "known.host", null, "{}")
+        gitHubWebhookService.handleWebhookEvent("UNSUPPORTED_EVENT", "known.host", null, "{}")
 
         verify(exactly = 0) { webhookEventService.consumeWebhookEvent(any(), any()) }
     }
@@ -65,7 +65,7 @@ class GitHubWebhookHandlerTest {
         every { gitHubEnterpriseProperties.webhookSecret } returns ""
         every { webhookEventService.consumeWebhookEvent(any(), any()) } returns Unit
 
-        gitHubWebhookHandler.handleWebhookEvent("PUSH", "host", null, "{}")
+        gitHubWebhookService.handleWebhookEvent("PUSH", "host", null, "{}")
 
         verify { webhookEventService.consumeWebhookEvent("PUSH", "{}") }
     }
