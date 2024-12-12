@@ -10,3 +10,5 @@ leanix:
     auth:
         access-token-uri: ${leanix.base-url}/mtm/v1
         technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN:dummy}
+webhookEventService:
+  waitingTime: 100
