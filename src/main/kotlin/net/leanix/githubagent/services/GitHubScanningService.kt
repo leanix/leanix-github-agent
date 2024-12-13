@@ -86,7 +86,7 @@ class GitHubScanningService(
             )
             webSocketService.sendMessage(
                 "${cachingService.get("runId")}/repositories",
-                repositoriesPage.repositories
+                repositoriesPage.repositories.filter { !it.archived }
             )
             repositories.addAll(repositoriesPage.repositories)
             cursor = repositoriesPage.cursor
