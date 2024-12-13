@@ -45,9 +45,7 @@ class GitHubScanningService(
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
-        val installations = rateLimitHandler.executeWithRateLimitHandler {
-            gitHubClient.getInstallations("Bearer $jwtToken")
-        }
+        val installations = gitHubClient.getInstallations("Bearer $jwtToken")
         gitHubAuthenticationService.generateAndCacheInstallationTokens(installations, jwtToken)
         return installations
     }
