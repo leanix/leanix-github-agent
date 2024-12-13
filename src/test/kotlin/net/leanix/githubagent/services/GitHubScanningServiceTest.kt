@@ -17,6 +17,7 @@ import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.RepositoryItemResponse
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
+import net.leanix.githubagent.handler.RateLimitHandler
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -32,13 +33,15 @@ class GitHubScanningServiceTest {
     private val gitHubGraphQLService = mockk<GitHubGraphQLService>()
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
     private val syncLogService = mockk<SyncLogService>(relaxUnitFun = true)
+    private val rateLimitHandler = mockk<RateLimitHandler>(relaxUnitFun = true)
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
         webSocketService,
         gitHubGraphQLService,
         gitHubAuthenticationService,
-        syncLogService
+        syncLogService,
+        rateLimitHandler
     )
     private val runId = UUID.randomUUID()
 
@@ -61,6 +64,8 @@ class GitHubScanningServiceTest {
         every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
         every { syncLogService.sendErrorLog(any()) } returns Unit
         every { syncLogService.sendInfoLog(any()) } returns Unit
+        every { rateLimitHandler.executeWithRateLimitHandler(any<() -> Any>()) } answers
+            { firstArg<() -> Any>().invoke() }
     }
 
     @Test

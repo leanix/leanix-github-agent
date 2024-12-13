@@ -1,5 +1,6 @@
 package net.leanix.githubagent.client
 
+import net.leanix.githubagent.config.FeignClientConfig
 import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
@@ -13,7 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 
-@FeignClient(name = "githubClient", url = "\${github-enterprise.baseUrl}")
+@FeignClient(
+    name = "githubClient",
+    url = "\${github-enterprise.baseUrl}",
+    configuration = [FeignClientConfig::class]
+)
 interface GitHubClient {
 
     @GetMapping("/api/v3/app")

@@ -10,6 +10,7 @@ import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
+import net.leanix.githubagent.handler.RateLimitHandler
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
@@ -23,7 +24,8 @@ class GitHubScanningService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
     private val gitHubAuthenticationService: GitHubAuthenticationService,
-    private val syncLogService: SyncLogService
+    private val syncLogService: SyncLogService,
+    private val rateLimitHandler: RateLimitHandler,
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -43,7 +45,9 @@ class GitHubScanningService(
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
-        val installations = gitHubClient.getInstallations("Bearer $jwtToken")
+        val installations = rateLimitHandler.executeWithRateLimitHandler {
+            gitHubClient.getInstallations("Bearer $jwtToken")
+        }
         gitHubAuthenticationService.generateAndCacheInstallationTokens(installations, jwtToken)
         return installations
     }
@@ -118,11 +122,13 @@ class GitHubScanningService(
 
     private fun fetchManifestFiles(installation: Installation, repositoryName: String) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
-        gitHubClient.searchManifestFiles(
-            "Bearer $installationToken",
-            "" +
-                "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME"
-        )
+        rateLimitHandler.executeWithRateLimitHandler {
+            gitHubClient.searchManifestFiles(
+                "Bearer $installationToken",
+                "" +
+                    "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME"
+            )
+        }
     }
     private fun fetchManifestContents(
         installation: Installation,
