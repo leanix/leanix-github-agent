@@ -3,6 +3,7 @@ package net.leanix.githubagent.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.resilience4j.retry.annotation.Retry
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
+import net.leanix.githubagent.services.LeanIXAuthService
 import net.leanix.githubagent.shared.GitHubAgentProperties.GITHUB_AGENT_VERSION
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -20,14 +21,16 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport
 class WebSocketClientConfig(
     private val brokerStompSessionHandler: BrokerStompSessionHandler,
     private val objectMapper: ObjectMapper,
-    private val leanIXProperties: LeanIXProperties
+    private val leanIXAuthService: LeanIXAuthService,
+    private val leanIXProperties: LeanIXProperties,
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
     @Retry(name = "ws_init_session")
     fun initSession(): StompSession {
         val headers = WebSocketHttpHeaders()
         val stompHeaders = StompHeaders()
-        stompHeaders["Authorization"] = "Bearer dummy"
-        stompHeaders["GitHub-Enterprise-URL"] = "https://url.com"
+        stompHeaders["Authorization"] = "Bearer ${leanIXAuthService.getBearerToken()}"
+        stompHeaders["GitHub-Enterprise-URL"] = gitHubEnterpriseProperties.baseUrl
         stompHeaders["GitHub-Agent-Version"] = GITHUB_AGENT_VERSION
         return stompClient().connectAsync(
             leanIXProperties.wsBaseUrl,
