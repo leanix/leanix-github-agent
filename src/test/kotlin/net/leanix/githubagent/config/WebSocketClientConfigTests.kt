@@ -22,6 +22,7 @@ class WebSocketClientConfigTests {
     private lateinit var authService: LeanIXAuthService
     private lateinit var leanIXProperties: LeanIXProperties
     private lateinit var gitHubEnterpriseProperties: GitHubEnterpriseProperties
+    private lateinit var leanIXAuthService: LeanIXAuthService
 
     @BeforeEach
     fun setUp() {
@@ -32,7 +33,14 @@ class WebSocketClientConfigTests {
         stompClient = mockk()
         stompSession = mockk()
         authService = mockk()
-        webSocketClientConfig = WebSocketClientConfig(brokerStompSessionHandler, objectMapper, leanIXProperties)
+        leanIXAuthService = mockk()
+        webSocketClientConfig = WebSocketClientConfig(
+            brokerStompSessionHandler,
+            objectMapper,
+            leanIXAuthService,
+            leanIXProperties,
+            gitHubEnterpriseProperties
+        )
 
         GitHubAgentProperties.GITHUB_AGENT_VERSION = "test-version"
     }
@@ -43,6 +51,7 @@ class WebSocketClientConfigTests {
         coEvery { leanIXProperties.wsBaseUrl } returns "ws://test.url"
         coEvery { gitHubEnterpriseProperties.baseUrl } returns "http://github.enterprise.url"
         coEvery { gitHubEnterpriseProperties.gitHubAppId } returns "appId"
+        coEvery { leanIXAuthService.getBearerToken() } returns "bearer token"
         coEvery {
             stompClient.connectAsync(
                 any<String>(), any<WebSocketHttpHeaders>(),
