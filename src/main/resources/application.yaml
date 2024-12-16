@@ -16,5 +16,8 @@ webhookEventService:
 resilience4j.retry:
   configs:
     default:
-      maxAttempts: 3
+      maxAttempts: 5
+      enable-exponential-backoff: true
+      exponential-backoff-multiplier: 2
       waitDuration: 1000
+
