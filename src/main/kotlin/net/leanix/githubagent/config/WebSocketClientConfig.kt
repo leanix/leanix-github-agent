@@ -25,8 +25,7 @@ class WebSocketClientConfig(
     private val leanIXProperties: LeanIXProperties,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
-
-    @Retry(name = "ws-init-session")
+    @Retry(name = "ws_init_session")
     fun initSession(): StompSession {
         val headers = WebSocketHttpHeaders()
         val stompHeaders = StompHeaders()
