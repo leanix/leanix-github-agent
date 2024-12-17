@@ -1,6 +1,6 @@
 query GetRepositories($pageCount: Int!, $cursor: String) {
     viewer {
-        repositories(isArchived:false, first: $pageCount, after: $cursor) {
+        repositories(first: $pageCount, after: $cursor) {
             pageInfo {
                 endCursor
                 hasNextPage
