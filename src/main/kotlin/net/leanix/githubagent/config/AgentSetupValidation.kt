@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class AgentSetupValidation(
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
+    private val leanIXProperties: LeanIXProperties
 ) {
 
     @PostConstruct
@@ -21,6 +22,14 @@ class AgentSetupValidation(
         }
         if (gitHubEnterpriseProperties.pemFile.isBlank()) {
             missingProperties.add("GITHUB_ENTERPRISE_PEM_FILE")
+        }
+
+        if (leanIXProperties.wsBaseUrl.isBlank()) {
+            missingProperties.add("LEANIX_WS_BASE_URL")
+        }
+
+        if (leanIXProperties.auth.accessTokenUri.isBlank()) {
+            missingProperties.add("LEANIX_AUTH_ACCESS_TOKEN_URI")
         }
 
         if (missingProperties.isNotEmpty()) {
