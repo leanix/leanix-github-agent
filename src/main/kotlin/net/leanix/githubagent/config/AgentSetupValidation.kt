@@ -1,7 +1,8 @@
 package net.leanix.githubagent.config
 
-import jakarta.annotation.PostConstruct
 import net.leanix.githubagent.exceptions.GitHubEnterpriseConfigurationMissingException
+import org.springframework.context.event.ContextRefreshedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
 @Component
@@ -10,8 +11,9 @@ class AgentSetupValidation(
     private val leanIXProperties: LeanIXProperties
 ) {
 
-    @PostConstruct
-    fun validateConfiguration() {
+    @EventListener
+    @SuppressWarnings("UnusedParameter")
+    fun onApplicationEvent(event: ContextRefreshedEvent) {
         val missingProperties = mutableListOf<String>()
 
         if (gitHubEnterpriseProperties.baseUrl.isBlank()) {
