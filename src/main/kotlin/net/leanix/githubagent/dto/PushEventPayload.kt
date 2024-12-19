@@ -9,7 +9,7 @@ data class PushEventPayload(
     val repository: PushEventRepository,
     val installation: PushEventInstallation,
     @JsonProperty("head_commit")
-    val headCommit: PushEventCommit
+    val headCommit: PushEventCommit?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

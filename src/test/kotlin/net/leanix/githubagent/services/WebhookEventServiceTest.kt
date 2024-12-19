@@ -338,4 +338,24 @@ class WebhookEventServiceTest {
 
         verify(exactly = 6) { cachingService.get("runId") }
     }
+
+    @Test
+    fun `should ignore push events without a head commit`() {
+        val payload = """{
+            "repository": {
+                "name": "repo",
+                "full_name": "owner/repo",
+                "owner": {"name": "owner"},
+                "default_branch": "main"
+            },
+            "installation": {"id": 1},
+            "ref": "refs/heads/main"
+        }"""
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 0) {
+            webSocketService.sendMessage(any(), any())
+        }
+    }
 }
