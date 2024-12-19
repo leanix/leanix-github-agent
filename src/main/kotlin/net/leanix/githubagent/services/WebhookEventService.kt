@@ -82,6 +82,7 @@ class WebhookEventService(
                 Account(installationEventPayload.installation.account.login)
             )
             gitHubAuthenticationService.refreshTokens()
+            gitHubScanningService.fetchAndSendOrganisationsData(listOf(installation))
             gitHubScanningService.fetchAndSendRepositoriesData(installation).forEach { repository ->
                 gitHubScanningService.fetchManifestFilesAndSend(installation, repository)
             }
