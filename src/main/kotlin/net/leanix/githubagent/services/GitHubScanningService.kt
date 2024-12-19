@@ -50,7 +50,7 @@ class GitHubScanningService(
         return installations
     }
 
-    private fun fetchAndSendOrganisationsData(
+    fun fetchAndSendOrganisationsData(
         installations: List<Installation>
     ) {
         if (installations.isEmpty()) {
