@@ -12,7 +12,7 @@ class GitHubEnterpriseService(private val githubClient: GitHubClient) {
 
     companion object {
         val expectedPermissions = listOf("administration", "contents", "metadata")
-        val expectedEvents = listOf("label", "public", "repository")
+        val expectedEvents = listOf("label", "public", "repository", "push", "installation")
     }
     private val logger = LoggerFactory.getLogger(GitHubEnterpriseService::class.java)
 
