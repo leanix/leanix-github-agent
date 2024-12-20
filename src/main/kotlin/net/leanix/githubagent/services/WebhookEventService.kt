@@ -51,7 +51,7 @@ class WebhookEventService(
 
         val installationToken = getInstallationToken(pushEventPayload.installation.id)
 
-        if (pushEventPayload.ref == "refs/heads/$defaultBranch") {
+        if (headCommit != null && pushEventPayload.ref == "refs/heads/$defaultBranch") {
             handleManifestFileChanges(
                 defaultBranch,
                 headCommit,

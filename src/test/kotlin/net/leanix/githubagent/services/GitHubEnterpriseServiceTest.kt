@@ -21,7 +21,7 @@ class GitHubEnterpriseServiceTest {
         val githubApp = GitHubAppResponse(
             slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
-            events = listOf("label", "public", "repository")
+            events = listOf("label", "public", "repository", "push", "installation")
         )
         every { githubClient.getApp(any()) } returns githubApp
 
@@ -41,7 +41,7 @@ class GitHubEnterpriseServiceTest {
         val response = GitHubAppResponse(
             slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
-            events = listOf("label", "public", "repository")
+            events = listOf("label", "public", "repository", "push", "installation")
         )
 
         assertDoesNotThrow { service.validateGithubAppResponse(response) }
