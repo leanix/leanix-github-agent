@@ -8,9 +8,11 @@ import net.leanix.githubagent.dto.ManifestFilesDTO
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RepositoryDto
+import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.handler.RateLimitHandler
+import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
@@ -26,6 +28,7 @@ class GitHubScanningService(
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val syncLogService: SyncLogService,
     private val rateLimitHandler: RateLimitHandler,
+    private val gitHubEnterpriseService: GitHubEnterpriseService,
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -35,11 +38,30 @@ class GitHubScanningService(
         val installations = getInstallations(jwtToken.toString())
         fetchAndSendOrganisationsData(installations)
         installations.forEach { installation ->
-            fetchAndSendRepositoriesData(installation)
-                .forEach { repository ->
-                    fetchManifestFilesAndSend(installation, repository)
+            kotlin.runCatching {
+                gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
+                    INSTALLATION_LABEL,
+                    installation.permissions,
+                    installation.events
+                )
+                fetchAndSendRepositoriesData(installation)
+                    .forEach { repository ->
+                        fetchManifestFilesAndSend(installation, repository)
+                    }
+                syncLogService.sendInfoLog("Finished initial full scan for organization ${installation.account.login}.")
+            }.onFailure {
+                val message = "Failed to scan organization ${installation.account.login}."
+                when (it) {
+                    is GitHubAppInsufficientPermissionsException -> {
+                        syncLogService.sendErrorLog("$message ${it.message}")
+                        logger.error("$message ${it.message}")
+                    }
+                    else -> {
+                        syncLogService.sendErrorLog(message)
+                        logger.error(message, it)
+                    }
                 }
-            syncLogService.sendInfoLog("Finished initial full scan for organization ${installation.account.login}.")
+            }
         }
         syncLogService.sendInfoLog("Finished full scan for all available organizations.")
     }

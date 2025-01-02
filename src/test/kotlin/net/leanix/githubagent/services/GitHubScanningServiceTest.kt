@@ -1,7 +1,9 @@
 package net.leanix.githubagent.services
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
@@ -34,6 +36,7 @@ class GitHubScanningServiceTest {
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
     private val syncLogService = mockk<SyncLogService>(relaxUnitFun = true)
     private val rateLimitHandler = mockk<RateLimitHandler>(relaxUnitFun = true)
+    private val gitHubEnterpriseService = mockk<GitHubEnterpriseService>(relaxUnitFun = true)
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
@@ -41,7 +44,8 @@ class GitHubScanningServiceTest {
         gitHubGraphQLService,
         gitHubAuthenticationService,
         syncLogService,
-        rateLimitHandler
+        rateLimitHandler,
+        gitHubEnterpriseService,
     )
     private val runId = UUID.randomUUID()
 
@@ -49,7 +53,7 @@ class GitHubScanningServiceTest {
     fun setup() {
         every { cachingService.get(any()) } returns "value"
         every { gitHubClient.getInstallations(any()) } returns listOf(
-            Installation(1, Account("testInstallation"))
+            Installation(1, Account("testInstallation"), mapOf(), listOf())
         )
         every { gitHubClient.createInstallationToken(1, any()) } returns
             InstallationTokenResponse("testToken", "2024-01-01T00:00:00Z", mapOf(), "all")
@@ -66,6 +70,7 @@ class GitHubScanningServiceTest {
         every { syncLogService.sendInfoLog(any()) } returns Unit
         every { rateLimitHandler.executeWithRateLimitHandler(any<() -> Any>()) } answers
             { firstArg<() -> Any>().invoke() }
+        every { gitHubEnterpriseService.validateEnabledPermissionsAndEvents(any(), any(), any()) } just runs
     }
 
     @Test
