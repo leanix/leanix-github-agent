@@ -6,14 +6,22 @@ import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import net.leanix.githubagent.exceptions.UnableToConnectToGitHubEnterpriseException
+import net.leanix.githubagent.shared.GITHUB_APP_LABEL
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
 class GitHubEnterpriseServiceTest {
 
     private val githubClient = mockk<GitHubClient>()
-    private val service = GitHubEnterpriseService(githubClient)
+    private val syncLogService = mockk<SyncLogService>()
+    private val service = GitHubEnterpriseService(githubClient, syncLogService)
+
+    @BeforeEach
+    fun setUp() {
+        every { syncLogService.sendErrorLog(any()) } returns Unit
+    }
 
     @Test
     fun `verifyJwt with valid jwt should not throw exception`() {
@@ -44,7 +52,9 @@ class GitHubEnterpriseServiceTest {
             events = listOf("label", "public", "repository", "push", "installation")
         )
 
-        assertDoesNotThrow { service.validateGithubAppResponse(response) }
+        assertDoesNotThrow {
+            service.validateEnabledPermissionsAndEvents(GITHUB_APP_LABEL, response.permissions, response.events)
+        }
     }
 
     @Test
@@ -57,7 +67,7 @@ class GitHubEnterpriseServiceTest {
 
         assertThrows(
             GitHubAppInsufficientPermissionsException::class.java
-        ) { service.validateGithubAppResponse(response) }
+        ) { service.validateEnabledPermissionsAndEvents(GITHUB_APP_LABEL, response.permissions, response.events) }
     }
 
     @Test
@@ -70,6 +80,6 @@ class GitHubEnterpriseServiceTest {
 
         assertThrows(
             GitHubAppInsufficientPermissionsException::class.java
-        ) { service.validateGithubAppResponse(response) }
+        ) { service.validateEnabledPermissionsAndEvents(GITHUB_APP_LABEL, response.permissions, response.events) }
     }
 }
