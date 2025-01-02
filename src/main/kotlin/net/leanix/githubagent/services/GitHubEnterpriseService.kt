@@ -27,8 +27,8 @@ class GitHubEnterpriseService(
         }.onFailure {
             when (it) {
                 is GitHubAppInsufficientPermissionsException -> {
-                    syncLogService.sendErrorLog(it.message!!)
                     logger.error(it.message)
+                    syncLogService.sendErrorLog(it.message!!)
                 }
                 else -> {
                     logger.error("Failed to verify JWT token", it)

@@ -243,9 +243,13 @@ class GitHubScanningServiceTest {
         )
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
-        verify { syncLogService.sendErrorLog("Failed to scan organization testInstallation1. Installation missing " +
-                "the following permissions: [administration, contents, metadata], " +
-                "and the following events: [label, public, repository, push]") }
+        verify {
+            syncLogService.sendErrorLog(
+                "Failed to scan organization testInstallation1. Installation missing " +
+                    "the following permissions: [administration, contents, metadata], " +
+                    "and the following events: [label, public, repository, push]"
+            )
+        }
         verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }
         verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }
     }
