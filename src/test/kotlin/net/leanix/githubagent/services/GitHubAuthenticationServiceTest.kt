@@ -21,12 +21,14 @@ class GitHubAuthenticationServiceTest {
     private val gitHubEnterpriseService = mockk<GitHubEnterpriseService>()
     private val gitHubClient = mockk<GitHubClient>()
     private val syncLogService = mockk<SyncLogService>()
+    private val gitHubAPIService = mockk<GitHubAPIService>()
     private val githubAuthenticationService = GitHubAuthenticationService(
         cachingService,
         githubEnterpriseProperties,
         resourceLoader,
         gitHubEnterpriseService,
-        gitHubClient
+        gitHubClient,
+        gitHubAPIService
     )
 
     @BeforeEach

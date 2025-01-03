@@ -28,7 +28,11 @@ interface GitHubClient {
     ): GitHubAppResponse
 
     @GetMapping("/api/v3/app/installations")
-    fun getInstallations(@RequestHeader("Authorization") jwt: String): List<Installation>
+    fun getInstallations(
+        @RequestHeader("Authorization") jwt: String,
+        @RequestParam("per_page", defaultValue = "30") perPage: Int,
+        @RequestParam("page", defaultValue = "1") page: Int
+    ): List<Installation>
 
     @PostMapping("/api/v3/app/installations/{installationId}/access_tokens")
     fun createInstallationToken(
@@ -37,7 +41,11 @@ interface GitHubClient {
     ): InstallationTokenResponse
 
     @GetMapping("/api/v3/organizations")
-    fun getOrganizations(@RequestHeader("Authorization") token: String): List<Organization>
+    fun getOrganizations(
+        @RequestHeader("Authorization") jwt: String,
+        @RequestParam("per_page", defaultValue = "30") perPage: Int,
+        @RequestParam("since", defaultValue = "1") since: Int
+    ): List<Organization>
 
     @GetMapping("/api/v3/orgs/{org}/repos")
     fun getRepositories(
