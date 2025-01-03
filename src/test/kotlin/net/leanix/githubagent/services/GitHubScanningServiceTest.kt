@@ -34,6 +34,7 @@ class GitHubScanningServiceTest {
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
     private val syncLogService = mockk<SyncLogService>(relaxUnitFun = true)
     private val rateLimitHandler = mockk<RateLimitHandler>(relaxUnitFun = true)
+    private val gitHubAPIService = mockk<GitHubAPIService>()
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
@@ -41,20 +42,21 @@ class GitHubScanningServiceTest {
         gitHubGraphQLService,
         gitHubAuthenticationService,
         syncLogService,
-        rateLimitHandler
+        rateLimitHandler,
+        gitHubAPIService
     )
     private val runId = UUID.randomUUID()
 
     @BeforeEach
     fun setup() {
         every { cachingService.get(any()) } returns "value"
-        every { gitHubClient.getInstallations(any()) } returns listOf(
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(
             Installation(1, Account("testInstallation"))
         )
         every { gitHubClient.createInstallationToken(1, any()) } returns
             InstallationTokenResponse("testToken", "2024-01-01T00:00:00Z", mapOf(), "all")
         every { cachingService.set(any(), any(), any()) } returns Unit
-        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
+        every { gitHubAPIService.getPaginatedOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
         every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
             repositories = emptyList(),
             hasNextPage = false,
@@ -85,7 +87,7 @@ class GitHubScanningServiceTest {
         val runId = UUID.randomUUID()
 
         every { cachingService.get("runId") } returns runId
-        every { gitHubClient.getInstallations(any()) } returns emptyList()
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns emptyList()
 
         gitHubScanningService.scanGitHubResources()
 

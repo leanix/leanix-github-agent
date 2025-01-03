@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.runs
 import io.mockk.verify
-import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.Organization
@@ -35,11 +34,11 @@ class WebhookEventServiceTest {
     @MockkBean
     private lateinit var gitHubAuthenticationService: GitHubAuthenticationService
 
-    @MockkBean
-    private lateinit var gitHubClient: GitHubClient
-
     @Autowired
     private lateinit var webhookEventService: WebhookEventService
+
+    @MockkBean
+    private lateinit var gitHubAPIService: GitHubAPIService
 
     @BeforeEach
     fun setUp() {
@@ -371,7 +370,8 @@ class WebhookEventServiceTest {
         every { cachingService.get("runId") } returnsMany listOf("value", null, runId)
         every { cachingService.set("runId", any(), any()) } just runs
         every { cachingService.remove("runId") } just runs
-        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
+        every { gitHubAPIService.getPaginatedOrganizations(any()) } returns
+            listOf(Organization("testOrganization", 1))
 
         val eventType = "INSTALLATION"
         val payload = """{

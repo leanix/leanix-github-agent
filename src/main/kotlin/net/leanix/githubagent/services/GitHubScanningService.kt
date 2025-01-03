@@ -26,6 +26,7 @@ class GitHubScanningService(
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val syncLogService: SyncLogService,
     private val rateLimitHandler: RateLimitHandler,
+    private val gitHubAPIService: GitHubAPIService,
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -45,7 +46,7 @@ class GitHubScanningService(
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
-        val installations = gitHubClient.getInstallations("Bearer $jwtToken")
+        val installations = gitHubAPIService.getPaginatedInstallations(jwtToken)
         gitHubAuthenticationService.generateAndCacheInstallationTokens(installations, jwtToken)
         return installations
     }
@@ -59,7 +60,7 @@ class GitHubScanningService(
             return
         }
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
-        val organizations = gitHubClient.getOrganizations("Bearer $installationToken")
+        val organizations = gitHubAPIService.getPaginatedOrganizations(installationToken.toString())
             .map { organization ->
                 if (installations.find { it.account.login == organization.login } != null) {
                     OrganizationDto(organization.id, organization.login, true)
