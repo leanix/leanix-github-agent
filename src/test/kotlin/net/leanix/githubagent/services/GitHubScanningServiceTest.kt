@@ -64,8 +64,8 @@ class GitHubScanningServiceTest {
         every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
         every { syncLogService.sendErrorLog(any()) } returns Unit
         every { syncLogService.sendInfoLog(any()) } returns Unit
-        every { rateLimitHandler.executeWithRateLimitHandler(any<() -> Any>()) } answers
-            { firstArg<() -> Any>().invoke() }
+        every { rateLimitHandler.executeWithRateLimitHandler(any(), any<() -> Any>()) } answers
+            { secondArg<() -> Any>().invoke() }
     }
 
     @Test
