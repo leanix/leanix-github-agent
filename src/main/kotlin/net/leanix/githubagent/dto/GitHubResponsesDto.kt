@@ -14,7 +14,9 @@ data class InstallationTokenResponse(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Installation(
     @JsonProperty("id") val id: Long,
-    @JsonProperty("account") val account: Account
+    @JsonProperty("account") val account: Account,
+    @JsonProperty("permissions") val permissions: Map<String, String>,
+    @JsonProperty("events") val events: List<String>
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -34,6 +34,12 @@ interface GitHubClient {
         @RequestParam("page", defaultValue = "1") page: Int
     ): List<Installation>
 
+    @GetMapping("/api/v3/app/installations/{installationId}")
+    fun getInstallation(
+        @PathVariable("installationId") installationId: Long,
+        @RequestHeader("Authorization") jwt: String
+    ): Installation
+
     @PostMapping("/api/v3/app/installations/{installationId}/access_tokens")
     fun createInstallationToken(
         @PathVariable("installationId") installationId: Long,

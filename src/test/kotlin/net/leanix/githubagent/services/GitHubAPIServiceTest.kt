@@ -14,12 +14,15 @@ class GitHubAPIServiceTest {
     private val gitHubClient = mockk<GitHubClient>()
     private val gitHubAPIService = GitHubAPIService(gitHubClient)
 
+    private val permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read")
+    private val events = listOf("label", "public", "repository", "push")
+
     @Test
     fun `test getPaginatedInstallations with one page`() {
         val jwtToken = "test-jwt-token"
         val installationsPage1 = listOf(
-            Installation(1, Account("test-account")),
-            Installation(2, Account("test-account"))
+            Installation(1, Account("test-account"), permissions, events),
+            Installation(2, Account("test-account"), permissions, events)
         )
 
         every { gitHubClient.getInstallations(any(), any(), any()) } returns installationsPage1
@@ -35,7 +38,7 @@ class GitHubAPIServiceTest {
         val perPage = 30
         val totalInstallations = 100
         val installations = (1..totalInstallations).map {
-            Installation(it.toLong(), Account("test-account-$it"))
+            Installation(it.toLong(), Account("test-account-$it"), permissions, events)
         }
         val pages = installations.chunked(perPage)
 
