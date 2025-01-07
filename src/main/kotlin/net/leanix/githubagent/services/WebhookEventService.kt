@@ -2,13 +2,14 @@ package net.leanix.githubagent.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import net.leanix.githubagent.dto.Account
-import net.leanix.githubagent.dto.Installation
+import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.InstallationEventPayload
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
+import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
@@ -24,7 +25,9 @@ class WebhookEventService(
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val gitHubScanningService: GitHubScanningService,
     private val syncLogService: SyncLogService,
-    @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long
+    @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
+    private val gitHubClient: GitHubClient,
+    private val gitHubEnterpriseService: GitHubEnterpriseService
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
@@ -77,9 +80,15 @@ class WebhookEventService(
         }
         syncLogService.sendFullScanStart(installationEventPayload.installation.account.login)
         kotlin.runCatching {
-            val installation = Installation(
+            val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
+            val installation = gitHubClient.getInstallation(
                 installationEventPayload.installation.id.toLong(),
-                Account(installationEventPayload.installation.account.login)
+                "Bearer $jwtToken"
+            )
+            gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
+                INSTALLATION_LABEL,
+                installation.permissions,
+                installation.events
             )
             gitHubAuthenticationService.refreshTokens()
             gitHubScanningService.fetchAndSendOrganisationsData(listOf(installation))

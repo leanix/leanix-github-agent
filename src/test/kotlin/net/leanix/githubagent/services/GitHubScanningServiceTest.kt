@@ -6,6 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
+import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
@@ -34,6 +35,7 @@ class GitHubScanningServiceTest {
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
     private val syncLogService = mockk<SyncLogService>(relaxUnitFun = true)
     private val rateLimitHandler = mockk<RateLimitHandler>(relaxUnitFun = true)
+    private val gitHubEnterpriseService = GitHubEnterpriseService(gitHubClient, syncLogService)
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
@@ -41,15 +43,19 @@ class GitHubScanningServiceTest {
         gitHubGraphQLService,
         gitHubAuthenticationService,
         syncLogService,
-        rateLimitHandler
+        rateLimitHandler,
+        gitHubEnterpriseService,
     )
     private val runId = UUID.randomUUID()
+
+    private val permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read")
+    private val events = listOf("label", "public", "repository", "push")
 
     @BeforeEach
     fun setup() {
         every { cachingService.get(any()) } returns "value"
         every { gitHubClient.getInstallations(any()) } returns listOf(
-            Installation(1, Account("testInstallation"))
+            Installation(1, Account("testInstallation"), permissions, events)
         )
         every { gitHubClient.createInstallationToken(1, any()) } returns
             InstallationTokenResponse("testToken", "2024-01-01T00:00:00Z", mapOf(), "all")
@@ -66,6 +72,7 @@ class GitHubScanningServiceTest {
         every { syncLogService.sendInfoLog(any()) } returns Unit
         every { rateLimitHandler.executeWithRateLimitHandler(any<() -> Any>()) } answers
             { firstArg<() -> Any>().invoke() }
+        every { gitHubClient.getApp(any()) } returns GitHubAppResponse("testApp", permissions, events)
     }
 
     @Test
@@ -224,5 +231,26 @@ class GitHubScanningServiceTest {
         // then
         verify { webSocketService.sendMessage(eq("$runId/manifestFiles"), capture(fileSlot)) }
         assertEquals(fileSlot.captured.manifestFiles[0].path, "")
+    }
+
+    @Test
+    fun `scanGitHubResources should skip organizations without correct permissions and events`() {
+        every { cachingService.get("runId") } returns runId
+        every { gitHubClient.getInstallations(any()) } returns listOf(
+            Installation(1, Account("testInstallation1"), mapOf(), listOf()),
+            Installation(2, Account("testInstallation2"), permissions, events),
+            Installation(3, Account("testInstallation3"), permissions, events)
+        )
+        gitHubScanningService.scanGitHubResources()
+        verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
+        verify {
+            syncLogService.sendErrorLog(
+                "Failed to scan organization testInstallation1. Installation missing " +
+                    "the following permissions: [administration, contents, metadata], " +
+                    "and the following events: [label, public, repository, push]"
+            )
+        }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }
     }
 }
