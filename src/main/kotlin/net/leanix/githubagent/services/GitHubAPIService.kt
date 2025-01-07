@@ -11,7 +11,7 @@ class GitHubAPIService(
 ) {
 
     companion object {
-        private const val PER_PAGE = 30 // Maximum allowed by GitHub API is 100
+            private const val PAGE_SIZE = 30 // Maximum allowed by GitHub API is 100
     }
 
     fun getPaginatedInstallations(jwtToken: String): List<Installation> {
@@ -20,10 +20,10 @@ class GitHubAPIService(
         var currentInstallations: List<Installation>
 
         do {
-            currentInstallations = gitHubClient.getInstallations("Bearer $jwtToken", PER_PAGE, page)
+            currentInstallations = gitHubClient.getInstallations("Bearer $jwtToken", PAGE_SIZE, page)
             if (currentInstallations.isNotEmpty()) installations.addAll(currentInstallations) else break
             page++
-        } while (currentInstallations.size == PER_PAGE)
+        } while (currentInstallations.size == PAGE_SIZE)
         return installations
     }
 
@@ -33,10 +33,10 @@ class GitHubAPIService(
         var currentOrganizations: List<Organization>
 
         do {
-            currentOrganizations = gitHubClient.getOrganizations("Bearer $installationToken", PER_PAGE, since)
+            currentOrganizations = gitHubClient.getOrganizations("Bearer $installationToken", PAGE_SIZE, since)
             if (currentOrganizations.isNotEmpty()) organizations.addAll(currentOrganizations) else break
             since = currentOrganizations.last().id
-        } while (currentOrganizations.size == PER_PAGE)
+        } while (currentOrganizations.size == PAGE_SIZE)
         return organizations
     }
 }
