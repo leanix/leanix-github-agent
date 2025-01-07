@@ -11,7 +11,7 @@ class GitHubAPIService(
 ) {
 
     companion object {
-            private const val PAGE_SIZE = 30 // Maximum allowed by GitHub API is 100
+        private const val PAGE_SIZE = 30 // Maximum allowed by GitHub API is 100
     }
 
     fun getPaginatedInstallations(jwtToken: String): List<Installation> {
