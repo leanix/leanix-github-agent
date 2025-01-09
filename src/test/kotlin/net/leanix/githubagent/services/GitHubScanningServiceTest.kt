@@ -186,6 +186,57 @@ class GitHubScanningServiceTest {
     }
 
     @Test
+    fun `scanGitHubResources should not send repositories and manifest files over WebSocket for archived repos`() {
+        // given
+        every { cachingService.get("runId") } returns runId
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    organizationName = "testOrg",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    defaultBranch = "main",
+                    archived = true,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
+            1,
+            listOf(
+                ItemResponse(
+                    name = "leanix.yaml",
+                    path = "dir/leanix.yaml",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                )
+            )
+        )
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), "dir/leanix.yaml", any()) } returns "content"
+
+        // when
+        gitHubScanningService.scanGitHubResources()
+
+        // then
+        verify(exactly = 0) { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
+        verify(exactly = 0) { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files.") }
+        verify(exactly = 0) { syncLogService.sendInfoLog("Fetched manifest file 'dir/leanix.yaml' from repository 'TestRepo'.") }
+        verify(exactly = 0) { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo.") }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation.") }
+        verify { syncLogService.sendInfoLog("Finished full scan for all available organizations.") }
+    }
+
+    @Test
     fun `scanGitHubResources should send manifest files with empty path if the file is in the root directory`() {
         // given
         every { cachingService.get("runId") } returns runId
