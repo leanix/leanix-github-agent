@@ -37,11 +37,14 @@ class WebhookEventServiceTest {
     @MockkBean
     private lateinit var gitHubAuthenticationService: GitHubAuthenticationService
 
+    @Autowired
+    private lateinit var webhookEventService: WebhookEventService
+
     @MockkBean
     private lateinit var gitHubClient: GitHubClient
 
-    @Autowired
-    private lateinit var webhookEventService: WebhookEventService
+    @MockkBean
+    private lateinit var gitHubAPIService: GitHubAPIService
 
     private val permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read")
     private val events = listOf("label", "public", "repository", "push")
@@ -53,7 +56,7 @@ class WebhookEventServiceTest {
         every { webSocketService.sendMessage(any(), any()) } returns Unit
         every { cachingService.get(any()) } returns "token"
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
-        every { gitHubClient.getInstallations(any()) } returns listOf(installation)
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(installation)
         every { gitHubClient.getInstallation(any(), any()) } returns installation
     }
 
@@ -379,7 +382,8 @@ class WebhookEventServiceTest {
         every { cachingService.get("runId") } returnsMany listOf("value", null, runId)
         every { cachingService.set("runId", any(), any()) } just runs
         every { cachingService.remove("runId") } just runs
-        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
+        every { gitHubAPIService.getPaginatedOrganizations(any()) } returns
+            listOf(Organization("testOrganization", 1))
 
         val eventType = "INSTALLATION"
         val payload = """{
