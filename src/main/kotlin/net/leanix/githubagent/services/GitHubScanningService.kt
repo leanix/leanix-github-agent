@@ -123,6 +123,7 @@ class GitHubScanningService(
     }
 
     fun fetchManifestFilesAndSend(installation: Installation, repository: RepositoryDto) {
+        if (repository.archived) return
         val manifestFiles = fetchManifestFiles(installation, repository.name).getOrThrow().items
         val manifestFilesContents = fetchManifestContents(
             installation,
