@@ -1,12 +1,12 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "3.2.11"
+    id("org.springframework.boot") version "3.3.6"
     id("io.spring.dependency-management") version "1.1.5"
-    id("com.expediagroup.graphql") version "7.0.2"
-    id("io.gitlab.arturbosch.detekt") version "1.23.4"
-    kotlin("jvm") version "1.9.21"
-    kotlin("plugin.spring") version "1.9.21"
+    id("com.expediagroup.graphql") version "8.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    kotlin("jvm") version "2.0.10"
+    kotlin("plugin.spring") version "2.0.10"
     jacoco
 }
 
@@ -36,7 +36,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.8.8")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.4")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -85,7 +85,7 @@ detekt {
     parallel = true
     buildUponDefaultConfig = true
     dependencies {
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.4")
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
     }
 }
 
