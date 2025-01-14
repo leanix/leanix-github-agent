@@ -6,6 +6,8 @@ import io.mockk.just
 import io.mockk.runs
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
+import net.leanix.githubagent.dto.Account
+import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.Organization
@@ -35,18 +37,27 @@ class WebhookEventServiceTest {
     @MockkBean
     private lateinit var gitHubAuthenticationService: GitHubAuthenticationService
 
-    @MockkBean
-    private lateinit var gitHubClient: GitHubClient
-
     @Autowired
     private lateinit var webhookEventService: WebhookEventService
 
+    @MockkBean
+    private lateinit var gitHubClient: GitHubClient
+
+    @MockkBean
+    private lateinit var gitHubAPIService: GitHubAPIService
+
+    private val permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read")
+    private val events = listOf("label", "public", "repository", "push")
+
     @BeforeEach
     fun setUp() {
+        val installation = Installation(1, Account("testInstallation"), permissions, events)
         every { gitHubAuthenticationService.refreshTokens() } returns Unit
         every { webSocketService.sendMessage(any(), any()) } returns Unit
         every { cachingService.get(any()) } returns "token"
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(installation)
+        every { gitHubClient.getInstallation(any(), any()) } returns installation
     }
 
     @Test
@@ -371,7 +382,8 @@ class WebhookEventServiceTest {
         every { cachingService.get("runId") } returnsMany listOf("value", null, runId)
         every { cachingService.set("runId", any(), any()) } just runs
         every { cachingService.remove("runId") } just runs
-        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
+        every { gitHubAPIService.getPaginatedOrganizations(any()) } returns
+            listOf(Organization("testOrganization", 1))
 
         val eventType = "INSTALLATION"
         val payload = """{

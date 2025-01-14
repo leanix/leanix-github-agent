@@ -9,9 +9,11 @@ import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.OrganizationDto
 import net.leanix.githubagent.dto.RateLimitType
 import net.leanix.githubagent.dto.RepositoryDto
+import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.exceptions.ManifestFileNotFoundException
 import net.leanix.githubagent.handler.RateLimitHandler
+import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
@@ -27,6 +29,8 @@ class GitHubScanningService(
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     private val syncLogService: SyncLogService,
     private val rateLimitHandler: RateLimitHandler,
+    private val gitHubEnterpriseService: GitHubEnterpriseService,
+    private val gitHubAPIService: GitHubAPIService,
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubScanningService::class.java)
@@ -36,17 +40,36 @@ class GitHubScanningService(
         val installations = getInstallations(jwtToken.toString())
         fetchAndSendOrganisationsData(installations)
         installations.forEach { installation ->
-            fetchAndSendRepositoriesData(installation)
-                .forEach { repository ->
-                    fetchManifestFilesAndSend(installation, repository)
+            kotlin.runCatching {
+                gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
+                    INSTALLATION_LABEL,
+                    installation.permissions,
+                    installation.events
+                )
+                fetchAndSendRepositoriesData(installation)
+                    .forEach { repository ->
+                        fetchManifestFilesAndSend(installation, repository)
+                    }
+                syncLogService.sendInfoLog("Finished initial full scan for organization ${installation.account.login}.")
+            }.onFailure {
+                val message = "Failed to scan organization ${installation.account.login}."
+                when (it) {
+                    is GitHubAppInsufficientPermissionsException -> {
+                        syncLogService.sendErrorLog("$message ${it.message}")
+                        logger.error("$message ${it.message}")
+                    }
+                    else -> {
+                        syncLogService.sendErrorLog(message)
+                        logger.error(message, it)
+                    }
                 }
-            syncLogService.sendInfoLog("Finished initial full scan for organization ${installation.account.login}.")
+            }
         }
         syncLogService.sendInfoLog("Finished full scan for all available organizations.")
     }
 
     private fun getInstallations(jwtToken: String): List<Installation> {
-        val installations = gitHubClient.getInstallations("Bearer $jwtToken")
+        val installations = gitHubAPIService.getPaginatedInstallations(jwtToken)
         gitHubAuthenticationService.generateAndCacheInstallationTokens(installations, jwtToken)
         return installations
     }
@@ -61,7 +84,7 @@ class GitHubScanningService(
         }
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
         val organizations = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.REST) {
-            gitHubClient.getOrganizations("Bearer $installationToken")
+            gitHubAPIService.getPaginatedOrganizations(installationToken.toString())
                 .map { organization ->
                     if (installations.find { it.account.login == organization.login } != null) {
                         OrganizationDto(organization.id, organization.login, true)
@@ -105,6 +128,7 @@ class GitHubScanningService(
     }
 
     fun fetchManifestFilesAndSend(installation: Installation, repository: RepositoryDto) {
+        if (repository.archived) return
         val manifestFiles = fetchManifestFiles(installation, repository.name).getOrThrow().items
         val manifestFilesContents = fetchManifestContents(
             installation,

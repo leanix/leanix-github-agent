@@ -6,6 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
+import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationTokenResponse
@@ -34,6 +35,8 @@ class GitHubScanningServiceTest {
     private val gitHubAuthenticationService = mockk<GitHubAuthenticationService>()
     private val syncLogService = mockk<SyncLogService>(relaxUnitFun = true)
     private val rateLimitHandler = mockk<RateLimitHandler>(relaxUnitFun = true)
+    private val gitHubAPIService = mockk<GitHubAPIService>()
+    private val gitHubEnterpriseService = GitHubEnterpriseService(gitHubClient, syncLogService)
     private val gitHubScanningService = GitHubScanningService(
         gitHubClient,
         cachingService,
@@ -41,20 +44,25 @@ class GitHubScanningServiceTest {
         gitHubGraphQLService,
         gitHubAuthenticationService,
         syncLogService,
-        rateLimitHandler
+        rateLimitHandler,
+        gitHubEnterpriseService,
+        gitHubAPIService
     )
     private val runId = UUID.randomUUID()
+
+    private val permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read")
+    private val events = listOf("label", "public", "repository", "push")
 
     @BeforeEach
     fun setup() {
         every { cachingService.get(any()) } returns "value"
-        every { gitHubClient.getInstallations(any()) } returns listOf(
-            Installation(1, Account("testInstallation"))
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(
+            Installation(1, Account("testInstallation"), permissions, events)
         )
         every { gitHubClient.createInstallationToken(1, any()) } returns
             InstallationTokenResponse("testToken", "2024-01-01T00:00:00Z", mapOf(), "all")
         every { cachingService.set(any(), any(), any()) } returns Unit
-        every { gitHubClient.getOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
+        every { gitHubAPIService.getPaginatedOrganizations(any()) } returns listOf(Organization("testOrganization", 1))
         every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
             repositories = emptyList(),
             hasNextPage = false,
@@ -66,6 +74,7 @@ class GitHubScanningServiceTest {
         every { syncLogService.sendInfoLog(any()) } returns Unit
         every { rateLimitHandler.executeWithRateLimitHandler(any(), any<() -> Any>()) } answers
             { secondArg<() -> Any>().invoke() }
+        every { gitHubClient.getApp(any()) } returns GitHubAppResponse("testApp", permissions, events)
     }
 
     @Test
@@ -85,7 +94,7 @@ class GitHubScanningServiceTest {
         val runId = UUID.randomUUID()
 
         every { cachingService.get("runId") } returns runId
-        every { gitHubClient.getInstallations(any()) } returns emptyList()
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns emptyList()
 
         gitHubScanningService.scanGitHubResources()
 
@@ -179,6 +188,59 @@ class GitHubScanningServiceTest {
     }
 
     @Test
+    fun `scanGitHubResources should not send repositories and manifest files over WebSocket for archived repos`() {
+        // given
+        every { cachingService.get("runId") } returns runId
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    organizationName = "testOrg",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    defaultBranch = "main",
+                    archived = true,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
+            1,
+            listOf(
+                ItemResponse(
+                    name = "leanix.yaml",
+                    path = "dir/leanix.yaml",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                )
+            )
+        )
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), "dir/leanix.yaml", any()) } returns "content"
+
+        // when
+        gitHubScanningService.scanGitHubResources()
+
+        // then
+        verify(exactly = 0) { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
+        verify(exactly = 0) { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files.") }
+        verify(
+            exactly = 0
+        ) { syncLogService.sendInfoLog("Fetched manifest file 'dir/leanix.yaml' from repository 'TestRepo'.") }
+        verify(exactly = 0) { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo.") }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation.") }
+        verify { syncLogService.sendInfoLog("Finished full scan for all available organizations.") }
+    }
+
+    @Test
     fun `scanGitHubResources should send manifest files with empty path if the file is in the root directory`() {
         // given
         every { cachingService.get("runId") } returns runId
@@ -224,5 +286,26 @@ class GitHubScanningServiceTest {
         // then
         verify { webSocketService.sendMessage(eq("$runId/manifestFiles"), capture(fileSlot)) }
         assertEquals(fileSlot.captured.manifestFiles[0].path, "")
+    }
+
+    @Test
+    fun `scanGitHubResources should skip organizations without correct permissions and events`() {
+        every { cachingService.get("runId") } returns runId
+        every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(
+            Installation(1, Account("testInstallation1"), mapOf(), listOf()),
+            Installation(2, Account("testInstallation2"), permissions, events),
+            Installation(3, Account("testInstallation3"), permissions, events)
+        )
+        gitHubScanningService.scanGitHubResources()
+        verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
+        verify {
+            syncLogService.sendErrorLog(
+                "Failed to scan organization testInstallation1. Installation missing " +
+                    "the following permissions: [administration, contents, metadata], " +
+                    "and the following events: [label, public, repository, push]"
+            )
+        }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }
+        verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }
     }
 }
