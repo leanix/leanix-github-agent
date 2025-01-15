@@ -7,6 +7,7 @@ import net.leanix.githubagent.dto.ManifestFileDTO
 import net.leanix.githubagent.dto.ManifestFilesDTO
 import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.OrganizationDto
+import net.leanix.githubagent.dto.RateLimitType
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GitHubAppInsufficientPermissionsException
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
@@ -82,14 +83,16 @@ class GitHubScanningService(
             return
         }
         val installationToken = cachingService.get("installationToken:${installations.first().id}")
-        val organizations = gitHubAPIService.getPaginatedOrganizations(installationToken.toString())
-            .map { organization ->
-                if (installations.find { it.account.login == organization.login } != null) {
-                    OrganizationDto(organization.id, organization.login, true)
-                } else {
-                    OrganizationDto(organization.id, organization.login, false)
+        val organizations = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.REST) {
+            gitHubAPIService.getPaginatedOrganizations(installationToken.toString())
+                .map { organization ->
+                    if (installations.find { it.account.login == organization.login } != null) {
+                        OrganizationDto(organization.id, organization.login, true)
+                    } else {
+                        OrganizationDto(organization.id, organization.login, false)
+                    }
                 }
-            }
+        }
         logger.info("Sending organizations data")
         syncLogService.sendInfoLog(
             "The connector found ${organizations.filter { it.installed }.size} " +
@@ -105,10 +108,12 @@ class GitHubScanningService(
         var page = 1
         val repositories = mutableListOf<RepositoryDto>()
         do {
-            val repositoriesPage = gitHubGraphQLService.getRepositories(
-                token = installationToken,
-                cursor = cursor
-            )
+            val repositoriesPage = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.GRAPHQL) {
+                gitHubGraphQLService.getRepositories(
+                    token = installationToken,
+                    cursor = cursor
+                )
+            }
             webSocketService.sendMessage(
                 "${cachingService.get("runId")}/repositories",
                 repositoriesPage.repositories.filter { !it.archived }
@@ -144,7 +149,7 @@ class GitHubScanningService(
 
     private fun fetchManifestFiles(installation: Installation, repositoryName: String) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
-        rateLimitHandler.executeWithRateLimitHandler {
+        rateLimitHandler.executeWithRateLimitHandler(RateLimitType.SEARCH) {
             gitHubClient.searchManifestFiles(
                 "Bearer $installationToken",
                 "" +

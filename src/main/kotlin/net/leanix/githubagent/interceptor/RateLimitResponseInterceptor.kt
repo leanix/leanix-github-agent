@@ -3,6 +3,7 @@ package net.leanix.githubagent.interceptor
 import feign.InvocationContext
 import feign.ResponseInterceptor
 import net.leanix.githubagent.shared.RateLimitMonitor
+import net.leanix.githubagent.shared.determineRateLimitType
 
 class RateLimitResponseInterceptor : ResponseInterceptor {
 
@@ -19,7 +20,8 @@ class RateLimitResponseInterceptor : ResponseInterceptor {
             val rateLimitReset = headers["x-ratelimit-reset"]?.firstOrNull()?.toLongOrNull()
 
             if (rateLimitRemaining != null && rateLimitReset != null) {
-                RateLimitMonitor.updateRateLimitInfo(rateLimitRemaining, rateLimitReset)
+                val rateLimitType = determineRateLimitType(response.request().url())
+                RateLimitMonitor.updateRateLimitInfo(rateLimitType, rateLimitRemaining, rateLimitReset)
             }
         }
 

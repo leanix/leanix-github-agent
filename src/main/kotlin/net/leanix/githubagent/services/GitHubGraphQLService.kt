@@ -7,6 +7,7 @@ import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
 import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
+import net.leanix.githubagent.interceptor.RateLimitInterceptor
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -97,6 +98,7 @@ class GitHubGraphQLService(
         GraphQLWebClient(
             url = "${cachingService.get("baseUrl")}/api/graphql",
             builder = WebClient.builder().defaultHeaders { it.setBearerAuth(token) }
+                .filter(RateLimitInterceptor())
         )
 }
 
