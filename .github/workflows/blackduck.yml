@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: 0 23 * * *
+  push:
+    branches:
+      - feature/CID-3003/Implement-SAP-security-tooling
 
 jobs:
   tests:
