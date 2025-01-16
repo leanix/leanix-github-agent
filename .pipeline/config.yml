@@ -1,0 +1,4 @@
+steps:
+  detectExecuteScan:
+    projectName: 'github.com/leanix/leanix-github-agent'
+    serverUrl: 'https://sap.blackducksoftware.com/'
