@@ -24,7 +24,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - run: echo "project_version=LeanIX_Release_2503" >> $GITHUB_ENV
+      - run: echo "project_version=0.0.3" >> $GITHUB_ENV
       - name: Blackduck Scan
         uses: SAP/project-piper-action@27cadf261545552a68660531476c0915a97ee3d8
         with:
