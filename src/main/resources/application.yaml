@@ -20,4 +20,6 @@ resilience4j.retry:
       enable-exponential-backoff: true
       exponential-backoff-multiplier: 2
       waitDuration: 1000
-
+logging:
+  level:
+    org.springframework.web.socket.handler: DEBUG
