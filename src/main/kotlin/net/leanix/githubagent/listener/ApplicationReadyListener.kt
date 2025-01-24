@@ -1,4 +1,4 @@
-package net.leanix.githubagent.runners
+package net.leanix.githubagent.listener
 
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.CachingService
@@ -9,14 +9,14 @@ import net.leanix.githubagent.services.SyncLogService
 import net.leanix.githubagent.services.WebSocketService
 import net.leanix.githubagent.shared.APP_NAME_TOPIC
 import org.slf4j.LoggerFactory
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
 @Profile("!test")
-class PostStartupRunner(
+class ApplicationReadyListener(
     private val githubAuthenticationService: GitHubAuthenticationService,
     private val webSocketService: WebSocketService,
     private val gitHubScanningService: GitHubScanningService,
@@ -24,11 +24,11 @@ class PostStartupRunner(
     private val cachingService: CachingService,
     private val brokerStompSessionHandler: BrokerStompSessionHandler,
     private val syncLogService: SyncLogService
-) : ApplicationRunner {
+) : ApplicationListener<ApplicationReadyEvent> {
 
-    private val logger = LoggerFactory.getLogger(PostStartupRunner::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun run(args: ApplicationArguments?) {
+    override fun onApplicationEvent(event: ApplicationReadyEvent) {
         webSocketService.initSession()
         if (!brokerStompSessionHandler.isConnected()) {
             logger.error("Stopping the application as the WebSocket connection could not be established.")

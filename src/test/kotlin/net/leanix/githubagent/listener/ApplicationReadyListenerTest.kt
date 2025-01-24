@@ -1,4 +1,4 @@
-package net.leanix.githubagent.runners
+package net.leanix.githubagent.listener
 
 import io.mockk.every
 import io.mockk.mockk
@@ -15,14 +15,14 @@ import net.leanix.githubagent.shared.APP_NAME_TOPIC
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class PostStartupRunnerTest {
+class ApplicationReadyListenerTest {
 
     private lateinit var githubAuthenticationService: GitHubAuthenticationService
     private lateinit var webSocketService: WebSocketService
     private lateinit var gitHubScanningService: GitHubScanningService
     private lateinit var gitHubEnterpriseService: GitHubEnterpriseService
     private lateinit var cachingService: CachingService
-    private lateinit var postStartupRunner: PostStartupRunner
+    private lateinit var applicationListener: ApplicationReadyListener
     private lateinit var brokerStompSessionHandler: BrokerStompSessionHandler
     private lateinit var syncLogService: SyncLogService
 
@@ -36,7 +36,7 @@ class PostStartupRunnerTest {
         brokerStompSessionHandler = mockk()
         syncLogService = mockk()
 
-        postStartupRunner = PostStartupRunner(
+        applicationListener = ApplicationReadyListener(
             githubAuthenticationService,
             webSocketService,
             gitHubScanningService,
@@ -67,7 +67,7 @@ class PostStartupRunnerTest {
                 gitHubAppName, mapOf(), listOf()
             )
 
-        postStartupRunner.run(mockk())
+        applicationListener.onApplicationEvent(mockk())
 
         verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
         verify { syncLogService.sendFullScanStart(any()) }
