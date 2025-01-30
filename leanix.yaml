@@ -1,0 +1,8 @@
+version: 1
+metadata:
+  name: leanix-github-agent-public
+  description: The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterprise setups and communicates this information to an SAP LeanIX workspace.
+  applications:
+    - name: Technology Risk and Compliance
+  teams:
+    - name: Cider
