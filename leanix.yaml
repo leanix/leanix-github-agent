@@ -6,3 +6,7 @@ metadata:
     - name: Technology Risk and Compliance
   teams:
     - name: Cider
+  tags:
+    - tagGroupName: Self-built software architecture
+      tagNames:
+        - Microservice
