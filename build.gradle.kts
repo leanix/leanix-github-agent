@@ -1,9 +1,9 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "3.3.7"
+    id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.5"
-    id("com.expediagroup.graphql") version "8.1.0"
+    id("com.expediagroup.graphql") version "8.3.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
     kotlin("jvm") version "2.0.10"
     kotlin("plugin.spring") version "2.0.10"
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2023.0.1"
+extra["springCloudVersion"] = "2024.0.0"
 
 dependencyManagement {
     imports {
@@ -41,8 +41,7 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
-    implementation("com.expediagroup:graphql-kotlin-spring-client:7.0.2")
-
+    implementation("com.expediagroup:graphql-kotlin-spring-client:8.3.0")
     developmentOnly("io.netty:netty-resolver-dns-native-macos:4.1.85.Final") {
         artifact {
             classifier = "osx-aarch_64"
