@@ -33,12 +33,13 @@ dependencyManagement {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.8.8")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.4")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
+    implementation("io.github.resilience4j:resilience4j-spring-boot3")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
     implementation("com.expediagroup:graphql-kotlin-spring-client:8.3.0")
