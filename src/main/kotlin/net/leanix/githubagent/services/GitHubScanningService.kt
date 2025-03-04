@@ -129,7 +129,7 @@ class GitHubScanningService(
 
     fun fetchManifestFilesAndSend(installation: Installation, repository: RepositoryDto) {
         if (repository.archived) return
-        val manifestFiles = fetchManifestFiles(installation, repository.name).getOrThrow().items
+        val manifestFiles = fetchManifestFiles(installation, repository.name).getOrThrow()
         val manifestFilesContents = fetchManifestContents(
             installation,
             manifestFiles,
@@ -149,13 +149,14 @@ class GitHubScanningService(
 
     private fun fetchManifestFiles(installation: Installation, repositoryName: String) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
-        rateLimitHandler.executeWithRateLimitHandler(RateLimitType.SEARCH) {
+        val manifestFiles = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.SEARCH) {
             gitHubClient.searchManifestFiles(
                 "Bearer $installationToken",
                 "" +
                     "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME"
             )
         }
+        manifestFiles.items.filter { it.name == MANIFEST_FILE_NAME }
     }
     private fun fetchManifestContents(
         installation: Installation,
