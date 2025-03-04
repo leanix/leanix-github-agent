@@ -110,9 +110,9 @@ class WebhookEventService(
         repositoryName: String,
         installationToken: String
     ) {
-        val addedManifestFiles = headCommit.added.filter { isLeanixManifestFile(it) }
-        val modifiedManifestFiles = headCommit.modified.filter { isLeanixManifestFile(it) }
-        val removedManifestFiles = headCommit.removed.filter { isLeanixManifestFile(it) }
+        val addedManifestFiles = headCommit.added.filter { isLeanixManifestFile(it.lowercase()) }
+        val modifiedManifestFiles = headCommit.modified.filter { isLeanixManifestFile(it.lowercase()) }
+        val removedManifestFiles = headCommit.removed.filter { isLeanixManifestFile(it.lowercase()) }
 
         addedManifestFiles.forEach { filePath ->
             handleAddedOrModifiedManifestFile(

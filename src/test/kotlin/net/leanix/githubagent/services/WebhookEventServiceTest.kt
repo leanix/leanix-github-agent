@@ -164,6 +164,63 @@ class WebhookEventServiceTest {
     }
 
     @Test
+    fun `should accept manifest files with case ignore`() {
+        val payload = """{
+            "repository": {
+                "name": "repo",
+                "full_name": "owner/repo",
+                "owner": {"name": "owner"},
+                "default_branch": "main"
+            },
+            "head_commit": {
+                "added": [],
+                "modified": ["a/$MANIFEST_FILE_NAME", "b/leanIX.yaml", "LEanIX.yaml"],
+                "removed": []
+            },
+            "installation": {"id": 1},
+            "ref": "refs/heads/main"
+        }"""
+
+        webhookEventService.consumeWebhookEvent("PUSH", payload)
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.MODIFIED,
+                    "content",
+                    "tree/main/b"
+                )
+            )
+        }
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.MODIFIED,
+                    "content",
+                    "tree/main/a"
+                )
+            )
+        }
+
+        verify(exactly = 1) {
+            webSocketService.sendMessage(
+                "/events/manifestFile",
+                ManifestFileUpdateDto(
+                    "owner/repo",
+                    ManifestFileAction.MODIFIED,
+                    "content",
+                    ""
+                )
+            )
+        }
+    }
+
+    @Test
     fun `should send all events of type other than push to backend without processing`() {
         val payload = """{
             "repository": {

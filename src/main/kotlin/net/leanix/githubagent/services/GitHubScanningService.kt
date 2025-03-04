@@ -156,7 +156,7 @@ class GitHubScanningService(
                     "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME"
             )
         }
-        manifestFiles.items.filter { it.name == MANIFEST_FILE_NAME }
+        manifestFiles.items.filter { it.name.lowercase() == MANIFEST_FILE_NAME }
     }
     private fun fetchManifestContents(
         installation: Installation,
