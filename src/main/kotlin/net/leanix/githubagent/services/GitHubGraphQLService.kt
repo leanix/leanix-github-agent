@@ -11,6 +11,8 @@ import net.leanix.githubagent.interceptor.RateLimitInterceptor
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.util.retry.Retry
+import java.time.Duration
 
 @Component
 class GitHubGraphQLService(
@@ -99,6 +101,10 @@ class GitHubGraphQLService(
             url = "${cachingService.get("baseUrl")}/api/graphql",
             builder = WebClient.builder().defaultHeaders { it.setBearerAuth(token) }
                 .filter(RateLimitInterceptor())
+                .filter { request, next ->
+                    next.exchange(request)
+                        .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+                }
         )
 }
 
