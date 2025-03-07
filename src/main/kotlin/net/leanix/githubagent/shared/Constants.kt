@@ -12,7 +12,7 @@ val SUPPORTED_EVENT_TYPES = listOf(
     "INSTALLATION",
 )
 
-val fileNameMatchRegex = Regex("/?$MANIFEST_FILE_NAME\$")
+val fileNameMatchRegex = Regex("/?$MANIFEST_FILE_NAME\$", RegexOption.IGNORE_CASE)
 
 const val GITHUB_APP_LABEL = "GitHub App"
 const val INSTALLATION_LABEL = "Installation"
