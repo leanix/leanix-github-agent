@@ -1,6 +1,8 @@
 package net.leanix.githubagent.client
 
+import feign.Response
 import net.leanix.githubagent.config.FeignClientConfig
+import net.leanix.githubagent.dto.ArtifactsListResponse
 import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
@@ -64,4 +66,20 @@ interface GitHubClient {
         @RequestHeader("Authorization") token: String,
         @RequestParam("q") query: String,
     ): GitHubSearchResponse
+
+    @GetMapping("/repos/{owner}/{repo}/actions/runs/{runId}/artifacts")
+    fun listRunArtifacts(
+        @PathVariable("owner") owner: String,
+        @PathVariable("repo") repo: String,
+        @PathVariable("runId") runId: Long,
+        @RequestHeader("Authorization") token: String
+    ): ArtifactsListResponse
+
+    @GetMapping("/repos/{owner}/{repo}/actions/artifacts/{artifactId}/zip")
+    fun downloadArtifact(
+        @PathVariable("owner") owner: String,
+        @PathVariable("repo") repo: String,
+        @PathVariable("artifactId") artifactId: Long,
+        @RequestHeader("Authorization") token: String
+    ): Response
 }
