@@ -20,6 +20,7 @@ class WorkflowRunService(
 
     private val logger = LoggerFactory.getLogger(WorkflowRunService::class.java)
     private val objectMapper = jacksonObjectMapper()
+    private val sbomConfig = SbomConfig()
 
     fun consumeWebhookPayload(payload: String) {
         val event = parseEvent(payload) ?: return
@@ -45,7 +46,6 @@ class WorkflowRunService(
         val owner = event.repository.owner.login
         val repo = event.repository.name
         val runId = event.workflowRun.id
-        val sbomConfig = SbomConfig()
 
         return gitHubClient.listRunArtifacts(owner, repo, runId, token)
             .artifacts
@@ -76,11 +76,12 @@ class WorkflowRunService(
     }
 
     private fun sendSbomEvent(repo: String, artifactName: String, sbomContent: String) {
+        logger.info("Sending sbom file: $repo - $artifactName")
         webSocketService.sendMessage(
             "/events/sbom",
             SbomEventDTO(
                 repositoryName = repo,
-                factSheetName = "",
+                factSheetName = sbomConfig.extractFactSheetName(artifactName),
                 sbomFileName = artifactName,
                 sbomFileContent = sbomContent
             )

@@ -8,13 +8,24 @@ data class SbomConfig(
     fun isFileNameValid(fileName: String, branchName: String): Boolean {
         return fileName == generateExpectedFileName(fileName) && branchName == defaultBranch
     }
+    fun extractFactSheetName(fileName: String): String {
+        val parts = fileName.split("-")
+        return parts.drop(1).dropLast(1).joinToString("-")
+    }
 
     private fun generateExpectedFileName(fileName: String): String {
-        val split = fileName.split("-")
-        if (split.size != 3) return ""
+        val parts = fileName.split("-")
+        if (parts.size < 3) return ""
 
-        val namingConventionSplit = namingConventions.split("-")
-        return "${namingConventionSplit[0]}-${split[1]}-${namingConventionSplit[2]}"
+        val serviceName = parts.drop(1).dropLast(1).joinToString("-")
+
+        val conventionParts = namingConventions.split("-")
+        if (conventionParts.size < 3) return ""
+
+        val orgPrefix = conventionParts.first()
+        val sbomSuffix = conventionParts.last()
+
+        return "$orgPrefix-$serviceName-$sbomSuffix"
     }
 }
 
