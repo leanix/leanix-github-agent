@@ -56,37 +56,13 @@ class WebhookEventServiceTest {
     fun setUp() {
         val installation = Installation(1, Account("testInstallation"), permissions, events)
         every { gitHubAuthenticationService.refreshTokens() } returns Unit
+        every { gitHubAuthenticationService.getInstallationToken(any()) } returns "token"
         every { webSocketService.sendMessage(any(), any()) } returns Unit
         every { cachingService.get(any()) } returns "token"
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
         every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(installation)
         every { gitHubClient.getInstallation(any(), any()) } returns installation
         every { workflowRunService.consumeWebhookPayload(any()) } returns Unit
-    }
-
-    @Test
-    fun `should refresh tokens if expired`() {
-        val payload = """{
-            "repository": {
-                "name": "repo",
-                "full_name": "owner/repo",
-                "owner": {"name": "owner"},
-                "default_branch": "main"
-            },
-            "head_commit": {
-                "added": [],
-                "modified": [],
-                "removed": []
-            },
-            "installation": {"id": 1},
-            "ref": "refs/heads/main"
-        }"""
-
-        every { cachingService.get("installationToken:1") } returns null andThen "token"
-
-        webhookEventService.consumeWebhookEvent("PUSH", payload)
-
-        verify(exactly = 1) { gitHubAuthenticationService.refreshTokens() }
     }
 
     @Test

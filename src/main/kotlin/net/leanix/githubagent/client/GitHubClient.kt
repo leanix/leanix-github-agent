@@ -70,7 +70,7 @@ interface GitHubClient {
     ): GitHubSearchResponse
 
     @GetMapping("/api/v3/repos/{owner}/{repo}/actions/runs/{runId}/artifacts")
-    fun listRunArtifacts(
+    fun getRunArtifacts(
         @PathVariable("owner") owner: String,
         @PathVariable("repo") repo: String,
         @PathVariable("runId") runId: Long,

@@ -23,16 +23,22 @@ class WorkflowRunService(
     private val sbomConfig = SbomConfig()
 
     fun consumeWebhookPayload(payload: String) {
-        val event = parseEvent(payload) ?: return
-        if (!event.isCompleted()) return
+        runCatching {
+            val event = parseEvent(payload) ?: return
+            if (!event.isCompleted()) return
 
-        logger.info("Detected workflow event that successfully completed on default branch")
-        val installationToken = "Bearer ${gitHubAuthenticationService.getInstallationToken(event.installation.id)}"
+            logger.info("Detected workflow event that successfully completed")
+            val installationToken = "Bearer ${gitHubAuthenticationService.getInstallationToken(event.installation.id)}"
 
-        val artifacts = getValidArtifacts(event, installationToken)
-        if (artifacts.isEmpty()) return
-        logger.info("Found ${artifacts.size} artifact(s).")
-        processArtifacts(artifacts, event, installationToken)
+            getValidArtifacts(event, installationToken)
+                .takeIf { it.isNotEmpty() }
+                ?.let { artifacts ->
+                    logger.info("Found ${artifacts.size} artifact(s).")
+                    fetchAndProcessArtifacts(artifacts, event, installationToken)
+                } ?: logger.info("No artifacts found for the event")
+        }.onFailure {
+            logger.error("Failed to consume workflow webhook", it)
+        }
     }
     private fun parseEvent(payload: String): WorkflowRunEventDto? {
         return try {
@@ -47,12 +53,12 @@ class WorkflowRunService(
         val repo = event.repository.name
         val runId = event.workflowRun.id
 
-        return gitHubClient.listRunArtifacts(owner, repo, runId, token)
+        return gitHubClient.getRunArtifacts(owner, repo, runId, token)
             .artifacts
             .filter { sbomConfig.isFileNameValid(it.name, event.workflowRun.headBranch ?: "") }
     }
 
-    private fun processArtifacts(
+    private fun fetchAndProcessArtifacts(
         artifacts: List<Artifact>,
         event: WorkflowRunEventDto,
         installationToken: String

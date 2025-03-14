@@ -11,7 +11,6 @@ import net.leanix.githubagent.dto.ArtifactsListResponse
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
 
 class WorkflowRunServiceTest {
 
@@ -50,7 +49,7 @@ class WorkflowRunServiceTest {
             }
         }"""
         every { gitHubAuthenticationService.getInstallationToken(any()) } returns "token"
-        every { gitHubClient.listRunArtifacts(any(), any(), any(), any()) } returns ArtifactsListResponse(
+        every { gitHubClient.getRunArtifacts(any(), any(), any(), any()) } returns ArtifactsListResponse(
             totalCount = 2,
             artifacts = listOf(
                 Artifact(

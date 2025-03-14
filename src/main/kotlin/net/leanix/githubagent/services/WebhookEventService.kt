@@ -55,7 +55,7 @@ class WebhookEventService(
         val owner = pushEventPayload.repository.owner.name
         val defaultBranch = pushEventPayload.repository.defaultBranch
 
-        val installationToken = getInstallationToken(pushEventPayload.installation.id)
+        val installationToken = gitHubAuthenticationService.getInstallationToken(pushEventPayload.installation.id)
 
         if (headCommit != null && pushEventPayload.ref == "refs/heads/$defaultBranch") {
             handleManifestFileChanges(
@@ -144,16 +144,6 @@ class WebhookEventService(
         removedManifestFiles.forEach { filePath ->
             handleRemovedManifestFile(repositoryFullName, filePath, defaultBranch)
         }
-    }
-
-    private fun getInstallationToken(installationId: Int): String {
-        var installationToken = cachingService.get("installationToken:$installationId")?.toString()
-        if (installationToken == null) {
-            gitHubAuthenticationService.refreshTokens()
-            installationToken = cachingService.get("installationToken:$installationId")?.toString()
-            require(installationToken != null) { "Installation token not found/ expired" }
-        }
-        return installationToken
     }
 
     @SuppressWarnings("LongParameterList")
