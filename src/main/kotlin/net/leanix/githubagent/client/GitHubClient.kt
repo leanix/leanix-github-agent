@@ -1,6 +1,8 @@
 package net.leanix.githubagent.client
 
+import feign.Response
 import net.leanix.githubagent.config.FeignClientConfig
+import net.leanix.githubagent.dto.ArtifactsListResponse
 import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
@@ -11,6 +13,7 @@ import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 
@@ -43,7 +46,8 @@ interface GitHubClient {
     @PostMapping("/api/v3/app/installations/{installationId}/access_tokens")
     fun createInstallationToken(
         @PathVariable("installationId") installationId: Long,
-        @RequestHeader("Authorization") jwt: String
+        @RequestHeader("Authorization") jwt: String,
+        @RequestBody emptyBody: String = ""
     ): InstallationTokenResponse
 
     @GetMapping("/api/v3/organizations")
@@ -64,4 +68,20 @@ interface GitHubClient {
         @RequestHeader("Authorization") token: String,
         @RequestParam("q") query: String,
     ): GitHubSearchResponse
+
+    @GetMapping("/api/v3/repos/{owner}/{repo}/actions/runs/{runId}/artifacts")
+    fun getRunArtifacts(
+        @PathVariable("owner") owner: String,
+        @PathVariable("repo") repo: String,
+        @PathVariable("runId") runId: Long,
+        @RequestHeader("Authorization") token: String
+    ): ArtifactsListResponse
+
+    @GetMapping("/api/v3/repos/{owner}/{repo}/actions/artifacts/{artifactId}/zip")
+    fun downloadArtifact(
+        @PathVariable("owner") owner: String,
+        @PathVariable("repo") repo: String,
+        @PathVariable("artifactId") artifactId: Long,
+        @RequestHeader("Authorization") token: String
+    ): Response
 }

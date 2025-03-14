@@ -11,6 +11,7 @@ import net.leanix.githubagent.dto.PushEventPayload
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
+import net.leanix.githubagent.shared.WORKFLOW_RUN_EVENT
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
@@ -27,7 +28,8 @@ class WebhookEventService(
     private val syncLogService: SyncLogService,
     @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
     private val gitHubClient: GitHubClient,
-    private val gitHubEnterpriseService: GitHubEnterpriseService
+    private val gitHubEnterpriseService: GitHubEnterpriseService,
+    private val workflowRunService: WorkflowRunService
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
@@ -37,6 +39,7 @@ class WebhookEventService(
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
             "INSTALLATION" -> handleInstallationEvent(payload)
+            WORKFLOW_RUN_EVENT -> workflowRunService.consumeWebhookPayload(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other", payload)
@@ -52,7 +55,7 @@ class WebhookEventService(
         val owner = pushEventPayload.repository.owner.name
         val defaultBranch = pushEventPayload.repository.defaultBranch
 
-        val installationToken = getInstallationToken(pushEventPayload.installation.id)
+        val installationToken = gitHubAuthenticationService.getInstallationToken(pushEventPayload.installation.id)
 
         if (headCommit != null && pushEventPayload.ref == "refs/heads/$defaultBranch") {
             handleManifestFileChanges(
@@ -144,16 +147,6 @@ class WebhookEventService(
     }
 
     private fun isLeanixManifestFile(it: String) = it == MANIFEST_FILE_NAME || it.endsWith("/$MANIFEST_FILE_NAME")
-
-    private fun getInstallationToken(installationId: Int): String {
-        var installationToken = cachingService.get("installationToken:$installationId")?.toString()
-        if (installationToken == null) {
-            gitHubAuthenticationService.refreshTokens()
-            installationToken = cachingService.get("installationToken:$installationId")?.toString()
-            require(installationToken != null) { "Installation token not found/ expired" }
-        }
-        return installationToken
-    }
 
     @SuppressWarnings("LongParameterList")
     private fun handleAddedOrModifiedManifestFile(

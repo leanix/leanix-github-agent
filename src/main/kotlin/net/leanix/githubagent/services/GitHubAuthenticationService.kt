@@ -121,4 +121,14 @@ class GitHubAuthenticationService(
             .replace(System.lineSeparator().toRegex(), "")
             .replace(pemSuffix, "")
     }
+
+    fun getInstallationToken(installationId: Int): String {
+        var installationToken = cachingService.get("installationToken:$installationId")?.toString()
+        if (installationToken == null) {
+            refreshTokens()
+            installationToken = cachingService.get("installationToken:$installationId")?.toString()
+            require(installationToken != null) { "Installation token not found/ expired" }
+        }
+        return installationToken
+    }
 }
