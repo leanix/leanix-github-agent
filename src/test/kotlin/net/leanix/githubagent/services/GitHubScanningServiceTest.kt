@@ -289,6 +289,147 @@ class GitHubScanningServiceTest {
     }
 
     @Test
+    fun `scanGitHubResources should not send manifest files over WebSocket for manifest files with wrong name`() {
+        // given
+        every { cachingService.get("runId") } returns runId
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    organizationName = "testOrg",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    defaultBranch = "main",
+                    archived = false,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
+            1,
+            listOf(
+                ItemResponse(
+                    name = MANIFEST_FILE_NAME,
+                    path = MANIFEST_FILE_NAME,
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                ),
+                ItemResponse(
+                    name = MANIFEST_FILE_NAME,
+                    path = "a/$MANIFEST_FILE_NAME",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                ),
+                ItemResponse(
+                    name = "a-$MANIFEST_FILE_NAME",
+                    path = "a/a-$MANIFEST_FILE_NAME",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                )
+            )
+        )
+        every { gitHubGraphQLService.getManifestFileContent(any(), any(), MANIFEST_FILE_NAME, any()) } returns "content"
+        every {
+            gitHubGraphQLService.getManifestFileContent(any(), any(), "a/$MANIFEST_FILE_NAME", any())
+        } returns "content"
+
+        // when
+        gitHubScanningService.scanGitHubResources()
+
+        // then
+        verify(exactly = 1) { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
+        verify(exactly = 1) { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files.") }
+        verify(exactly = 1) { syncLogService.sendInfoLog("Found 2 manifest files in repository TestRepo.") }
+    }
+
+    @Test
+    fun `scanGitHubResources should accept manifest files with case ignored`() {
+        // given
+        every { cachingService.get("runId") } returns runId
+        every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
+            repositories = listOf(
+                RepositoryDto(
+                    id = "repo1",
+                    name = "TestRepo",
+                    organizationName = "testOrg",
+                    description = "A test repository",
+                    url = "https://github.com/testRepo",
+                    defaultBranch = "main",
+                    archived = false,
+                    visibility = RepositoryVisibility.PUBLIC,
+                    updatedAt = "2024-01-01T00:00:00Z",
+                    languages = listOf("Kotlin", "Java"),
+                    topics = listOf("test", "example"),
+                )
+            ),
+            hasNextPage = false,
+            cursor = null
+        )
+        every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
+            1,
+            listOf(
+                ItemResponse(
+                    name = "leanIX.yaml",
+                    path = "leanIX.yaml",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                ),
+                ItemResponse(
+                    name = "lEAnIX.yaml",
+                    path = "a/lEAnIX.yaml",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                ),
+                ItemResponse(
+                    name = MANIFEST_FILE_NAME,
+                    path = "b/$MANIFEST_FILE_NAME",
+                    repository = RepositoryItemResponse(
+                        name = "TestRepo",
+                        fullName = "testOrg/TestRepo"
+                    ),
+                    url = "http://url"
+                )
+            )
+        )
+        every {
+            gitHubGraphQLService.getManifestFileContent(any(), any(), "b/leanix.yaml", any())
+        } returns "content"
+        every {
+            gitHubGraphQLService.getManifestFileContent(any(), any(), "leanIX.yaml", any())
+        } returns "content"
+        every {
+            gitHubGraphQLService.getManifestFileContent(any(), any(), "a/lEAnIX.yaml", any())
+        } returns "content"
+
+        // when
+        gitHubScanningService.scanGitHubResources()
+
+        // then
+        verify(exactly = 1) { syncLogService.sendInfoLog("Found 3 manifest files in repository TestRepo.") }
+    }
+
+    @Test
     fun `scanGitHubResources should skip organizations without correct permissions and events`() {
         every { cachingService.get("runId") } returns runId
         every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(
