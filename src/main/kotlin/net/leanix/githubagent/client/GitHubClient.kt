@@ -13,6 +13,7 @@ import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 
@@ -45,7 +46,8 @@ interface GitHubClient {
     @PostMapping("/api/v3/app/installations/{installationId}/access_tokens")
     fun createInstallationToken(
         @PathVariable("installationId") installationId: Long,
-        @RequestHeader("Authorization") jwt: String
+        @RequestHeader("Authorization") jwt: String,
+        @RequestBody emptyBody: String = ""
     ): InstallationTokenResponse
 
     @GetMapping("/api/v3/organizations")
@@ -67,7 +69,7 @@ interface GitHubClient {
         @RequestParam("q") query: String,
     ): GitHubSearchResponse
 
-    @GetMapping("/repos/{owner}/{repo}/actions/runs/{runId}/artifacts")
+    @GetMapping("/api/v3/repos/{owner}/{repo}/actions/runs/{runId}/artifacts")
     fun listRunArtifacts(
         @PathVariable("owner") owner: String,
         @PathVariable("repo") repo: String,
@@ -75,7 +77,7 @@ interface GitHubClient {
         @RequestHeader("Authorization") token: String
     ): ArtifactsListResponse
 
-    @GetMapping("/repos/{owner}/{repo}/actions/artifacts/{artifactId}/zip")
+    @GetMapping("/api/v3/repos/{owner}/{repo}/actions/artifacts/{artifactId}/zip")
     fun downloadArtifact(
         @PathVariable("owner") owner: String,
         @PathVariable("repo") repo: String,
