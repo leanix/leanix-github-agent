@@ -6,6 +6,7 @@ import net.leanix.githubagent.dto.PagedRepositories
 import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.exceptions.GraphQLApiException
 import net.leanix.githubagent.graphql.data.GetRepositories
+import net.leanix.githubagent.graphql.data.GetRepository
 import net.leanix.githubagent.graphql.data.GetRepositoryManifestContent
 import net.leanix.githubagent.interceptor.RateLimitInterceptor
 import org.slf4j.LoggerFactory
@@ -92,6 +93,46 @@ class GitHubGraphQLService(
         }
 
         return (result.data?.repository?.manifestFile as? RepositoryManifestBlob)?.text
+    }
+
+    fun getRepository(
+        owner: String,
+        repositoryName: String,
+        token: String
+    ): RepositoryDto? {
+        val client = buildGitHubGraphQLClient(token)
+
+        val query = GetRepository(
+            GetRepository.Variables(
+                owner = owner,
+                repositoryName = repositoryName
+            )
+        )
+
+        val result = runBlocking {
+            client.execute(query)
+        }
+
+        val repository = result.data?.viewer?.repository
+
+        if (repository == null) {
+            logger.error("Error getting repository: ${result.errors}")
+            throw GraphQLApiException(result.errors!!)
+        }
+
+        return RepositoryDto(
+            id = repository.id,
+            name = repository.name,
+            organizationName = repository.owner.login,
+            description = repository.description,
+            url = repository.url,
+            defaultBranch = repository.defaultBranchRef?.name,
+            archived = repository.isArchived,
+            visibility = repository.visibility,
+            updatedAt = repository.updatedAt,
+            languages = repository.languages!!.nodes!!.map { language -> language!!.name },
+            topics = repository.repositoryTopics.nodes!!.map { topic -> topic!!.topic.name },
+        )
     }
 
     private fun buildGitHubGraphQLClient(

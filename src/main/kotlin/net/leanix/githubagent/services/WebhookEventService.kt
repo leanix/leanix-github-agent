@@ -4,12 +4,16 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.InstallationEventPayload
+import net.leanix.githubagent.dto.InstallationRepositoriesEventPayload
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
+import net.leanix.githubagent.dto.RateLimitType
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
+import net.leanix.githubagent.handler.RateLimitHandler
 import net.leanix.githubagent.shared.INSTALLATION_LABEL
+import net.leanix.githubagent.shared.INSTALLATION_REPOSITORIES
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.WORKFLOW_RUN_EVENT
 import net.leanix.githubagent.shared.fileNameMatchRegex
@@ -29,7 +33,8 @@ class WebhookEventService(
     @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
     private val gitHubClient: GitHubClient,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
-    private val workflowRunService: WorkflowRunService
+    private val workflowRunService: WorkflowRunService,
+    private val rateLimitHandler: RateLimitHandler,
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
@@ -39,6 +44,7 @@ class WebhookEventService(
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
             "INSTALLATION" -> handleInstallationEvent(payload)
+            INSTALLATION_REPOSITORIES -> handleInstallationRepositories(payload)
             WORKFLOW_RUN_EVENT -> workflowRunService.consumeWebhookPayload(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
@@ -202,6 +208,26 @@ class WebhookEventService(
             "directory '/${manifestFilePath.substringBeforeLast('/')}'"
         } else {
             "root folder"
+        }
+    }
+
+    private val handleInstallationRepositories: (String) -> Unit = { payload ->
+        val installationRepositoriesEventPayload: InstallationRepositoriesEventPayload = objectMapper.readValue(payload)
+        val installationId = installationRepositoriesEventPayload.installation.id
+        val installationToken = gitHubAuthenticationService.getInstallationToken(installationId)
+        installationRepositoriesEventPayload.repositoriesAdded.forEach { repository ->
+            gitHubGraphQLService.getRepository(
+                installationRepositoriesEventPayload.installation.account.login,
+                repository.name, installationToken
+            )?.let {
+                if (it.archived) return@let
+                webSocketService.sendMessage(
+                    "${cachingService.get("runId")}/repositories",
+                    it
+                )
+                // Search for manifest files in the repository
+                // and send them to the backend
+            }
         }
     }
 }
