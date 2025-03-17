@@ -2,11 +2,11 @@ package net.leanix.githubagent.dto
 
 data class SbomConfig(
     val source: GitHubSbomSource = GitHubSbomSource.GITHUB_ARTIFACT,
-    val namingConventions: String = "leanix-serviceName-sbom",
-    val defaultBranch: String = "main",
+    val namingConventions: String = "serviceName-sbom",
+    val branches: String = "default",
 ) {
     fun isFileNameValid(fileName: String, branchName: String): Boolean {
-        return fileName == generateExpectedFileName(fileName) && branchName == defaultBranch
+        return fileName == generateExpectedFileName(fileName) && branchName == branches
     }
     fun extractFactSheetName(fileName: String): String {
         val parts = fileName.split("-")
