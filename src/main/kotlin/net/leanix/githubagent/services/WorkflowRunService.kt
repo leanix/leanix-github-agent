@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Artifact
-import net.leanix.githubagent.dto.SbomConfig
 import net.leanix.githubagent.dto.SbomEventDTO
 import net.leanix.githubagent.dto.WorkflowRunEventDto
 import org.slf4j.LoggerFactory
@@ -20,7 +19,6 @@ class WorkflowRunService(
 
     private val logger = LoggerFactory.getLogger(WorkflowRunService::class.java)
     private val objectMapper = jacksonObjectMapper()
-    private val sbomConfig = SbomConfig()
 
     fun consumeWebhookPayload(payload: String) {
         runCatching {
@@ -55,7 +53,7 @@ class WorkflowRunService(
 
         return gitHubClient.getRunArtifacts(owner, repo, runId, token)
             .artifacts
-            .filter { sbomConfig.isFileNameValid(it.name, event.workflowRun.headBranch ?: "") }
+            .filter { it.name.contains("-sbom") }
     }
 
     private fun fetchAndProcessArtifacts(
@@ -87,7 +85,6 @@ class WorkflowRunService(
             "/events/sbom",
             SbomEventDTO(
                 repositoryName = repo,
-                factSheetName = sbomConfig.extractFactSheetName(artifactName),
                 sbomFileName = artifactName,
                 sbomFileContent = sbomContent
             )

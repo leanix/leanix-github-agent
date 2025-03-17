@@ -5,7 +5,6 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.Expiry
 import jakarta.annotation.PostConstruct
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
-import net.leanix.githubagent.dto.SbomConfig
 import org.springframework.stereotype.Service
 
 @Service
@@ -63,6 +62,5 @@ class CachingService(
     private fun init() {
         set("baseUrl", gitHubEnterpriseProperties.baseUrl, null)
         set("githubAppId", gitHubEnterpriseProperties.gitHubAppId, null)
-        set("sbomConfig", SbomConfig(), null)
     }
 }

@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.CountDownLatch
 
 @Component
-class BrokerStompSessionHandler(
-    private val sbomConfigHandler: SbomConfigHandler
-) : StompSessionHandlerAdapter() {
+class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
     @Lazy
     @Autowired
     private lateinit var webSocketService: WebSocketService
@@ -29,7 +27,6 @@ class BrokerStompSessionHandler(
         logger.info("connected to the server: ${session.sessionId}")
         isConnected = true
         latch.countDown()
-        session.subscribe("/user/queue/message", sbomConfigHandler)
     }
 
     override fun handleException(
