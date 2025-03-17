@@ -1,6 +1,7 @@
 package net.leanix.githubagent.dto
 
 data class SbomConfig(
+    val fileNameRule: SbomFileNameRule = SbomFileNameRule.STARTS,
     val source: GitHubSbomSource = GitHubSbomSource.GITHUB_ARTIFACT,
     val namingConventions: String = "serviceName-sbom",
     val branches: String = "default",

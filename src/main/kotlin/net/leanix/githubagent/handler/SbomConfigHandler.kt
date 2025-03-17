@@ -1,6 +1,7 @@
 package net.leanix.githubagent.handler
 
 import net.leanix.githubagent.dto.SbomConfigDTO
+import net.leanix.githubagent.dto.toSbomConfig
 import net.leanix.githubagent.services.CachingService
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.simp.stomp.StompFrameHandler
@@ -22,8 +23,7 @@ class SbomConfigHandler(
         logger.info("Received sbom config payload: {}", payload)
         payload?.let {
             val configDTO = payload as SbomConfigDTO
-            println(configDTO)
-            cachingService.remove("sbomConfig")
+            cachingService.set("sbomConfig", configDTO.toSbomConfig(), null)
         }
     }
 }
