@@ -4,4 +4,5 @@ data class SbomEventDTO(
     val repositoryName: String,
     val sbomFileName: String,
     val sbomFileContent: String,
+    val branchName: String,
 )

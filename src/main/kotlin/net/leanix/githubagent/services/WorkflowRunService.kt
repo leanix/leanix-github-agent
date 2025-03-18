@@ -66,27 +66,32 @@ class WorkflowRunService(
 
         artifacts.forEach { artifact ->
             logger.info("Processing artifact: ${artifact.name}")
-            downloadAndSendArtifact(owner, repo, artifact, installationToken)
+            downloadAndSendArtifact(event, artifact, installationToken)
         }
     }
 
-    private fun downloadAndSendArtifact(owner: String, repo: String, artifact: Artifact, token: String) = runCatching {
+    private fun downloadAndSendArtifact(event: WorkflowRunEventDto, artifact: Artifact, token: String) = runCatching {
+        val owner = event.repository.owner.login
+        val repo = event.repository.name
         gitHubClient.downloadArtifact(owner, repo, artifact.id, token).body()?.use { body ->
             val sbomContent = Base64.getEncoder().encodeToString(body.asInputStream().readAllBytes())
-            sendSbomEvent(repo, artifact.name, sbomContent)
+            sendSbomEvent(event, artifact.name, sbomContent)
         } ?: logger.error("Failed to download artifact: ${artifact.name}")
     }.onFailure {
         logger.error("Error processing artifact: ${artifact.name}", it)
     }
 
-    private fun sendSbomEvent(repo: String, artifactName: String, sbomContent: String) {
+    private fun sendSbomEvent(event: WorkflowRunEventDto, artifactName: String, sbomContent: String) {
+        val owner = event.repository.owner.login
+        val repo = event.repository.name
         logger.info("Sending sbom file: $repo - $artifactName")
         webSocketService.sendMessage(
             "/events/sbom",
             SbomEventDTO(
-                repositoryName = repo,
+                repositoryName = "$owner/$repo",
                 sbomFileName = artifactName,
-                sbomFileContent = sbomContent
+                sbomFileContent = sbomContent,
+                branchName = event.workflowRun.headBranch ?: ""
             )
         )
     }
