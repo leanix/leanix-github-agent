@@ -1,11 +1,12 @@
 package net.leanix.githubagent.dto
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class InstallationRepositoriesEventPayload(
     val installation: InstallationRepositoriesInstallation,
-    val repositoriesAdded: List<InstallationRepositoriesRepository>
+    @JsonProperty("repositories_added") val repositoriesAdded: List<InstallationRepositoriesRepository>
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,8 +24,8 @@ data class InstallationEventRepositoriesInstallationAccount(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class InstallationRepositoriesRepository(
     val id: Int,
-    val nodeId: String,
+    @JsonProperty("node_id") val nodeId: String,
     val name: String,
-    val fullName: String,
+    @JsonProperty("full_name") val fullName: String,
     val private: Boolean
 )

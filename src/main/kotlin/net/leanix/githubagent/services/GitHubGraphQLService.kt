@@ -113,7 +113,7 @@ class GitHubGraphQLService(
             client.execute(query)
         }
 
-        val repository = result.data?.viewer?.repository
+        val repository = result.data?.repositoryOwner?.repository
 
         if (repository == null) {
             logger.error("Error getting repository: ${result.errors}")

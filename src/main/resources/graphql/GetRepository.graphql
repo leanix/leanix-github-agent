@@ -1,6 +1,6 @@
-query GetRepository($owner: String, $repositoryName: String!) {
-    viewer {
-        repository(owner: $owner, name: $repositoryName) {
+query GetRepository($owner: String!, $repositoryName: String!) {
+    repositoryOwner(login: $owner){
+        repository(name: $repositoryName) {
             id
             name
             description
