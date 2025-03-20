@@ -29,3 +29,12 @@ data class InstallationRepositoriesRepository(
     @JsonProperty("full_name") val fullName: String,
     val private: Boolean
 )
+
+fun InstallationRepositoriesInstallation.toInstallation(): Installation {
+    return Installation(
+        id = id.toLong(),
+        account = Account(login = account.login),
+        events = emptyList(),
+        permissions = emptyMap()
+    )
+}
