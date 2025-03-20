@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
+@SuppressWarnings("TooManyFunctions")
 @Service
 class WebhookEventService(
     private val webSocketService: WebSocketService,
@@ -228,17 +229,30 @@ class WebhookEventService(
             }
     }
 
-    private fun processRepository(installation: Installation, repositoryAdded: InstallationRepositoriesRepository, installationToken: String) {
+    private fun processRepository(
+        installation: Installation,
+        repositoryAdded: InstallationRepositoriesRepository,
+        installationToken: String
+    ) {
         logger.info("Fetching repository details for: ${repositoryAdded.fullName}")
-        gitHubGraphQLService.getRepository(installation.account.login, repositoryAdded.name, installationToken)?.let { repository ->
-            if (repository.archived) {
-                logger.info("Repository ${repository.fullName} is archived, skipping.")
-                return
-            }
-            logger.info("Sending repository details for: ${repository.fullName}")
-            webSocketService.sendMessage("events/repository", repository)
-            fetchAndSendManifestFiles(installation, repository)
+        val repository = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.GRAPHQL) {
+            gitHubGraphQLService.getRepository(
+                installation.account.login,
+                repositoryAdded.name,
+                installationToken
+            )
         }
+        if (repository == null) {
+            logger.error("Failed to fetch repository details for: ${repositoryAdded.fullName}")
+            return
+        }
+        if (repository.archived) {
+            logger.info("Repository ${repository.fullName} is archived, skipping.")
+            return
+        }
+        logger.info("Sending repository details for: ${repository.fullName}")
+        webSocketService.sendMessage("events/repository", repository)
+        fetchAndSendManifestFiles(installation, repository)
     }
 
     private fun fetchAndSendManifestFiles(installation: Installation, repositoryAdded: RepositoryDto) {
