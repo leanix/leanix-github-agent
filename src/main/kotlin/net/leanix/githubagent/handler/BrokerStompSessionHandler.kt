@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component
 import java.util.concurrent.CountDownLatch
 
 @Component
-class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
+class BrokerStompSessionHandler(
+    private val artifactDownloadHandler: ArtifactDownloadHandler
+) : StompSessionHandlerAdapter() {
     @Lazy
     @Autowired
     private lateinit var webSocketService: WebSocketService
@@ -27,6 +29,7 @@ class BrokerStompSessionHandler : StompSessionHandlerAdapter() {
         logger.info("connected to the server: ${session.sessionId}")
         isConnected = true
         latch.countDown()
+        session.subscribe("/user/queue/message/artifact", artifactDownloadHandler)
     }
 
     override fun handleException(
