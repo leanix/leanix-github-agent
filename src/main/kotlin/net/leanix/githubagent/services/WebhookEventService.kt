@@ -251,7 +251,7 @@ class WebhookEventService(
             return
         }
         logger.info("Sending repository details for: ${repository.fullName}")
-        webSocketService.sendMessage("events/repository", repository)
+        webSocketService.sendMessage("/events/repository", repository)
         fetchAndSendManifestFiles(installation, repository)
     }
 

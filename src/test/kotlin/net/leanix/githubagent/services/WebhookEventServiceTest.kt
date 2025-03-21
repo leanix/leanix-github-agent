@@ -615,11 +615,16 @@ class WebhookEventServiceTest {
 
         webhookEventService.consumeWebhookEvent(INSTALLATION_REPOSITORIES, payload)
 
-        verify(exactly = 3) { webSocketService.sendMessage("events/repository", any()) }
+        verify(exactly = 3) { webSocketService.sendMessage("/events/repository", any()) }
         verify(exactly = 6) { webSocketService.sendMessage("/events/manifestFile", any()) }
     }
 
     fun createItemResponse(repoName: String, organization: String): ItemResponse {
-        return ItemResponse(MANIFEST_FILE_NAME, "$organization/$repoName/$MANIFEST_FILE_NAME", RepositoryItemResponse(repoName, repoName), "url")
+        return ItemResponse(
+            MANIFEST_FILE_NAME,
+            "$organization/$repoName/$MANIFEST_FILE_NAME",
+            RepositoryItemResponse(repoName, repoName),
+            "url"
+        )
     }
 }
