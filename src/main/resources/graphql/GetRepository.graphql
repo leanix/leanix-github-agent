@@ -1,0 +1,31 @@
+query GetRepository($owner: String!, $repositoryName: String!) {
+    repositoryOwner(login: $owner){
+        repository(name: $repositoryName) {
+            id
+            name
+            description
+            url
+            defaultBranchRef{
+                name
+            }
+            isArchived
+            visibility
+            updatedAt
+            owner{
+                login
+            }
+            languages(first: 25) {
+                nodes {
+                    name
+                }
+            }
+            repositoryTopics(first:25) {
+                nodes {
+                    topic {
+                        name
+                    }
+                }
+            }
+        }
+    }
+}

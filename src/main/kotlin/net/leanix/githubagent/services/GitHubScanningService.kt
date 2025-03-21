@@ -147,7 +147,7 @@ class GitHubScanningService(
         )
     }
 
-    private fun fetchManifestFiles(installation: Installation, repositoryName: String) = runCatching {
+    fun fetchManifestFiles(installation: Installation, repositoryName: String) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
         val manifestFiles = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.SEARCH) {
             gitHubClient.searchManifestFiles(
@@ -158,7 +158,7 @@ class GitHubScanningService(
         }
         manifestFiles.items.filter { it.name.lowercase() == MANIFEST_FILE_NAME }
     }
-    private fun fetchManifestContents(
+    fun fetchManifestContents(
         installation: Installation,
         items: List<ItemResponse>,
         repositoryName: String,
