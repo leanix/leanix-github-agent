@@ -234,25 +234,29 @@ class WebhookEventService(
         repositoryAdded: InstallationRepositoriesRepository,
         installationToken: String
     ) {
-        logger.info("Fetching repository details for: ${repositoryAdded.fullName}")
-        val repository = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.GRAPHQL) {
-            gitHubGraphQLService.getRepository(
-                installation.account.login,
-                repositoryAdded.name,
-                installationToken
-            )
+        kotlin.runCatching {
+            logger.info("Fetching repository details for: ${repositoryAdded.fullName}")
+            val repository = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.GRAPHQL) {
+                gitHubGraphQLService.getRepository(
+                    installation.account.login,
+                    repositoryAdded.name,
+                    installationToken
+                )
+            }
+            if (repository == null) {
+                logger.error("Failed to fetch repository details for: ${repositoryAdded.fullName}")
+                return
+            }
+            if (repository.archived) {
+                logger.info("Repository ${repository.fullName} is archived, skipping.")
+                return
+            }
+            logger.info("Sending repository details for: ${repository.fullName}")
+            webSocketService.sendMessage("/events/repository", repository)
+            fetchAndSendManifestFiles(installation, repository)
+        }.onFailure {
+            logger.error("Failed to process repository event: ${repositoryAdded.fullName}", it)
         }
-        if (repository == null) {
-            logger.error("Failed to fetch repository details for: ${repositoryAdded.fullName}")
-            return
-        }
-        if (repository.archived) {
-            logger.info("Repository ${repository.fullName} is archived, skipping.")
-            return
-        }
-        logger.info("Sending repository details for: ${repository.fullName}")
-        webSocketService.sendMessage("/events/repository", repository)
-        fetchAndSendManifestFiles(installation, repository)
     }
 
     private fun fetchAndSendManifestFiles(installation: Installation, repositoryAdded: RepositoryDto) {
