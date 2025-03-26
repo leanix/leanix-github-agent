@@ -53,9 +53,6 @@ class WebhookEventServiceTest {
     @MockkBean
     private lateinit var gitHubAPIService: GitHubAPIService
 
-    @MockkBean
-    private lateinit var workflowRunService: WorkflowRunService
-
     @SpykBean
     private lateinit var syncLogService: SyncLogService
 
@@ -72,7 +69,6 @@ class WebhookEventServiceTest {
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), any(), any()) } returns "content"
         every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(installation)
         every { gitHubClient.getInstallation(any(), any()) } returns installation
-        every { workflowRunService.consumeWebhookPayload(any()) } returns Unit
     }
 
     @Test
@@ -230,7 +226,7 @@ class WebhookEventServiceTest {
 
         webhookEventService.consumeWebhookEvent("OTHER", payload)
 
-        verify(exactly = 1) { webSocketService.sendMessage("/events/other", payload) }
+        verify(exactly = 1) { webSocketService.sendMessage("/events/OTHER", payload) }
     }
 
     @Test
@@ -497,25 +493,6 @@ class WebhookEventServiceTest {
                 any()
             )
         }
-    }
-
-    @Test
-    fun `should consume workflow run webhook event`() {
-        val eventType = "WORKFLOW_RUN"
-        val payload = """{
-            "action": "completed",
-            "workflow_run": {
-                "id": 12345678,
-                "head_branch": "main",
-                "url": "https://api.github.com/repos/leanix/sbom-test/actions/runs/12345678",
-                "status": "completed",
-                "conclusion": "success",
-                }
-        }"""
-
-        webhookEventService.consumeWebhookEvent(eventType, payload)
-
-        verify { workflowRunService.consumeWebhookPayload(payload) }
     }
 
     @Test

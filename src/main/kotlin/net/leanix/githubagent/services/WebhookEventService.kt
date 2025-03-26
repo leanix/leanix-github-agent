@@ -19,7 +19,6 @@ import net.leanix.githubagent.handler.RateLimitHandler
 import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.INSTALLATION_REPOSITORIES
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
-import net.leanix.githubagent.shared.WORKFLOW_RUN_EVENT
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
@@ -38,7 +37,6 @@ class WebhookEventService(
     @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
     private val gitHubClient: GitHubClient,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
-    private val workflowRunService: WorkflowRunService,
     private val rateLimitHandler: RateLimitHandler,
 ) {
 
@@ -50,10 +48,9 @@ class WebhookEventService(
             "PUSH" -> handlePushEvent(payload)
             "INSTALLATION" -> handleInstallationEvent(payload)
             INSTALLATION_REPOSITORIES -> handleInstallationRepositories(payload)
-            WORKFLOW_RUN_EVENT -> workflowRunService.consumeWebhookPayload(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
-                webSocketService.sendMessage("/events/other", payload)
+                webSocketService.sendMessage("/events/$eventType", payload)
             }
         }
     }
