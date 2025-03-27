@@ -59,6 +59,7 @@ class ArtifactDownloadHandlerTest {
         every { gitHubClient.downloadArtifact(any(), any(), any(), any()) } returns Response
             .builder()
             .request(request)
+            .status(200)
             .body(readSbomFile()).build()
 
         // when
@@ -104,7 +105,9 @@ class ArtifactDownloadHandlerTest {
         every { gitHubClient.downloadArtifact(any(), any(), any(), any()) } returns Response
             .builder()
             .request(request)
-            .body(readSbomFile()).build()
+            .body(readSbomFile())
+            .status(200)
+            .build()
 
         // when
         artifactDownloadHandler.handleFrame(
@@ -122,6 +125,52 @@ class ArtifactDownloadHandlerTest {
             webSocketService.sendMessage("/artifact", any())
         }
     }
+
+    @Test
+    fun `it should receive message from server and not send empty artifact`() {
+        // given
+        every { gitHubAuthenticationService.getInstallationToken(any()) } returns "token"
+        every { gitHubClient.getRunArtifacts(any(), any(), any(), any()) } returns ArtifactsListResponse(
+            totalCount = 2,
+            artifacts = listOf(
+                Artifact(
+                    id = 1,
+                    name = "leanix-sbom-test-sbom",
+                    url = "http://download.url",
+                    archiveDownloadUrl = "http://download.url"
+                ),
+                Artifact(
+                    id = 2,
+                    name = "invalid-name",
+                    url = "http://download.url",
+                    archiveDownloadUrl = "http://download.url"
+                )
+            )
+        )
+        val request = mockk<Request>()
+        every { gitHubClient.downloadArtifact(any(), any(), any(), any()) } returns Response
+            .builder()
+            .request(request)
+            .status(404)
+            .build()
+
+        // when
+        artifactDownloadHandler.handleFrame(
+            StompHeaders(),
+            ArtifactDownloadDTO(
+                repositoryName = "repository",
+                repositoryOwner = "leanix",
+                runId = 1,
+                installationId = 1,
+            )
+        )
+
+        // then
+        verify(exactly = 0) {
+            webSocketService.sendMessage("/artifact", any())
+        }
+    }
+
     private fun readSbomFile(): ByteArray {
         val filePath = Paths.get("src/test/resources/sbom/leanix-sbom-test-sbom.zip")
         return Files.readAllBytes(filePath)
