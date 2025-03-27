@@ -9,6 +9,7 @@ import net.leanix.githubagent.services.WebSocketService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
+import org.springframework.http.HttpStatus
 import org.springframework.messaging.simp.stomp.StompFrameHandler
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.stereotype.Component
@@ -72,11 +73,16 @@ class ArtifactDownloadHandler(
 
     private fun downloadAndSendArtifact(dto: ArtifactDownloadDTO, artifact: Artifact, token: String) = runCatching {
         val owner = dto.repositoryOwner
-        val repo = dto.repositoryOwner
-        gitHubClient.downloadArtifact(owner, repo, artifact.id, token).body()?.use { body ->
-            val artifactContent = Base64.getEncoder().encodeToString(body.asInputStream().readAllBytes())
-            sendArtifactEvent(dto, artifact.name, artifactContent)
-        } ?: logger.error("Failed to download artifact: ${artifact.name}")
+        val repo = dto.repositoryName
+        val response = gitHubClient.downloadArtifact(owner, repo, artifact.id, token)
+        if (response.status() == HttpStatus.OK.value()) {
+            response.body()?.use { body ->
+                val artifactContent = Base64.getEncoder().encodeToString(body.asInputStream().readAllBytes())
+                sendArtifactEvent(dto, artifact.name, artifactContent)
+            }
+        } else {
+            logger.error("Failed to download artifact: ${artifact.name}")
+        }
     }.onFailure {
         logger.error("Error processing artifact: ${artifact.name}", it)
     }
