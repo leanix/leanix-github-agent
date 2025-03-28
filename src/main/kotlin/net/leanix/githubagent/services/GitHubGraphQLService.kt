@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.util.retry.Retry
 import java.time.Duration
+import io.github.resilience4j.retry.annotation.Retry as ResilienceRetry
 
 @Component
 class GitHubGraphQLService(
@@ -24,6 +25,7 @@ class GitHubGraphQLService(
         private const val PAGE_COUNT = 20
     }
 
+    @ResilienceRetry(name = "secondary_rate_limit")
     fun getRepositories(
         token: String,
         cursor: String? = null
@@ -67,6 +69,7 @@ class GitHubGraphQLService(
         }
     }
 
+    @ResilienceRetry(name = "secondary_rate_limit")
     fun getManifestFileContent(
         owner: String,
         repositoryName: String,
@@ -95,6 +98,7 @@ class GitHubGraphQLService(
         return (result.data?.repository?.manifestFile as? RepositoryManifestBlob)?.text
     }
 
+    @ResilienceRetry(name = "secondary_rate_limit")
     fun getRepository(
         owner: String,
         repositoryName: String,
