@@ -1,5 +1,6 @@
 package net.leanix.githubagent.config
 
+import io.github.resilience4j.core.IntervalFunction
 import io.github.resilience4j.retry.RetryConfig
 import io.github.resilience4j.retry.RetryRegistry
 import org.slf4j.LoggerFactory
@@ -16,10 +17,11 @@ class Resilience4jConfig {
 
     @Bean
     fun retryRegistry(): RetryRegistry {
-        val waitDuration = Duration.ofSeconds(20)
+        val intervalWithExponentialBackoff = IntervalFunction
+            .ofExponentialBackoff(Duration.ofSeconds(20), 2.0)
         val retryConfig = RetryConfig.custom<Any>()
             .maxAttempts(5)
-            .waitDuration(waitDuration)
+            .intervalFunction(intervalWithExponentialBackoff)
             .retryOnException { throwable ->
                 logger.debug("Retrying due to exception: ${throwable.message}")
                 true
@@ -34,8 +36,8 @@ class Resilience4jConfig {
                 val readableWaitTime = String.format(
                     Locale.getDefault(),
                     "%d minutes, %d seconds",
-                    waitDuration.toMinutes(),
-                    waitDuration.minus(waitDuration.toMinutes(), ChronoUnit.MINUTES).seconds
+                    event.waitInterval.toMinutes(),
+                    event.waitInterval.minus(event.waitInterval.toMinutes(), ChronoUnit.MINUTES).seconds
                 )
                 logger.info(
                     "Retrying call due to ${event.name}, attempt: ${event.numberOfRetryAttempts}, " +
