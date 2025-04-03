@@ -72,7 +72,7 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s --
           ./bin/syft --version
-          ./bin/syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.tag-action.outputs.tag }} \
+          ./bin/syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev \
           --scope "all-layers" \
           --output "cyclonedx-json=${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}"
 
