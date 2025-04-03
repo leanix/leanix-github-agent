@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: |
           # These are outputs (not vars) so that they can be used as input to the upload step
-          echo "SBOM_ARTIFACT_NAME=$(echo ${{ env.IMAGE_NAME }} | sed 's/\//_/g')" >> $GITHUB_OUTPUT
+          echo "SBOM_ARTIFACT_NAME=$(echo ${{ env.IMAGE_NAME }}-sbom | sed 's/\//_/g')" >> $GITHUB_OUTPUT
           echo "SBOM_DIR=./sbom" >> $GITHUB_OUTPUT
 
       - name: Generate SBOM artifact
