@@ -77,7 +77,7 @@ jobs:
           --output "cyclonedx-json=${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}"
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
           path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}
