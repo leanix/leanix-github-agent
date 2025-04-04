@@ -60,28 +60,6 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Derive SBOM artifact name
-        id: derive-artifact-name
-        shell: bash
-        run: |
-          # These are outputs (not vars) so that they can be used as input to the upload step
-          echo "SBOM_ARTIFACT_NAME=$(echo ${{ env.IMAGE_NAME }}-sbom | sed 's/\//_/g')" >> $GITHUB_OUTPUT
-          echo "SBOM_DIR=./sbom" >> $GITHUB_OUTPUT
-
-      - name: Generate SBOM artifact
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s --
-          ./bin/syft --version
-          ./bin/syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev \
-          --scope "all-layers" \
-          --output "cyclonedx-json=${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}"
-
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
-          path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}
-
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
