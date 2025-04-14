@@ -50,7 +50,7 @@ class WebhookEventService(
             INSTALLATION_REPOSITORIES -> handleInstallationRepositories(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
-                webSocketService.sendMessage("/events/$eventType", payload)
+                webSocketService.sendMessage("/events/other/$eventType", payload)
             }
         }
     }

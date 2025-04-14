@@ -226,7 +226,7 @@ class WebhookEventServiceTest {
 
         webhookEventService.consumeWebhookEvent("OTHER", payload)
 
-        verify(exactly = 1) { webSocketService.sendMessage("/events/OTHER", payload) }
+        verify(exactly = 1) { webSocketService.sendMessage("/events/other/OTHER", payload) }
     }
 
     @Test
