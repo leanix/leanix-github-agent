@@ -30,8 +30,7 @@ class RepositoryGetHandler(
             val dto = payload as RepositoryRequestDTO
             logger.info("Received repository get message from server for repo: ${dto.repositoryName}")
             runCatching {
-                val installationToken =
-                    "Bearer ${gitHubAuthenticationService.getInstallationToken(dto.installation.id.toInt())}"
+                val installationToken = gitHubAuthenticationService.getInstallationToken(dto.installation.id.toInt())
                 repositoryGetService.fetchAndSendRepositoryAndManifest(
                     dto.installation,
                     dto.repositoryName,

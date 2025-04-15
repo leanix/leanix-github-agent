@@ -66,6 +66,10 @@ class GitHubRepositoryService(
             repositoryAdded.defaultBranch
         ).getOrThrow()
 
+        if (manifestContents.isEmpty()) {
+            logger.info("No manifest files found for repository: ${repositoryAdded.fullName}")
+            return
+        }
         manifestContents.forEach {
             logger.info("Sending manifest file content for: ${it.path} in repository: ${repositoryAdded.fullName}")
             webSocketService.sendMessage(
