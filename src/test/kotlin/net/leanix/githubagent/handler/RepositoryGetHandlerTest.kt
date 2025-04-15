@@ -7,6 +7,7 @@ import io.mockk.verify
 import net.leanix.githubagent.dto.Account
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.RepositoryRequestDTO
+import net.leanix.githubagent.dto.RepositoryRequestInstallationDTO
 import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubRepositoryService
 import org.junit.jupiter.api.BeforeEach
@@ -38,7 +39,7 @@ class RepositoryGetHandlerTest {
         repositoryGetHandler.handleFrame(
             StompHeaders(),
             RepositoryRequestDTO(
-                installation = Installation(1, Account("account"), mapOf(), listOf()),
+                installation = RepositoryRequestInstallationDTO(1, Account("account")),
                 repositoryName = "repoName",
                 repositoryFullName = "repoFullName"
             )

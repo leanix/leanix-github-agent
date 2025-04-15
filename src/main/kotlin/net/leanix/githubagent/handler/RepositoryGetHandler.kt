@@ -1,5 +1,6 @@
 package net.leanix.githubagent.handler
 
+import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.RepositoryRequestDTO
 import net.leanix.githubagent.services.GitHubAuthenticationService
 import net.leanix.githubagent.services.GitHubRepositoryService
@@ -32,7 +33,12 @@ class RepositoryGetHandler(
             runCatching {
                 val installationToken = gitHubAuthenticationService.getInstallationToken(dto.installation.id.toInt())
                 repositoryGetService.fetchAndSendRepositoryAndManifest(
-                    dto.installation,
+                    Installation(
+                        id = dto.installation.id,
+                        account = dto.installation.account,
+                        mapOf(),
+                        emptyList(),
+                    ),
                     dto.repositoryName,
                     dto.repositoryFullName,
                     installationToken
