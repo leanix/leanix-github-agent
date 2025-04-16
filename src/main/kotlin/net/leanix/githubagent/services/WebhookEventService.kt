@@ -3,19 +3,14 @@ package net.leanix.githubagent.services
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.client.GitHubClient
-import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.InstallationEventPayload
 import net.leanix.githubagent.dto.InstallationRepositoriesEventPayload
-import net.leanix.githubagent.dto.InstallationRepositoriesRepository
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.dto.RateLimitType
-import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.toInstallation
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
-import net.leanix.githubagent.handler.RateLimitHandler
 import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.INSTALLATION_REPOSITORIES
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
@@ -37,7 +32,7 @@ class WebhookEventService(
     @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
     private val gitHubClient: GitHubClient,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
-    private val rateLimitHandler: RateLimitHandler,
+    private val gitHubRepositoryService: GitHubRepositoryService,
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
@@ -50,7 +45,7 @@ class WebhookEventService(
             INSTALLATION_REPOSITORIES -> handleInstallationRepositories(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
-                webSocketService.sendMessage("/events/$eventType", payload)
+                webSocketService.sendMessage("/events/other/$eventType", payload)
             }
         }
     }
@@ -222,61 +217,12 @@ class WebhookEventService(
         installationRepositoriesEventPayload.repositoriesAdded
             .forEach { repositoryAdded ->
                 logger.info("Processing repository: ${repositoryAdded.fullName}")
-                processRepository(installation.toInstallation(), repositoryAdded, installationToken)
-            }
-    }
-
-    private fun processRepository(
-        installation: Installation,
-        repositoryAdded: InstallationRepositoriesRepository,
-        installationToken: String
-    ) {
-        kotlin.runCatching {
-            logger.info("Fetching repository details for: ${repositoryAdded.fullName}")
-            val repository = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.GRAPHQL) {
-                gitHubGraphQLService.getRepository(
-                    installation.account.login,
+                gitHubRepositoryService.fetchAndSendRepositoryAndManifest(
+                    installation.toInstallation(),
                     repositoryAdded.name,
+                    repositoryAdded.fullName,
                     installationToken
                 )
             }
-            if (repository == null) {
-                logger.error("Failed to fetch repository details for: ${repositoryAdded.fullName}")
-                return
-            }
-            if (repository.archived) {
-                logger.info("Repository ${repository.fullName} is archived, skipping.")
-                return
-            }
-            logger.info("Sending repository details for: ${repository.fullName}")
-            webSocketService.sendMessage("/events/repository", repository)
-            fetchAndSendManifestFiles(installation, repository)
-        }.onFailure {
-            logger.error("Failed to process repository event: ${repositoryAdded.fullName}", it)
-        }
-    }
-
-    private fun fetchAndSendManifestFiles(installation: Installation, repositoryAdded: RepositoryDto) {
-        logger.info("Fetching manifest files for repository: ${repositoryAdded.fullName}")
-        val manifestFiles = gitHubScanningService.fetchManifestFiles(installation, repositoryAdded.name).getOrThrow()
-        val manifestContents = gitHubScanningService.fetchManifestContents(
-            installation,
-            manifestFiles,
-            repositoryAdded.name,
-            repositoryAdded.defaultBranch
-        ).getOrThrow()
-
-        manifestContents.forEach {
-            logger.info("Sending manifest file content for: ${it.path} in repository: ${repositoryAdded.fullName}")
-            webSocketService.sendMessage(
-                "/events/manifestFile",
-                ManifestFileUpdateDto(
-                    repositoryAdded.fullName,
-                    ManifestFileAction.ADDED,
-                    it.content,
-                    generateFullPath(repositoryAdded.defaultBranch, fileNameMatchRegex.replace(it.path, ""))
-                )
-            )
-        }
     }
 }
