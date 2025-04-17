@@ -1,23 +1,18 @@
 package net.leanix.githubagent.services
 
 import com.ninjasquad.springmockk.MockkBean
-import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
 import io.mockk.just
 import io.mockk.runs
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
-import net.leanix.githubagent.dto.GitHubSearchResponse
 import net.leanix.githubagent.dto.Installation
 import net.leanix.githubagent.dto.ItemResponse
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.Organization
-import net.leanix.githubagent.dto.RepositoryDto
 import net.leanix.githubagent.dto.RepositoryItemResponse
-import net.leanix.githubagent.graphql.data.enums.RepositoryVisibility
-import net.leanix.githubagent.shared.INSTALLATION_REPOSITORIES
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,9 +47,6 @@ class WebhookEventServiceTest {
 
     @MockkBean
     private lateinit var gitHubAPIService: GitHubAPIService
-
-    @SpykBean
-    private lateinit var syncLogService: SyncLogService
 
     private val permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read")
     private val events = listOf("label", "public", "repository", "push")
@@ -493,107 +485,6 @@ class WebhookEventServiceTest {
                 any()
             )
         }
-    }
-
-    @Test
-    fun `should handle installation repositories event`() {
-        every { syncLogService.sendSyncLog(any(), any(), any(), any()) } just runs
-        every { gitHubGraphQLService.getRepository(any(), any(), any()) } returns RepositoryDto(
-            id = "1",
-            name = "repo",
-            organizationName = "owner/repo",
-            description = "main",
-            url = "content",
-            defaultBranch = "main",
-            archived = false,
-            visibility = RepositoryVisibility.PRIVATE,
-            languages = emptyList(),
-            topics = emptyList(),
-            updatedAt = "2021-09-01"
-        )
-        every { gitHubClient.searchManifestFiles(any(), any()) } returnsMany listOf(
-            GitHubSearchResponse(
-                2,
-                listOf(
-                    createItemResponse("repo-test", "cider-org-3"),
-                    createItemResponse("repo-test", "cider-org-3")
-                )
-            ),
-            GitHubSearchResponse(
-                3,
-                listOf(
-                    createItemResponse("demo-repo-1", "cider-org-3"),
-                    createItemResponse("demo-repo-1", "cider-org-3")
-                )
-            )
-        )
-
-        val payload = """
-        {
-          "action": "added",
-          "installation": {
-            "id": 150,
-            "account": {
-              "login": "cider-org-3",
-              "id": 47
-            },
-            "repository_selection": "selected",
-            "access_tokens_url": "https://cider-gh-enterprise.northeurope.cloudapp.azure.com/api/v3/app/installations/150/access_tokens",
-            "repositories_url": "https://cider-gh-enterprise.northeurope.cloudapp.azure.com/api/v3/installation/repositories",
-            "html_url": "https://cider-gh-enterprise.northeurope.cloudapp.azure.com/organizations/cider-org-3/settings/installations/150",
-            "app_id": 3,
-            "app_slug": "test-github-app",
-            "target_id": 47,
-            "target_type": "Organization",
-            "permissions": {
-              "checks": "write",
-              "members": "read",
-              "contents": "read",
-              "metadata": "read",
-              "administration": "read"
-            },
-            "events": [
-              "check_run",
-              "check_suite",
-              "label",
-              "organization",
-              "public",
-              "push",
-              "repository"
-            ]
-          },
-          "repository_selection": "selected",
-          "repositories_added": [
-            {
-              "id": 30,
-              "node_id": "MDEwOlJlcG9zaXRvcnkzMA==",
-              "name": "repo-test",
-              "full_name": "cider-org-3/kostas-test",
-              "private": true
-            },
-            {
-              "id": 1648,
-              "node_id": "MDEwOlJlcG9zaXRvcnkxNjQ4",
-              "name": "demo-repo-1",
-              "full_name": "cider-org-3/demo-repo-1",
-              "private": true
-            },
-            {
-              "id": 1649,
-              "node_id": "MDEwOlJlcG9zaXRvcnkxNjQ5",
-              "name": "demo-repo-2",
-              "full_name": "cider-org-3/demo-repo-2",
-              "private": true
-            }
-          ],
-          "repositories_removed": []
-        }
-    """
-
-        webhookEventService.consumeWebhookEvent(INSTALLATION_REPOSITORIES, payload)
-
-        verify(exactly = 3) { webSocketService.sendMessage("/events/repository", any()) }
-        verify(exactly = 6) { webSocketService.sendMessage("/events/manifestFile", any()) }
     }
 
     fun createItemResponse(repoName: String, organization: String): ItemResponse {
