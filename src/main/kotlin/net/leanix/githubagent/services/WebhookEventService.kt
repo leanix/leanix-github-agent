@@ -4,15 +4,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.InstallationEventPayload
-import net.leanix.githubagent.dto.InstallationRepositoriesEventPayload
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.dto.toInstallation
 import net.leanix.githubagent.exceptions.JwtTokenNotFound
 import net.leanix.githubagent.shared.INSTALLATION_LABEL
-import net.leanix.githubagent.shared.INSTALLATION_REPOSITORIES
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
@@ -31,8 +28,7 @@ class WebhookEventService(
     private val syncLogService: SyncLogService,
     @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
     private val gitHubClient: GitHubClient,
-    private val gitHubEnterpriseService: GitHubEnterpriseService,
-    private val gitHubRepositoryService: GitHubRepositoryService,
+    private val gitHubEnterpriseService: GitHubEnterpriseService
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
@@ -42,7 +38,6 @@ class WebhookEventService(
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
             "INSTALLATION" -> handleInstallationEvent(payload)
-            INSTALLATION_REPOSITORIES -> handleInstallationRepositories(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other/$eventType", payload)
@@ -206,23 +201,5 @@ class WebhookEventService(
         } else {
             "root folder"
         }
-    }
-
-    private val handleInstallationRepositories: (String) -> Unit = { payload ->
-        logger.info("Handling installation repositories event")
-        val installationRepositoriesEventPayload: InstallationRepositoriesEventPayload = objectMapper.readValue(payload)
-        val installation = installationRepositoriesEventPayload.installation
-        val installationToken = gitHubAuthenticationService.getInstallationToken(installation.id)
-
-        installationRepositoriesEventPayload.repositoriesAdded
-            .forEach { repositoryAdded ->
-                logger.info("Processing repository: ${repositoryAdded.fullName}")
-                gitHubRepositoryService.fetchAndSendRepositoryAndManifest(
-                    installation.toInstallation(),
-                    repositoryAdded.name,
-                    repositoryAdded.fullName,
-                    installationToken
-                )
-            }
     }
 }
