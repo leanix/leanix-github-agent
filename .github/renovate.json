@@ -1,11 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-
   "automerge": false,
-
   "prConcurrentLimit": 1,
-
   "packageRules": [
     {
       "matchPackagePatterns": ["*"],
@@ -13,7 +10,6 @@
       "groupName": "all dependencies"
     }
   ],
-
-  "schedule": ["at 5am every day"],
+  "schedule": ["* 0-3 * * *"],
   "timezone": "Europe/Berlin"
 }
