@@ -48,7 +48,7 @@ class WebSocketClientConfig(
         return session
     }
 
-    private fun sendHeartbeat(session: StompSession) {
+    fun sendHeartbeat(session: StompSession) {
         val scheduler = ThreadPoolTaskScheduler()
         scheduler.initialize()
         heartbeatTask = scheduler.scheduleAtFixedRate({
