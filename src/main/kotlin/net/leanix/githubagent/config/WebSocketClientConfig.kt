@@ -50,6 +50,7 @@ class WebSocketClientConfig(
         val sockJsClient = SockJsClient(transports)
         val stompClient = WebSocketStompClient(sockJsClient)
         stompClient.messageConverter = jsonConverter
+        stompClient.defaultHeartbeat = longArrayOf(10000, 10000)
         val scheduler = ThreadPoolTaskScheduler()
         scheduler.initialize()
         stompClient.taskScheduler = scheduler
