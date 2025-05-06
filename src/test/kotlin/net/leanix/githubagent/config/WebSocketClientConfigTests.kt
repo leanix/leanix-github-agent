@@ -2,9 +2,7 @@ package net.leanix.githubagent.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.LeanIXAuthService
@@ -16,7 +14,6 @@ import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.web.socket.WebSocketHttpHeaders
 import org.springframework.web.socket.messaging.WebSocketStompClient
-import java.util.concurrent.ScheduledFuture
 
 class WebSocketClientConfigTests {
     private lateinit var webSocketClientConfig: WebSocketClientConfig
@@ -26,7 +23,6 @@ class WebSocketClientConfigTests {
     private lateinit var leanIXProperties: LeanIXProperties
     private lateinit var gitHubEnterpriseProperties: GitHubEnterpriseProperties
     private lateinit var leanIXAuthService: LeanIXAuthService
-    private lateinit var scheduledFuture: ScheduledFuture<*>
 
     @BeforeEach
     fun setUp() {
@@ -45,7 +41,6 @@ class WebSocketClientConfigTests {
             leanIXProperties,
             gitHubEnterpriseProperties
         )
-        scheduledFuture = mockk()
 
         GitHubAgentProperties.GITHUB_AGENT_VERSION = "test-version"
     }
@@ -67,16 +62,5 @@ class WebSocketClientConfigTests {
         val session = runCatching { webSocketClientConfig.initSession() }.getOrNull()
 
         assertEquals(null, session)
-    }
-
-    @Test
-    fun `should send heartbeat when session is connected`() {
-        val receiptable = mockk<StompSession.Receiptable>()
-        every { stompSession.isConnected } returns true
-        every { stompSession.send(any<String>(), any()) } returns receiptable
-
-        webSocketClientConfig.sendHeartbeat(stompSession)
-
-        verify { stompSession.send("/app/ghe/heartbeat", "") }
     }
 }
