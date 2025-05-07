@@ -126,11 +126,18 @@ jobs:
           --scope "all-layers" \
           --output "cyclonedx-json=${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}"
 
-      - name: Upload SBOM
+      - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
           path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}
+
+      - name: Upload SBOM asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
+          asset_name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
