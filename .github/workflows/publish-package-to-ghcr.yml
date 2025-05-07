@@ -158,6 +158,7 @@ jobs:
           upload_url: ${{ steps.get_release.outputs.result }}
           asset_path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
           asset_name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
+          asset_content_type: application/zip
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
