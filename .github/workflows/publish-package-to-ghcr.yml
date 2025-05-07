@@ -67,6 +67,22 @@ jobs:
             });
             console.log(`Published draft release for tag ${tag}`);
 
+      - name: Fetch upload_url for this tag
+        id: get_release
+        if: steps.tag-action.outputs.tag != ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const tag  = '${{ steps.tag-action.outputs.tag }}';
+            const { data: release } = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              tag
+            });
+            return release.upload_url;
+
       - name: Checkout
         uses: actions/checkout@v3
         if: (steps.tag-action.outputs.tag != '')
@@ -135,7 +151,7 @@ jobs:
       - name: Upload SBOM asset
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          upload_url: ${{ steps.get_release.outputs.result }}
           asset_path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
           asset_name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
 
