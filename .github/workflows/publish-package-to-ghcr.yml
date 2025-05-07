@@ -128,6 +128,7 @@ jobs:
 
       - name: Derive SBOM artifact name
         id: derive-artifact-name
+        if: (steps.tag-action.outputs.tag != '')
         shell: bash
         run: |
           # These are outputs (not vars) so that they can be used as input to the upload step
@@ -135,6 +136,7 @@ jobs:
           echo "SBOM_DIR=./sbom" >> $GITHUB_OUTPUT
 
       - name: Generate SBOM artifact
+        if: (steps.tag-action.outputs.tag != '')
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s --
           ./bin/syft --version
@@ -144,12 +146,14 @@ jobs:
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
+        if: (steps.tag-action.outputs.tag != '')
         with:
           name: ${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
           path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}
 
       - name: Upload SBOM asset
         uses: actions/upload-release-asset@v1
+        if: (steps.tag-action.outputs.tag != '')
         with:
           upload_url: ${{ steps.get_release.outputs.result }}
           asset_path: ${{ steps.derive-artifact-name.outputs.SBOM_DIR }}/${{ steps.derive-artifact-name.outputs.SBOM_ARTIFACT_NAME }}
