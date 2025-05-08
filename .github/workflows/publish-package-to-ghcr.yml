@@ -156,6 +156,8 @@ jobs:
 
       - name: Upload SBOM asset
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: (steps.tag-action.outputs.tag != '')
         with:
           upload_url: ${{ steps.get_release.outputs.result }}
