@@ -43,6 +43,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Wait for GitHub to process the tag and draft release
+        run: sleep 10
+
       - name: Publish Release Draft
         uses: actions/github-script@v6.4.1
         if: (steps.tag-action.outputs.tag != '')
