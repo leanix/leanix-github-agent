@@ -6,7 +6,7 @@ github-enterprise:
   webhookSecret: ${WEBHOOK_SECRET:}
 leanix:
   base-url: https://${LEANIX_DOMAIN}/services
-  ws-base-url: ws://localhost:8090/git-ws
+  ws-base-url: wss://${LEANIX_DOMAIN}/services/git-integrations/v1/git-ws
   auth:
     access-token-uri: ${leanix.base-url}/mtm/v1
     technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN}
