@@ -34,12 +34,15 @@ class WebSocketClientConfigTests {
         stompSession = mockk()
         authService = mockk()
         leanIXAuthService = mockk()
+        val heartbeatInterval = 10000L
+
         webSocketClientConfig = WebSocketClientConfig(
             brokerStompSessionHandler,
             objectMapper,
             leanIXAuthService,
             leanIXProperties,
-            gitHubEnterpriseProperties
+            gitHubEnterpriseProperties,
+            heartbeatInterval
         )
 
         GitHubAgentProperties.GITHUB_AGENT_VERSION = "test-version"

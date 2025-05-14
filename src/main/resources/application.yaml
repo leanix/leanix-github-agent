@@ -12,6 +12,8 @@ leanix:
     technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN}
 webhookEventService:
   waitingTime: 10000
+websocket:
+  heartbeat-interval: 30000
 
 resilience4j.retry:
   configs:
