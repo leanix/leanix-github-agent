@@ -5,6 +5,7 @@ import io.github.resilience4j.retry.annotation.Retry
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.LeanIXAuthService
 import net.leanix.githubagent.shared.GitHubAgentProperties.GITHUB_AGENT_VERSION
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
@@ -23,7 +24,8 @@ class WebSocketClientConfig(
     private val objectMapper: ObjectMapper,
     private val leanIXAuthService: LeanIXAuthService,
     private val leanIXProperties: LeanIXProperties,
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
+    @Value("\${websocket.heartbeat-interval}") private val heartbeatInterval: Long
 ) {
     @Retry(name = "ws_init_session")
     fun initSession(): StompSession {
@@ -50,7 +52,7 @@ class WebSocketClientConfig(
         val sockJsClient = SockJsClient(transports)
         val stompClient = WebSocketStompClient(sockJsClient)
         stompClient.messageConverter = jsonConverter
-        stompClient.defaultHeartbeat = longArrayOf(10000, 10000)
+        stompClient.defaultHeartbeat = longArrayOf(heartbeatInterval, 0)
         val scheduler = ThreadPoolTaskScheduler()
         scheduler.initialize()
         stompClient.taskScheduler = scheduler

@@ -12,3 +12,5 @@ leanix:
         technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN:dummy}
 webhookEventService:
   waitingTime: 100
+websocket:
+  heartbeat-interval: 30000
