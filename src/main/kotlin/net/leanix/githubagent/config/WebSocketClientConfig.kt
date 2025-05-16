@@ -17,6 +17,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.messaging.WebSocketStompClient
 import org.springframework.web.socket.sockjs.client.SockJsClient
 import org.springframework.web.socket.sockjs.client.WebSocketTransport
+import java.time.Duration
 import java.util.concurrent.ScheduledFuture
 
 @Configuration
@@ -64,7 +65,7 @@ class WebSocketClientConfig(
             }.onFailure {
                 logger.error("Failed to send heartbeat: ${it.message}")
             }
-        }, java.time.Duration.ofSeconds(30))
+        }, Duration.ofSeconds(60))
     }
 
     fun stopHeartbeat() {
