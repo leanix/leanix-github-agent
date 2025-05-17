@@ -14,10 +14,13 @@ class GitHubWebhookServiceTest {
 
     private val webhookEventService = mockk<WebhookEventService>()
     private val gitHubEnterpriseProperties = mockk<GitHubEnterpriseProperties>()
-    private val gitHubWebhookService = GitHubWebhookService(webhookEventService, gitHubEnterpriseProperties)
+    private val webSocketService = mockk<WebSocketService>()
+    private val gitHubWebhookService =
+        GitHubWebhookService(webhookEventService, gitHubEnterpriseProperties, webSocketService)
 
     @BeforeEach
     fun setUp() {
+        every { webSocketService.isConnected() } returns true
     }
 
     @Test

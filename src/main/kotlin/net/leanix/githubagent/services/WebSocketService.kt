@@ -26,4 +26,6 @@ class WebSocketService(
     fun sendMessage(topic: String, data: Any) {
         stompSession!!.send("$TOPIC_PREFIX$topic", data)
     }
+
+    fun isConnected(): Boolean = stompSession!!.isConnected
 }

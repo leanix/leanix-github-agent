@@ -13,13 +13,17 @@ import org.springframework.stereotype.Service
 @Service
 class GitHubWebhookService(
     private val webhookEventService: WebhookEventService,
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
+    private val webSocketService: WebSocketService
 ) {
 
     private val logger = LoggerFactory.getLogger(GitHubWebhookService::class.java)
 
     @Async
     fun handleWebhookEvent(eventType: String, host: String, signature256: String?, payload: String) {
+        if (!webSocketService.isConnected()) {
+            return
+        }
         if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
             if (!gitHubEnterpriseProperties.baseUrl.contains(host)) {
                 logger.error("Received a webhook event from an unknown host: $host")

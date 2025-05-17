@@ -8,6 +8,7 @@ import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubWebhookService
 import net.leanix.githubagent.services.SyncLogService
+import net.leanix.githubagent.services.WebSocketService
 import net.leanix.githubagent.services.WebhookEventService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,11 +36,15 @@ class GitHubWebhookControllerTest {
     @MockkBean
     private lateinit var cachingService: CachingService
 
+    @MockkBean
+    private lateinit var webSocketService: WebSocketService
+
     @BeforeEach
     fun setUp() {
         every { syncLogService.sendErrorLog(any()) } returns Unit
         every { cachingService.get(any()) } returns Unit
         every { cachingService.set(any(), any(), any()) } returns Unit
+        every { webSocketService.isConnected() } returns true
     }
 
     @Test
