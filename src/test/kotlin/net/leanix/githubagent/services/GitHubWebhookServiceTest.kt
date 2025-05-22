@@ -14,10 +14,16 @@ class GitHubWebhookServiceTest {
 
     private val webhookEventService = mockk<WebhookEventService>()
     private val gitHubEnterpriseProperties = mockk<GitHubEnterpriseProperties>()
-    private val gitHubWebhookService = GitHubWebhookService(webhookEventService, gitHubEnterpriseProperties)
+    private val cachingService = mockk<CachingService>()
+    private val gitHubWebhookService = GitHubWebhookService(
+        webhookEventService,
+        gitHubEnterpriseProperties,
+        cachingService,
+    )
 
     @BeforeEach
     fun setUp() {
+        every { cachingService.get("runId") } returns null
     }
 
     @Test
@@ -68,5 +74,17 @@ class GitHubWebhookServiceTest {
         gitHubWebhookService.handleWebhookEvent("PUSH", "host", null, "{}")
 
         verify { webhookEventService.consumeWebhookEvent("PUSH", "{}") }
+    }
+
+    @Test
+    fun `should ignore event when runId is present and event type is not INSTALLATION`() {
+        every { gitHubEnterpriseProperties.baseUrl } returns "host"
+        every { gitHubEnterpriseProperties.webhookSecret } returns ""
+        every { webhookEventService.consumeWebhookEvent(any(), any()) } returns Unit
+        every { cachingService.get("runId") } returns "someRunId"
+
+        gitHubWebhookService.handleWebhookEvent("PUSH", "host", null, "{}")
+
+        verify(exactly = 0) { webhookEventService.consumeWebhookEvent(any(), any()) }
     }
 }
