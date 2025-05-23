@@ -39,7 +39,7 @@ class WebhookEventService(
             "PUSH" -> handlePushEvent(payload)
             "INSTALLATION" -> handleInstallationEvent(payload)
             else -> {
-                logger.info("Sending event of type: $eventType")
+                logger.debug("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other/$eventType", payload)
             }
         }

@@ -9,7 +9,6 @@ import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
 import org.springframework.stereotype.Component
-import java.util.concurrent.CountDownLatch
 
 @Component
 class BrokerStompSessionHandler(
@@ -24,12 +23,9 @@ class BrokerStompSessionHandler(
 
     private var isConnected = false
 
-    private val latch = CountDownLatch(1)
-
     override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
         logger.info("connected to the server: ${session.sessionId}")
         isConnected = true
-        latch.countDown()
         session.subscribe("/user/queue/message/artifact", artifactDownloadHandler)
         session.subscribe("/user/queue/message/repository", repositoryGetHandler)
     }
@@ -42,27 +38,17 @@ class BrokerStompSessionHandler(
         exception: Throwable,
     ) {
         logger.error("handleException", exception)
-        logger.error(exception.message)
     }
 
     override fun handleTransportError(session: StompSession, exception: Throwable) {
         logger.error("Connection error: ${exception.message}")
-        if (isConnected) {
-            logger.error("Session closed. This could be due to a network error or the server closing the connection.")
-            isConnected = false
-            logger.info("Reconnecting...")
-            webSocketService.initSession()
-        } else {
-            if (latch.count != 0L) latch.countDown()
-        }
+        isConnected = false
+        logger.error("Session closed. This could be due to a network error or the server closing the connection.")
+        logger.info("Reconnecting...")
+        webSocketService.initSession()
     }
 
     fun isConnected(): Boolean {
-        awaitConnection()
         return isConnected
-    }
-
-    private fun awaitConnection() {
-        latch.await()
     }
 }
