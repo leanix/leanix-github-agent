@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch
 class BrokerStompSessionHandler(
     private val artifactDownloadHandler: ArtifactDownloadHandler,
     private val repositoryGetHandler: RepositoryGetHandler,
+    private val installationGetHandler: InstallationGetHandler,
 ) : StompSessionHandlerAdapter() {
     @Lazy
     @Autowired
@@ -32,6 +33,7 @@ class BrokerStompSessionHandler(
         latch.countDown()
         session.subscribe("/user/queue/message/artifact", artifactDownloadHandler)
         session.subscribe("/user/queue/message/repository", repositoryGetHandler)
+        session.subscribe("/user/queue/message/installation", installationGetHandler)
     }
 
     override fun handleException(
