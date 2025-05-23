@@ -8,10 +8,10 @@ import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
 import net.leanix.githubagent.dto.Installation
+import net.leanix.githubagent.dto.InstallationRequestDTO
 import net.leanix.githubagent.dto.ItemResponse
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
-import net.leanix.githubagent.dto.Organization
 import net.leanix.githubagent.dto.RepositoryItemResponse
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import org.junit.jupiter.api.BeforeEach
@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import java.util.UUID
 
 const val UNSUPPORTED_MANIFEST_EXTENSION = "leanix.yml"
 
@@ -419,19 +418,12 @@ class WebhookEventServiceTest {
         every { cachingService.set("runId", any(), any()) } just runs
         every { cachingService.remove("runId") } just runs
 
-        val eventType = "INSTALLATION"
-        val payload = """{
-          "action": "created",
-          "installation": {
-            "id": 30,
-            "account": {
-              "login": "test-org",
-              "id": 20
-            }
-          }
-        }"""
+        val installationRequestDTO = InstallationRequestDTO(
+            30,
+            Account("test-org")
+        )
 
-        webhookEventService.consumeWebhookEvent(eventType, payload)
+        webhookEventService.handleInstallationCreated(installationRequestDTO)
 
         verify(exactly = 6) { cachingService.get("runId") }
     }
@@ -453,37 +445,6 @@ class WebhookEventServiceTest {
 
         verify(exactly = 0) {
             webSocketService.sendMessage(any(), any())
-        }
-    }
-
-    @Test
-    fun `should send the org to the backend when an new installation is created`() {
-        val runId = UUID.randomUUID()
-        every { cachingService.get("runId") } returnsMany listOf("value", null, runId)
-        every { cachingService.set("runId", any(), any()) } just runs
-        every { cachingService.remove("runId") } just runs
-        every { gitHubAPIService.getPaginatedOrganizations(any()) } returns
-            listOf(Organization("testOrganization", 1))
-
-        val eventType = "INSTALLATION"
-        val payload = """{
-          "action": "created",
-          "installation": {
-            "id": 30,
-            "account": {
-              "login": "test-org",
-              "id": 20
-            }
-          }
-        }"""
-
-        webhookEventService.consumeWebhookEvent(eventType, payload)
-
-        verify {
-            webSocketService.sendMessage(
-                "$runId/organizations",
-                any()
-            )
         }
     }
 

@@ -3,7 +3,7 @@ package net.leanix.githubagent.services
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.client.GitHubClient
-import net.leanix.githubagent.dto.InstallationEventPayload
+import net.leanix.githubagent.dto.InstallationRequestDTO
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
@@ -37,7 +37,6 @@ class WebhookEventService(
     fun consumeWebhookEvent(eventType: String, payload: String) {
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
-            "INSTALLATION" -> handleInstallationEvent(payload)
             else -> {
                 logger.info("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other/$eventType", payload)
@@ -67,23 +66,16 @@ class WebhookEventService(
         }
     }
 
-    private fun handleInstallationEvent(payload: String) {
-        val installationEventPayload: InstallationEventPayload = objectMapper.readValue(payload)
-        if (installationEventPayload.action == "created") {
-            handleInstallationCreated(installationEventPayload)
-        }
-    }
-
-    private fun handleInstallationCreated(installationEventPayload: InstallationEventPayload) {
+    fun handleInstallationCreated(installationRequestDTO: InstallationRequestDTO) {
         while (cachingService.get("runId") != null) {
             logger.info("A full scan is already in progress, waiting for it to finish.")
             Thread.sleep(waitingTime)
         }
-        syncLogService.sendFullScanStart(installationEventPayload.installation.account.login)
+        syncLogService.sendFullScanStart(installationRequestDTO.account.login)
         kotlin.runCatching {
             val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
             val installation = gitHubClient.getInstallation(
-                installationEventPayload.installation.id.toLong(),
+                installationRequestDTO.id,
                 "Bearer $jwtToken"
             )
             gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
