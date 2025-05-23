@@ -95,15 +95,15 @@ docker run --platform linux/amd64 \
         ghcr.io/leanix/leanix-github-agent:dev
 ```
 ## Release Process
-In order to provide a excellent experience with the agent, we are using a three-pronged release process. Any change we undertake can be classified into one of the three categories:
+In order to provide an excellent experience with the agent, we are using a three-pronged release process. Any change we undertake can be classified into one of the following three categories:
 
-**Major**: These are releases that change the brokers behavior fundamentally or are significant feature addition. As per SemVer nomenclature these wil bump the version like so v1.0.0 > v2.0.0.
-Each major release (X.0.0) will be supported at least 3 months from its initial release.
+**Major**: These releases fundamentally change the agent's behavior or introduce significant new features. As per Semantic Versioning (SemVer) nomenclature, these will bump the version as follows: 1.0.0 → 2.0.0.
+Each major release (X.0.0) will be supported for at least 3 months from its initial release.
 
-**Minor**: These are releases that add non-breaking feature increments. Examples could be: adding new API calls to fetch further data for use in SAP LeanIX. As per SemVer nomenclature these wil bump the version like so v1.0.0 > v1.1.0.
+**Minor**: These releases add non-breaking feature enhancements. Examples include adding new API calls to fetch additional data for use in SAP LeanIX. As per SemVer, these will bump the version like so: 1.0.0 → 1.1.0.
 Each minor release (X.Y.0) will be supported until the next minor or major release, whichever comes first.
 
-**Patch**: These are releases that entail hotfixes, non-breaking updates to underlying libraries. As per SemVer nomenclature these wil bump the version like so v1.0.0 > v1.0.1.
+**Patch**: These releases include hotfixes or non-breaking updates to underlying libraries. As per SemVer, these will bump the version as follows: 1.0.0 → 1.0.1.
 
 ### Community Support
 
