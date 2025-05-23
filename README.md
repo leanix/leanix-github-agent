@@ -94,6 +94,25 @@ docker run --platform linux/amd64 \
            ...
         ghcr.io/leanix/leanix-github-agent:dev
 ```
+## Release Process
+In order to provide a excellent experience with the agent, we are using a three-pronged release process. Any change we undertake can be classified into one of the three categories:
+
+**Major**: These are releases that change the brokers behavior fundamentally or are significant feature addition. As per SemVer nomenclature these wil bump the version like so v1.0.0 > v2.0.0.
+Each major release (X.0.0) will be supported at least 3 months from its initial release.
+
+**Minor**: These are releases that add non-breaking feature increments. Examples could be: adding new API calls to fetch further data for use in SAP LeanIX. As per SemVer nomenclature these wil bump the version like so v1.0.0 > v1.1.0.
+Each minor release (X.Y.0) will be supported until the next minor or major release, whichever comes first.
+
+**Patch**: These are releases that entail hotfixes, non-breaking updates to underlying libraries. As per SemVer nomenclature these wil bump the version like so v1.0.0 > v1.0.1.
+
+### Community Support
+
+Once a version reaches EOL, official support ends. Upgrading to a supported version is strongly recommended. However, in exceptional cases where upgrading is not possible, the community may continue discussing and sharing fixes through forums or other community channels.
+
+### Support and Feedback
+
+We welcome your feedback, feature suggestions, and bug reports via [GitHub issues](https://github.com/leanix/leanix-github-agent/issues).
+
 
 ## Support and Feedback
 
