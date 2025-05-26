@@ -97,6 +97,7 @@ docker run --platform linux/amd64 \
 To provide an excellent experience with the agent, we are using a three-pronged release process. Any change we undertake can be classified into one of the following three categories:
 
 **Major**: These releases fundamentally change the agent's behavior or introduce significant new features. As per [Semantic Versioning (SemVer)](https://semver.org/) nomenclature, these will bump the version as follows: 1.0.0 → 2.0.0.
+
 Major versions are supported for at least 12 months or 3 months after the release of a newer major version.
 
 **Minor**: These releases add non-breaking feature enhancements. Examples include adding new API calls to fetch additional data for use in SAP LeanIX. As per SemVer, these will bump the version like so: 1.0.0 → 1.1.0.
