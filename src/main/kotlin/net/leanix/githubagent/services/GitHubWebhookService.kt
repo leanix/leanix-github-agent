@@ -23,7 +23,7 @@ class GitHubWebhookService(
     fun handleWebhookEvent(eventType: String, host: String, signature256: String?, payload: String) {
         val runId = cachingService.get("runId")
         if (runId != null && eventType.uppercase() != "INSTALLATION") {
-            logger.info("Received a webhook event while a full sync is in progress, ignoring the event.")
+            logger.debug("Received a webhook event while a full sync is in progress, ignoring the event.")
             return
         }
         if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {

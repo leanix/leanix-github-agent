@@ -42,10 +42,12 @@ class BrokerStompSessionHandler(
 
     override fun handleTransportError(session: StompSession, exception: Throwable) {
         logger.error("Connection error: ${exception.message}")
-        isConnected = false
-        logger.error("Session closed. This could be due to a network error or the server closing the connection.")
-        logger.info("Reconnecting...")
-        webSocketService.initSession()
+        if (isConnected) {
+            isConnected = false
+            logger.error("Session closed. This could be due to a network error or the server closing the connection.")
+            logger.info("Reconnecting...")
+            webSocketService.initSession()
+        }
     }
 
     fun isConnected(): Boolean {
