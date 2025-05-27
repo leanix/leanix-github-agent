@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component
 class BrokerStompSessionHandler(
     private val artifactDownloadHandler: ArtifactDownloadHandler,
     private val repositoryGetHandler: RepositoryGetHandler,
+    private val installationGetHandler: InstallationGetHandler,
 ) : StompSessionHandlerAdapter() {
     @Lazy
     @Autowired
@@ -28,6 +29,7 @@ class BrokerStompSessionHandler(
         isConnected = true
         session.subscribe("/user/queue/message/artifact", artifactDownloadHandler)
         session.subscribe("/user/queue/message/repository", repositoryGetHandler)
+        session.subscribe("/user/queue/message/installation", installationGetHandler)
     }
 
     override fun handleException(
