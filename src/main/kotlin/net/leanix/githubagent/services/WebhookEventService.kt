@@ -2,19 +2,14 @@ package net.leanix.githubagent.services
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import net.leanix.githubagent.client.GitHubClient
-import net.leanix.githubagent.dto.InstallationRequestDTO
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
 import net.leanix.githubagent.dto.PushEventPayload
-import net.leanix.githubagent.exceptions.JwtTokenNotFound
-import net.leanix.githubagent.shared.INSTALLATION_LABEL
 import net.leanix.githubagent.shared.MANIFEST_FILE_NAME
 import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @SuppressWarnings("TooManyFunctions")
@@ -22,13 +17,7 @@ import org.springframework.stereotype.Service
 class WebhookEventService(
     private val webSocketService: WebSocketService,
     private val gitHubGraphQLService: GitHubGraphQLService,
-    private val cachingService: CachingService,
     private val gitHubAuthenticationService: GitHubAuthenticationService,
-    private val gitHubScanningService: GitHubScanningService,
-    private val syncLogService: SyncLogService,
-    @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
-    private val gitHubClient: GitHubClient,
-    private val gitHubEnterpriseService: GitHubEnterpriseService
 ) {
 
     private val logger = LoggerFactory.getLogger(WebhookEventService::class.java)
@@ -63,35 +52,6 @@ class WebhookEventService(
                 repositoryName,
                 installationToken
             )
-        }
-    }
-
-    fun handleInstallationCreated(installationRequestDTO: InstallationRequestDTO) {
-        while (cachingService.get("runId") != null) {
-            logger.info("A full scan is already in progress, waiting for it to finish.")
-            Thread.sleep(waitingTime)
-        }
-        syncLogService.sendFullScanStart(installationRequestDTO.account.login)
-        kotlin.runCatching {
-            val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
-            val installation = gitHubClient.getInstallation(
-                installationRequestDTO.id,
-                "Bearer $jwtToken"
-            )
-            gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
-                INSTALLATION_LABEL,
-                installation.permissions,
-                installation.events
-            )
-            gitHubAuthenticationService.refreshTokens()
-            gitHubScanningService.fetchAndSendOrganisationsData(listOf(installation))
-            gitHubScanningService.fetchAndSendRepositoriesData(installation).forEach { repository ->
-                gitHubScanningService.fetchManifestFilesAndSend(installation, repository)
-            }
-        }.onSuccess {
-            syncLogService.sendFullScanSuccess()
-        }.onFailure {
-            syncLogService.sendFullScanFailure(it.message)
         }
     }
 

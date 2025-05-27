@@ -2,13 +2,10 @@ package net.leanix.githubagent.services
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
-import io.mockk.just
-import io.mockk.runs
 import io.mockk.verify
 import net.leanix.githubagent.client.GitHubClient
 import net.leanix.githubagent.dto.Account
 import net.leanix.githubagent.dto.Installation
-import net.leanix.githubagent.dto.InstallationRequestDTO
 import net.leanix.githubagent.dto.ItemResponse
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
@@ -410,22 +407,6 @@ class WebhookEventServiceTest {
                 )
             )
         }
-    }
-
-    @Test
-    fun `should wait for active scan to finish before starting scanning new org`() {
-        every { cachingService.get("runId") } returnsMany listOf("value", "value", "value", null)
-        every { cachingService.set("runId", any(), any()) } just runs
-        every { cachingService.remove("runId") } just runs
-
-        val installationRequestDTO = InstallationRequestDTO(
-            30,
-            Account("test-org")
-        )
-
-        webhookEventService.handleInstallationCreated(installationRequestDTO)
-
-        verify(exactly = 6) { cachingService.get("runId") }
     }
 
     @Test
