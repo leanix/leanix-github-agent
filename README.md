@@ -101,7 +101,7 @@ To provide an excellent experience with the agent, we are using a three-pronged 
 Major versions are supported for at least 12 months or 3 months after the release of a newer major version.
 
 **Minor**: These releases add non-breaking feature enhancements. Examples include adding new API calls to fetch additional data for use in SAP LeanIX. As per SemVer, these will bump the version like so: 1.0.0 → 1.1.0.
-Each minor release (X.Y.0) will be supported until the next minor or major release, whichever comes first.
+Each minor release (X.Y.0) will be supported until the next minor or the end of support for its parent major version, whichever comes first.
 
 **Patch**: These releases include hotfixes or non-breaking updates to underlying libraries. As per SemVer, these will bump the version as follows: 1.0.0 → 1.0.1.
 
