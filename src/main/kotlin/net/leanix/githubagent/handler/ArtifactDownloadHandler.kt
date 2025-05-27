@@ -88,7 +88,7 @@ class ArtifactDownloadHandler(
     }
 
     private fun sendArtifactEvent(dto: ArtifactDownloadDTO, artifactName: String, artifactContent: String) {
-        logger.debug("Sending artifacts file: ${dto.repositoryName} - $artifactName")
+        logger.info("Sending artifacts file: ${dto.repositoryName} - $artifactName")
         webSocketService.sendMessage(
             "/artifact",
             ArtifactDTO(
