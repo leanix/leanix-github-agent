@@ -14,3 +14,4 @@ class GraphQLApiException(errors: List<GraphQLClientError>) :
 class WebhookSecretNotSetException : RuntimeException("Webhook secret not set")
 class InvalidEventSignatureException : RuntimeException("Invalid event signature")
 class ManifestFileNotFoundException : RuntimeException("Manifest File Not Found")
+class UnableToSendMessageException : RuntimeException("Unable to send message to the backend")

@@ -1,8 +1,9 @@
 package net.leanix.githubagent.services
 
-import net.leanix.githubagent.handler.BrokerStompSessionHandler
+import net.leanix.githubagent.dto.ConnectionEstablishedEvent
+import net.leanix.githubagent.exceptions.UnableToSendMessageException
 import net.leanix.githubagent.shared.APP_NAME_TOPIC
-import org.slf4j.LoggerFactory
+import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
@@ -13,26 +14,25 @@ class GitHubStartService(
     private val gitHubScanningService: GitHubScanningService,
     private val gitHubEnterpriseService: GitHubEnterpriseService,
     private val cachingService: CachingService,
-    private val brokerStompSessionHandler: BrokerStompSessionHandler,
     private val syncLogService: SyncLogService
 ) {
+    var requireScan = true
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
+    @SuppressWarnings("UnusedParameter")
     @Async
-    fun startAgent() {
-        webSocketService.initSession()
-        if (!brokerStompSessionHandler.isConnected()) {
-            logger.error("Stopping the application as the WebSocket connection could not be established.")
-            return
-        }
-        kotlin.runCatching {
-            syncLogService.sendFullScanStart(null)
-            scanResources()
-        }.onSuccess {
-            syncLogService.sendFullScanSuccess()
-        }.onFailure {
-            syncLogService.sendFullScanFailure(it.message)
+    @EventListener
+    fun startAgent(connectionEstablishedEvent: ConnectionEstablishedEvent) {
+        if (requireScan) {
+            runCatching {
+                requireScan = false
+                syncLogService.sendFullScanStart(null)
+                scanResources()
+            }.onSuccess {
+                syncLogService.sendFullScanSuccess()
+            }.onFailure {
+                if (it is UnableToSendMessageException) requireScan = true
+                syncLogService.sendFullScanFailure(it.message)
+            }
         }
     }
 

@@ -15,10 +15,11 @@ class WebSocketServiceTests {
     private val webSocketClientConfig: WebSocketClientConfig = mockk()
     private val stompSession: StompSession = mockk()
     private val brokerStompSessionHandler: BrokerStompSessionHandler = mockk()
+    private val cachingService: CachingService = mockk()
 
     @BeforeEach
     fun setUp() {
-        webSocketService = WebSocketService(webSocketClientConfig, brokerStompSessionHandler)
+        webSocketService = WebSocketService(webSocketClientConfig, brokerStompSessionHandler, cachingService)
     }
 
     @Test
