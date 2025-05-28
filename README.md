@@ -44,11 +44,10 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
 
    This command starts the agent and exposes it on port 8000. The agent starts scanning your organizations and repositories.
 
+#### Health Endpoint
 
-6. The container hosts a live service that runs continuously.
-   - It provides a health endpoint at `/actuator/health`, which can be used to monitor the service's health.
+The agent provides a health endpoint at `/actuator/health`, which can be used to monitor the service's health.
 
-**Note**: The Docker image for the agent is currently unavailable. It will become available for download once a new version is released. Please check the [Releases](https://github.com/leanix/leanix-github-agent/releases) page for updates.
 
 ### Troubleshooting
 
@@ -94,6 +93,21 @@ docker run --platform linux/amd64 \
            ...
         ghcr.io/leanix/leanix-github-agent:dev
 ```
+## Release Process
+To provide an excellent experience with the agent, we are using a three-pronged release process. Any change we undertake can be classified into one of the following three categories:
+
+**Major**: These releases fundamentally change the agent's behavior or introduce significant new features. As per [Semantic Versioning (SemVer)](https://semver.org/) nomenclature, these will bump the version as follows: 1.0.0 → 2.0.0.
+
+Major versions are supported for at least 12 months or 3 months after the release of a newer major version.
+
+**Minor**: These releases add non-breaking feature enhancements. Examples include adding new API calls to fetch additional data for use in SAP LeanIX. As per SemVer, these will bump the version like so: 1.0.0 → 1.1.0.
+Each minor release (X.Y.0) will be supported until the next minor or the end of support for its parent major version, whichever comes first.
+
+**Patch**: These releases include hotfixes or non-breaking updates to underlying libraries. As per SemVer, these will bump the version as follows: 1.0.0 → 1.0.1.
+
+### Community Support
+
+Once a version reaches End-of-Life (EOL), official support ends. Upgrading to a supported version is strongly recommended. However, in exceptional cases where upgrading is not possible, the community may continue discussing and sharing fixes through forums or other community channels.
 
 ## Support and Feedback
 
