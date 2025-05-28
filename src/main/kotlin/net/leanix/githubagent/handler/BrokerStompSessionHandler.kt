@@ -1,8 +1,10 @@
 package net.leanix.githubagent.handler
 
+import net.leanix.githubagent.dto.ConnectionEstablishedEvent
 import net.leanix.githubagent.services.WebSocketService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaders
@@ -15,6 +17,7 @@ class BrokerStompSessionHandler(
     private val artifactDownloadHandler: ArtifactDownloadHandler,
     private val repositoryGetHandler: RepositoryGetHandler,
     private val installationGetHandler: InstallationGetHandler,
+    private val eventPublisher: ApplicationEventPublisher
 ) : StompSessionHandlerAdapter() {
     @Lazy
     @Autowired
@@ -30,6 +33,7 @@ class BrokerStompSessionHandler(
         session.subscribe("/user/queue/message/artifact", artifactDownloadHandler)
         session.subscribe("/user/queue/message/repository", repositoryGetHandler)
         session.subscribe("/user/queue/message/installation", installationGetHandler)
+        eventPublisher.publishEvent(ConnectionEstablishedEvent())
     }
 
     override fun handleException(

@@ -3,6 +3,7 @@ package net.leanix.githubagent.services
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import net.leanix.githubagent.dto.ConnectionEstablishedEvent
 import net.leanix.githubagent.dto.GitHubAppResponse
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.shared.APP_NAME_TOPIC
@@ -36,7 +37,6 @@ class GitHubStartServiceTest {
             gitHubScanningService,
             gitHubEnterpriseService,
             cachingService,
-            brokerStompSessionHandler,
             syncLogService
         )
 
@@ -61,7 +61,7 @@ class GitHubStartServiceTest {
                 gitHubAppName, mapOf(), listOf()
             )
 
-        gitHubStartService.startAgent()
+        gitHubStartService.startAgent(ConnectionEstablishedEvent())
 
         verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
         verify { syncLogService.sendFullScanStart(any()) }

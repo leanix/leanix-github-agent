@@ -1,6 +1,8 @@
 package net.leanix.githubagent.services
 
+import io.github.resilience4j.retry.annotation.Retry
 import net.leanix.githubagent.config.WebSocketClientConfig
+import net.leanix.githubagent.exceptions.UnableToSendMessageException
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.slf4j.LoggerFactory
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service
 class WebSocketService(
     private val webSocketClientConfig: WebSocketClientConfig,
     private val brokerStompSessionHandler: BrokerStompSessionHandler,
+    private val cachingService: CachingService,
 ) {
 
     private val logger = LoggerFactory.getLogger(WebSocketService::class.java)
@@ -27,10 +30,15 @@ class WebSocketService(
         }
     }
 
+    @Retry(name = "sendMessageRetry")
     fun sendMessage(topic: String, data: Any) {
-        if (!brokerStompSessionHandler.isConnected()) {
+        if (!brokerStompSessionHandler.isConnected() && cachingService.get("runId") == null) {
             return
         }
-        stompSession!!.send("$TOPIC_PREFIX$topic", data)
+        runCatching {
+            stompSession!!.send("$TOPIC_PREFIX$topic", data)
+        }.onFailure {
+            throw UnableToSendMessageException()
+        }
     }
 }
