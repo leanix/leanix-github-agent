@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "net.leanix"
-version = "v0.2.0"
+version = "v1.0.0"
 
 java {
     toolchain {
