@@ -16,12 +16,18 @@ class GitHubStartService(
     private val cachingService: CachingService,
     private val syncLogService: SyncLogService
 ) {
-    var requireScan = true
+    companion object {
+        var requireScan: Boolean = true
+    }
 
     @SuppressWarnings("UnusedParameter")
     @Async
     @EventListener
     fun startAgent(connectionEstablishedEvent: ConnectionEstablishedEvent) {
+        verifyAndStartScan()
+    }
+
+    fun verifyAndStartScan() {
         if (requireScan) {
             runCatching {
                 requireScan = false
