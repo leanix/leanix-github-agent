@@ -1,7 +1,7 @@
 package net.leanix.githubagent.handler
 
 import net.leanix.githubagent.services.CachingService
-import net.leanix.githubagent.services.GitHubStartService
+import net.leanix.githubagent.services.FullScanService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -16,7 +16,7 @@ class FullScanHandler(
     @Lazy @Autowired
     private val cachingService: CachingService,
     @Lazy @Autowired
-    private val gitHubStartService: GitHubStartService,
+    private val fullScanService: FullScanService,
     @Value("\${webhookEventService.waitingTime}") private val waitingTime: Long,
 ) : StompFrameHandler {
 
@@ -33,8 +33,8 @@ class FullScanHandler(
                 logger.info("A full scan is already in progress, waiting for it to finish.")
                 Thread.sleep(waitingTime)
             }
-            GitHubStartService.requireScan = true
-            gitHubStartService.verifyAndStartScan()
+            FullScanService.requireScan = true
+            fullScanService.verifyAndStartScan()
         }
     }
 }
