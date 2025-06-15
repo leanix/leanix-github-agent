@@ -44,7 +44,7 @@ jobs:
 
       - name: Add coverage to PR
         id: jacoco
-        uses: madrapps/jacoco-report@v1.3
+        uses: madrapps/jacoco-report@v1.6
         with:
           paths: ${{ github.workspace }}/build/jacocoXml/jacocoTestReport.xml
           token: ${{secrets.GITHUB_TOKEN}}
