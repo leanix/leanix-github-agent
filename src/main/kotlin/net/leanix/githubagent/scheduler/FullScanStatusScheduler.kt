@@ -12,7 +12,7 @@ class FullScanStatusScheduler(
     private val cachingService: CachingService,
 ) {
 
-    @Scheduled(fixedDelay = 10000, initialDelay = 10000)
+    @Scheduled(fixedDelay = 30000, initialDelay = 30000)
     fun sendFullScanStatus() {
         val runId = cachingService.get("runId")
         val status = if (runId != null) FullScanStatus.IN_PROGRESS else FullScanStatus.FINISHED
