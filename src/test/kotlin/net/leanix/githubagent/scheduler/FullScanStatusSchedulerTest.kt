@@ -20,7 +20,7 @@ class FullScanStatusSchedulerTest {
 
         scheduler.sendFullScanStatus()
 
-        verify { webSocketService.sendMessage("fullScan/status", FullScanStatus.IN_PROGRESS.name) }
+        verify { webSocketService.sendMessage("/fullScanStatus", FullScanStatus.IN_PROGRESS.name) }
     }
 
     @Test
@@ -29,6 +29,6 @@ class FullScanStatusSchedulerTest {
 
         scheduler.sendFullScanStatus()
 
-        verify { webSocketService.sendMessage("fullScan/status", FullScanStatus.FINISHED.name) }
+        verify { webSocketService.sendMessage("/fullScanStatus", FullScanStatus.FINISHED.name) }
     }
 }

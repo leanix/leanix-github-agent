@@ -14,8 +14,8 @@ class FullScanStatusScheduler(
 
     @Scheduled(fixedDelay = 10000, initialDelay = 10000)
     fun sendFullScanStatus() {
-        val runId = cachingService.get("runId") as String?
+        val runId = cachingService.get("runId")
         val status = if (runId != null) FullScanStatus.IN_PROGRESS else FullScanStatus.FINISHED
-        webSocketService.sendMessage("fullScan/status", status.name)
+        webSocketService.sendMessage("/fullScanStatus", status.name)
     }
 }
