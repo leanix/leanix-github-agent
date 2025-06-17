@@ -25,11 +25,19 @@ class WebSocketClientConfig(
     private val leanIXProperties: LeanIXProperties,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
+    private val logger = org.slf4j.LoggerFactory.getLogger(WebSocketClientConfig::class.java)
+
     @Retry(name = "ws_init_session")
     fun initSession(): StompSession {
         val headers = WebSocketHttpHeaders()
         val stompHeaders = StompHeaders()
-        stompHeaders["Authorization"] = "Bearer ${leanIXAuthService.getBearerToken()}"
+        stompHeaders["Authorization"] = runCatching {
+            "Bearer ${leanIXAuthService.getBearerToken()}"
+        }.getOrElse {
+            logger.error("Failed to get Bearer token for WebSocket connection, please check your Technical User token")
+            logger.info("Retrying to connect...")
+            throw it
+        }
         stompHeaders["GitHub-Enterprise-URL"] = gitHubEnterpriseProperties.baseUrl
         stompHeaders["GitHub-Agent-Version"] = GITHUB_AGENT_VERSION
         return stompClient().connectAsync(
