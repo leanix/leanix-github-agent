@@ -5,6 +5,7 @@ import io.github.resilience4j.retry.annotation.Retry
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.LeanIXAuthService
 import net.leanix.githubagent.shared.GitHubAgentProperties.GITHUB_AGENT_VERSION
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
@@ -25,7 +26,7 @@ class WebSocketClientConfig(
     private val leanIXProperties: LeanIXProperties,
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
 ) {
-    private val logger = org.slf4j.LoggerFactory.getLogger(WebSocketClientConfig::class.java)
+    private val logger = LoggerFactory.getLogger(WebSocketClientConfig::class.java)
 
     @Retry(name = "ws_init_session")
     fun initSession(): StompSession {
