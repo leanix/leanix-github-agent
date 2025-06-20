@@ -34,10 +34,8 @@ class GitHubStartServiceTest {
         gitHubStartService = GitHubStartService(
             githubAuthenticationService,
             webSocketService,
-            gitHubScanningService,
             gitHubEnterpriseService,
             cachingService,
-            syncLogService
         )
 
         every { webSocketService.initSession() } returns Unit
@@ -64,6 +62,5 @@ class GitHubStartServiceTest {
         gitHubStartService.startAgent(ConnectionEstablishedEvent())
 
         verify { webSocketService.sendMessage(APP_NAME_TOPIC, gitHubAppName) }
-        verify { syncLogService.sendFullScanStart(any()) }
     }
 }
