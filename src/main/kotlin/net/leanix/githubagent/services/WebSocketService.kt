@@ -41,7 +41,7 @@ class WebSocketService(
         try {
             stompSession!!.send("$TOPIC_PREFIX$topic", data)
         } catch (e: Exception) {
-            throw UnableToSendMessageException()
+            throw UnableToSendMessageException(e)
         } finally {
             stompSendLock.unlock()
         }
