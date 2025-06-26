@@ -8,6 +8,7 @@ import net.leanix.githubagent.shared.TOPIC_PREFIX
 import org.slf4j.LoggerFactory
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.stereotype.Service
+import java.util.concurrent.locks.ReentrantLock
 
 @Service
 class WebSocketService(
@@ -18,6 +19,7 @@ class WebSocketService(
 
     private val logger = LoggerFactory.getLogger(WebSocketService::class.java)
     var stompSession: StompSession? = null
+    private val stompSendLock = ReentrantLock()
 
     fun initSession() {
         logger.info("Initializing websocket session")
@@ -35,10 +37,13 @@ class WebSocketService(
         if (!brokerStompSessionHandler.isConnected() && cachingService.get("runId") == null) {
             return
         }
-        runCatching {
+        stompSendLock.lock()
+        try {
             stompSession!!.send("$TOPIC_PREFIX$topic", data)
-        }.onFailure {
-            throw UnableToSendMessageException()
+        } catch (e: Exception) {
+            throw UnableToSendMessageException(e)
+        } finally {
+            stompSendLock.unlock()
         }
     }
 }
