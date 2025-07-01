@@ -1,9 +1,11 @@
 package net.leanix.githubagent.services
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
+import net.leanix.githubagent.dto.GenericWebhookEvent
 import net.leanix.githubagent.exceptions.InvalidEventSignatureException
 import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
-import net.leanix.githubagent.shared.SUPPORTED_EVENT_TYPES
+import net.leanix.githubagent.handler.SupportedWebhookEvent
 import net.leanix.githubagent.shared.hmacSHA256
 import net.leanix.githubagent.shared.timingSafeEqual
 import org.slf4j.LoggerFactory
@@ -17,6 +19,17 @@ class GitHubWebhookService(
     private val cachingService: CachingService,
 ) {
 
+    companion object {
+        private var supportedWebhookEvents = listOf<SupportedWebhookEvent>()
+
+        fun updateSupportedWebhookEvents(events: List<SupportedWebhookEvent>) {
+            supportedWebhookEvents = events
+        }
+
+        fun getSupportedWebhookEvents(): List<SupportedWebhookEvent> = supportedWebhookEvents
+    }
+
+    private val objectMapper = jacksonObjectMapper()
     private val logger = LoggerFactory.getLogger(GitHubWebhookService::class.java)
 
     @Async
@@ -26,7 +39,10 @@ class GitHubWebhookService(
             logger.debug("Received a webhook event while a full sync is in progress, ignoring the event.")
             return
         }
-        if (SUPPORTED_EVENT_TYPES.contains(eventType.uppercase())) {
+
+        val eventAction = extractEventAction(payload)
+        val supportedWebhookEvent = findSupportedWebhookEvent(eventType)
+        if (isEventSupported(supportedWebhookEvent, eventAction)) {
             if (!gitHubEnterpriseProperties.baseUrl.contains(host)) {
                 logger.error("Received a webhook event from an unknown host: $host")
                 return
@@ -49,7 +65,19 @@ class GitHubWebhookService(
             logger.info("Received a webhook event of type: $eventType")
             webhookEventService.consumeWebhookEvent(eventType, payload)
         } else {
-            logger.warn("Received an unsupported event of type: $eventType")
+            logger.warn("Received an unsupported event of type: $eventType with action: $eventAction")
         }
+    }
+
+    private fun findSupportedWebhookEvent(eventType: String): SupportedWebhookEvent? {
+        return getSupportedWebhookEvents().find { it.eventType.equals(eventType, ignoreCase = true) }
+    }
+
+    private fun extractEventAction(payload: String): String? {
+        return objectMapper.readValue(payload, GenericWebhookEvent::class.java).action
+    }
+
+    private fun isEventSupported(event: SupportedWebhookEvent?, action: String?): Boolean {
+        return event != null && (event.actions.isEmpty() || (action != null && action in event.actions))
     }
 }

@@ -6,6 +6,7 @@ import io.mockk.verify
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.exceptions.InvalidEventSignatureException
 import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
+import net.leanix.githubagent.helper.defaultSupportedWebhookEvents
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -24,6 +25,7 @@ class GitHubWebhookServiceTest {
     @BeforeEach
     fun setUp() {
         every { cachingService.get("runId") } returns null
+        GitHubWebhookService.updateSupportedWebhookEvents(defaultSupportedWebhookEvents())
     }
 
     @Test
