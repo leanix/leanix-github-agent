@@ -29,7 +29,7 @@ class ConfigurationSetHandlerTest {
         configurationSetHandler.handleFrame(headers, payload)
 
         verify { GitHubWebhookService.updateSupportedWebhookEvents(supportedEvents) }
-        assertEquals( GitHubWebhookService.getSupportedWebhookEvents().size, supportedEvents.size)
+        assertEquals(GitHubWebhookService.getSupportedWebhookEvents().size, supportedEvents.size)
     }
 
     @Test
