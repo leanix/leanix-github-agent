@@ -18,6 +18,7 @@ class BrokerStompSessionHandler(
     private val repositoryGetHandler: RepositoryGetHandler,
     private val installationGetHandler: InstallationGetHandler,
     private val fullScanHandler: FullScanHandler,
+    private val configurationSetHandler: ConfigurationSetHandler,
     private val eventPublisher: ApplicationEventPublisher
 ) : StompSessionHandlerAdapter() {
     @Lazy
@@ -35,6 +36,7 @@ class BrokerStompSessionHandler(
         session.subscribe("/user/queue/message/repository", repositoryGetHandler)
         session.subscribe("/user/queue/message/installation", installationGetHandler)
         session.subscribe("/user/queue/message/fullScan", fullScanHandler)
+        session.subscribe("/user/queue/message/configurationSet", configurationSetHandler)
         eventPublisher.publishEvent(ConnectionEstablishedEvent())
     }
 

@@ -5,6 +5,7 @@ import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
 import io.mockk.verify
 import net.leanix.githubagent.exceptions.WebhookSecretNotSetException
+import net.leanix.githubagent.helper.defaultSupportedWebhookEvents
 import net.leanix.githubagent.services.CachingService
 import net.leanix.githubagent.services.GitHubWebhookService
 import net.leanix.githubagent.services.SyncLogService
@@ -40,6 +41,7 @@ class GitHubWebhookControllerTest {
         every { syncLogService.sendErrorLog(any()) } returns Unit
         every { cachingService.get(any()) } returns Unit
         every { cachingService.set(any(), any(), any()) } returns Unit
+        GitHubWebhookService.updateSupportedWebhookEvents(defaultSupportedWebhookEvents())
     }
 
     @Test
