@@ -32,8 +32,8 @@ class GitHubAuthenticationService(
 ) {
 
     companion object {
-        private const val JWT_EXPIRATION_DURATION_IN_MILLISECONDS = 600000L
-        private const val INSTALLATION_JWT_EXPIRATION_DURATION_IN_MILLISECONDS = 300000L
+        private const val JWT_EXPIRATION_DURATION_IN_SECONDS = 600L
+        private const val INSTALLATION_JWT_EXPIRATION_DURATION_IN_SECONDS = 3600L
         private const val pemPrefix = "-----BEGIN RSA PRIVATE KEY-----"
         private const val pemSuffix = "-----END RSA PRIVATE KEY-----"
         private val logger = LoggerFactory.getLogger(GitHubAuthenticationService::class.java)
@@ -77,7 +77,7 @@ class GitHubAuthenticationService(
         return runCatching {
             Jwts.builder()
                 .setIssuedAt(Date())
-                .setExpiration(Date(System.currentTimeMillis() + JWT_EXPIRATION_DURATION_IN_MILLISECONDS))
+                .setExpiration(Date(System.currentTimeMillis() + (JWT_EXPIRATION_DURATION_IN_SECONDS * 1000)))
                 .setIssuer(cachingService.get("githubAppId").toString())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact()
@@ -90,7 +90,7 @@ class GitHubAuthenticationService(
     private fun verifyAndCacheJwtToken(jwt: String) {
         runCatching {
             gitHubEnterpriseService.verifyJwt(jwt)
-            cachingService.set("jwtToken", jwt, JWT_EXPIRATION_DURATION_IN_MILLISECONDS)
+            cachingService.set("jwtToken", jwt, JWT_EXPIRATION_DURATION_IN_SECONDS)
             logger.info("JWT token generated and cached successfully")
         }.onFailure {
             logger.error("Failed to verify and cache JWT token", it)
@@ -107,7 +107,7 @@ class GitHubAuthenticationService(
             cachingService.set(
                 "installationToken:${installation.id}",
                 installationToken,
-                INSTALLATION_JWT_EXPIRATION_DURATION_IN_MILLISECONDS
+                INSTALLATION_JWT_EXPIRATION_DURATION_IN_SECONDS
             )
         }
     }

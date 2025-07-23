@@ -23,7 +23,7 @@ class CachingService(
                 value: CacheValue,
                 currentTime: Long
             ): Long {
-                return TimeUnit.MILLISECONDS.toNanos(value.expiry ?: Long.MAX_VALUE)
+                return TimeUnit.SECONDS.toNanos(value.expiry ?: Long.MAX_VALUE)
             }
 
             override fun expireAfterUpdate(
@@ -32,7 +32,7 @@ class CachingService(
                 currentTime: Long,
                 currentDuration: Long
             ): Long {
-                return TimeUnit.MILLISECONDS.toNanos(value.expiry ?: Long.MAX_VALUE)
+                return TimeUnit.SECONDS.toNanos(value.expiry ?: Long.MAX_VALUE)
             }
 
             override fun expireAfterRead(
