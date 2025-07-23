@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Expiry
 import jakarta.annotation.PostConstruct
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import org.springframework.stereotype.Service
+import java.util.concurrent.TimeUnit
 
 @Service
 class CachingService(
@@ -22,7 +23,7 @@ class CachingService(
                 value: CacheValue,
                 currentTime: Long
             ): Long {
-                return value.expiry?.times(1_000_000_000) ?: Long.MAX_VALUE
+                return TimeUnit.MILLISECONDS.toNanos(value.expiry ?: Long.MAX_VALUE)
             }
 
             override fun expireAfterUpdate(
@@ -31,7 +32,7 @@ class CachingService(
                 currentTime: Long,
                 currentDuration: Long
             ): Long {
-                return value.expiry?.times(1_000_000_000) ?: Long.MAX_VALUE
+                return TimeUnit.MILLISECONDS.toNanos(value.expiry ?: Long.MAX_VALUE)
             }
 
             override fun expireAfterRead(

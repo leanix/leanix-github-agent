@@ -32,7 +32,8 @@ class GitHubAuthenticationService(
 ) {
 
     companion object {
-        private const val JWT_EXPIRATION_DURATION = 600000L
+        private const val JWT_EXPIRATION_DURATION_IN_MILLISECONDS = 600000L
+        private const val INSTALLATION_JWT_EXPIRATION_DURATION_IN_MILLISECONDS = 300000L
         private const val pemPrefix = "-----BEGIN RSA PRIVATE KEY-----"
         private const val pemSuffix = "-----END RSA PRIVATE KEY-----"
         private val logger = LoggerFactory.getLogger(GitHubAuthenticationService::class.java)
@@ -76,7 +77,7 @@ class GitHubAuthenticationService(
         return runCatching {
             Jwts.builder()
                 .setIssuedAt(Date())
-                .setExpiration(Date(System.currentTimeMillis() + JWT_EXPIRATION_DURATION))
+                .setExpiration(Date(System.currentTimeMillis() + JWT_EXPIRATION_DURATION_IN_MILLISECONDS))
                 .setIssuer(cachingService.get("githubAppId").toString())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact()
@@ -89,7 +90,7 @@ class GitHubAuthenticationService(
     private fun verifyAndCacheJwtToken(jwt: String) {
         runCatching {
             gitHubEnterpriseService.verifyJwt(jwt)
-            cachingService.set("jwtToken", jwt, JWT_EXPIRATION_DURATION)
+            cachingService.set("jwtToken", jwt, JWT_EXPIRATION_DURATION_IN_MILLISECONDS)
             logger.info("JWT token generated and cached successfully")
         }.onFailure {
             logger.error("Failed to verify and cache JWT token", it)
@@ -103,7 +104,11 @@ class GitHubAuthenticationService(
     ) {
         installations.forEach { installation ->
             val installationToken = gitHubClient.createInstallationToken(installation.id, "Bearer $jwtToken").token
-            cachingService.set("installationToken:${installation.id}", installationToken, 3600L)
+            cachingService.set(
+                "installationToken:${installation.id}",
+                installationToken,
+                INSTALLATION_JWT_EXPIRATION_DURATION_IN_MILLISECONDS
+            )
         }
     }
 
