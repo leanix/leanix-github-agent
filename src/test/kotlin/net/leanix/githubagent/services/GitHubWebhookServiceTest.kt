@@ -89,4 +89,14 @@ class GitHubWebhookServiceTest {
 
         verify(exactly = 0) { webhookEventService.consumeWebhookEvent(any(), any()) }
     }
+
+    @Test
+    fun `should throw InvalidEventSignatureException when signature does not start with sha256=`() {
+        every { gitHubEnterpriseProperties.baseUrl } returns "known.host"
+        every { gitHubEnterpriseProperties.webhookSecret } returns "secret"
+
+        assertThrows<InvalidEventSignatureException> {
+            gitHubWebhookService.handleWebhookEvent("PUSH", "known.host", "invalid_signature", "{}")
+        }
+    }
 }
