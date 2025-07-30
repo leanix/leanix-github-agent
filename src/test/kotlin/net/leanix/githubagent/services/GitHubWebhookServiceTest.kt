@@ -99,4 +99,27 @@ class GitHubWebhookServiceTest {
             gitHubWebhookService.handleWebhookEvent("PUSH", "known.host", "invalid_signature", "{}")
         }
     }
+
+    @Test
+    fun `should process event with valid signature from event json`() {
+        val payload = """{
+          "action": "created",
+          "installation": {
+            "id": 30,
+            "account": {
+              "login": "test-org",
+              "id": 20
+            }
+          }
+        }"""
+        val secret = "secret"
+        val validSignature = "sha256=042fb14dec4f623e224b1b574e40ff776c341fcd883756256d786a1b95bb3aa8"
+        every { gitHubEnterpriseProperties.baseUrl } returns "known.host"
+        every { gitHubEnterpriseProperties.webhookSecret } returns secret
+        every { webhookEventService.consumeWebhookEvent(any(), any()) } returns Unit
+
+        gitHubWebhookService.handleWebhookEvent("PUSH", "known.host", validSignature, payload)
+
+        verify { webhookEventService.consumeWebhookEvent("PUSH", payload) }
+    }
 }
