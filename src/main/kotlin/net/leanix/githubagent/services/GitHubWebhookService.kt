@@ -60,6 +60,13 @@ class GitHubWebhookService(
                     logger.error("Invalid signature format, expected 'sha256=' prefix")
                     throw InvalidEventSignatureException()
                 }
+
+                val signatureWithoutPrefix = signature256.removePrefix("sha256=")
+                if (!signatureWithoutPrefix.matches(Regex("^[a-fA-F0-9]{64}$"))) {
+                    logger.error("Invalid signature format, expected a 64-character hexadecimal string after 'sha256='")
+                    throw InvalidEventSignatureException()
+                }
+
                 val hashedSecret = hmacSHA256(gitHubEnterpriseProperties.webhookSecret, payload)
                 val isEqual = timingSafeEqual(signature256.removePrefix("sha256="), hashedSecret)
                 if (!isEqual) throw InvalidEventSignatureException()
