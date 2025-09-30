@@ -1,15 +1,24 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": [
+    "github>leanix/.github"
+  ],
   "automerge": false,
   "prConcurrentLimit": 1,
   "packageRules": [
     {
-      "matchPackagePatterns": ["*"],
-      "matchUpdateTypes": ["patch", "minor"],
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
       "groupName": "all dependencies"
     }
   ],
-  "schedule": ["* 0-3 * * *"],
+  "schedule": [
+    "* 0-3 * * *"
+  ],
   "timezone": "Europe/Berlin"
 }
