@@ -5,8 +5,8 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("com.expediagroup.graphql") version "8.8.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
-    kotlin("jvm") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.spring") version "2.0.21"
     jacoco
 }
 
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2024.0.2"
+extra["springCloudVersion"] = "2025.0.0"
 
 dependencyManagement {
     imports {
