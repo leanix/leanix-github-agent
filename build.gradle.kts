@@ -1,8 +1,8 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "3.4.3"
-    id("io.spring.dependency-management") version "1.1.5"
+    id("org.springframework.boot") version "3.4.5"
+    id("io.spring.dependency-management") version "1.1.7"
     id("com.expediagroup.graphql") version "8.3.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
     kotlin("jvm") version "2.0.10"
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2024.0.0"
+extra["springCloudVersion"] = "2024.0.1"
 
 dependencyManagement {
     imports {
@@ -36,12 +36,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
-    implementation("com.github.ben-manes.caffeine:caffeine:2.8.8")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.4")
+    implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.2.1")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("io.github.resilience4j:resilience4j-spring-boot3")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.1")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.19.0")
     implementation("com.expediagroup:graphql-kotlin-spring-client:8.3.0")
     developmentOnly("io.netty:netty-resolver-dns-native-macos:4.1.85.Final") {
         artifact {
@@ -50,8 +50,8 @@ dependencies {
     }
 
     // Dependencies for generating JWT token
-    implementation("io.jsonwebtoken:jjwt-impl:0.11.2")
-    implementation("io.jsonwebtoken:jjwt-jackson:0.11.2")
+    implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.ninja-squad:springmockk:4.0.2"){
