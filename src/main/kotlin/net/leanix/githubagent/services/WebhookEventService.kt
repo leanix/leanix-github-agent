@@ -135,7 +135,9 @@ class WebhookEventService(
         defaultBranch: String?
     ) {
         val location = getManifestFileLocation(manifestFilePath)
-        logger.info("Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName under $location")
+        logger.info(
+            "   Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName under $location"
+        )
         webSocketService.sendMessage(
             "/events/manifestFile",
             ManifestFileUpdateDto(
