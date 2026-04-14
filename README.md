@@ -39,7 +39,7 @@ The SAP LeanIX agent discovers self-built software in self-hosted GitHub Enterpr
     -e GITHUB_APP_ID=<github_app_id> \
     -e PEM_FILE=/privateKey.pem \
     -e WEBHOOK_SECRET=<webhook_secret> \
-    ghcr.io/leanix/leanix-github-agent:dev
+    ghcr.io/leanix/leanix-github-agent:latest
     ```
 
    This command starts the agent and exposes it on port 8000. The agent starts scanning your organizations and repositories.
@@ -59,7 +59,7 @@ Add the following properties to the command:
 docker run 
            ...
            -e JAVA_OPTS="-Dhttp.proxyHost=<HTTP_HOST> -Dhttp.proxyPort=<HTTP_PORT> -Dhttps.proxyHost=<HTTPS_HOST> -Dhttps.proxyPort=<HTTPS_PORT>" \
-        ghcr.io/leanix/leanix-github-agent:dev
+        ghcr.io/leanix/leanix-github-agent:latest
 ```
 
 > **Note:** Basic authentication is not currently supported.
@@ -69,7 +69,7 @@ docker run
 Build your own Docker image by adding the certificate:
 
 ```console
-FROM ghcr.io/leanix/leanix-github-agent:dev
+FROM ghcr.io/leanix/leanix-github-agent:latest
 
 
 USER root
@@ -91,7 +91,7 @@ Run the container by providing the following command:
 
 docker run --platform linux/amd64 \
            ...
-        ghcr.io/leanix/leanix-github-agent:dev
+        ghcr.io/leanix/leanix-github-agent:latest
 ```
 ## Release Process
 To provide an excellent experience with the agent, we are using a three-pronged release process. Any change we undertake can be classified into one of the following three categories:
