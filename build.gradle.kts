@@ -1,12 +1,12 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "3.5.13"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.expediagroup.graphql") version "8.8.1"
+    id("com.expediagroup.graphql") version "8.9.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.8"
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
+    kotlin("jvm") version "2.3.20"
+    kotlin("plugin.spring") version "2.3.20"
     jacoco
 }
 
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2025.0.0"
+extra["springCloudVersion"] = "2025.1.1"
 
 dependencyManagement {
     imports {
@@ -37,13 +37,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.3.2")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("io.github.resilience4j:resilience4j-spring-boot3")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.20")
-    implementation("com.expediagroup:graphql-kotlin-spring-client:8.8.1")
-    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.7.Final") {
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.21")
+    implementation("com.expediagroup:graphql-kotlin-spring-client:8.9.0")
+    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.12.Final") {
         artifact {
             classifier = "osx-aarch_64"
         }
