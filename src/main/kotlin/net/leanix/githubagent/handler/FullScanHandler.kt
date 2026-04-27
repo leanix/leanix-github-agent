@@ -22,9 +22,7 @@ class FullScanHandler(
 
     private val logger = LoggerFactory.getLogger(FullScanHandler::class.java)
 
-    override fun getPayloadType(headers: StompHeaders): Type {
-        return MessagePayload::class.java
-    }
+    override fun getPayloadType(headers: StompHeaders): Type = MessagePayload::class.java
 
     override fun handleFrame(headers: StompHeaders, payload: Any?) {
         logger.info("Received full scan request")

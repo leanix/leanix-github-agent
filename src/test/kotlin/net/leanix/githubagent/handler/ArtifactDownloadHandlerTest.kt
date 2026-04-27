@@ -26,7 +26,7 @@ class ArtifactDownloadHandlerTest {
     private val artifactDownloadHandler = ArtifactDownloadHandler(
         gitHubClient,
         webSocketService,
-        gitHubAuthenticationService
+        gitHubAuthenticationService,
     )
 
     @BeforeEach
@@ -45,15 +45,15 @@ class ArtifactDownloadHandlerTest {
                     id = 1,
                     name = "leanix-sbom-test-sbom",
                     url = "http://download.url",
-                    archiveDownloadUrl = "http://download.url"
+                    archiveDownloadUrl = "http://download.url",
                 ),
                 Artifact(
                     id = 2,
                     name = "invalid-name",
                     url = "http://download.url",
-                    archiveDownloadUrl = "http://download.url"
-                )
-            )
+                    archiveDownloadUrl = "http://download.url",
+                ),
+            ),
         )
         val request = mockk<Request>()
         every { gitHubClient.downloadArtifact(any(), any(), any(), any()) } returns Response
@@ -70,8 +70,8 @@ class ArtifactDownloadHandlerTest {
                 repositoryOwner = "leanix",
                 runId = 1,
                 installationId = 1,
-                artifactName = "-sbom"
-            )
+                artifactName = "-sbom",
+            ),
         )
 
         // then
@@ -91,15 +91,15 @@ class ArtifactDownloadHandlerTest {
                     id = 1,
                     name = "leanix-sbom-test-sbom",
                     url = "http://download.url",
-                    archiveDownloadUrl = "http://download.url"
+                    archiveDownloadUrl = "http://download.url",
                 ),
                 Artifact(
                     id = 2,
                     name = "invalid-name",
                     url = "http://download.url",
-                    archiveDownloadUrl = "http://download.url"
-                )
-            )
+                    archiveDownloadUrl = "http://download.url",
+                ),
+            ),
         )
         val request = mockk<Request>()
         every { gitHubClient.downloadArtifact(any(), any(), any(), any()) } returns Response
@@ -117,7 +117,7 @@ class ArtifactDownloadHandlerTest {
                 repositoryOwner = "leanix",
                 runId = 1,
                 installationId = 1,
-            )
+            ),
         )
 
         // then
@@ -137,15 +137,15 @@ class ArtifactDownloadHandlerTest {
                     id = 1,
                     name = "leanix-sbom-test-sbom",
                     url = "http://download.url",
-                    archiveDownloadUrl = "http://download.url"
+                    archiveDownloadUrl = "http://download.url",
                 ),
                 Artifact(
                     id = 2,
                     name = "invalid-name",
                     url = "http://download.url",
-                    archiveDownloadUrl = "http://download.url"
-                )
-            )
+                    archiveDownloadUrl = "http://download.url",
+                ),
+            ),
         )
         val request = mockk<Request>()
         every { gitHubClient.downloadArtifact(any(), any(), any(), any()) } returns Response
@@ -162,7 +162,7 @@ class ArtifactDownloadHandlerTest {
                 repositoryOwner = "leanix",
                 runId = 1,
                 installationId = 1,
-            )
+            ),
         )
 
         // then

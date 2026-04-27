@@ -35,7 +35,7 @@ class InstallationGetHandlerTest {
 
         val installationRequestDTO = InstallationRequestDTO(
             30,
-            Account("test-org")
+            Account("test-org"),
         )
 
         installationGetHandler.fetchAndSendOrganisationData(installationRequestDTO)

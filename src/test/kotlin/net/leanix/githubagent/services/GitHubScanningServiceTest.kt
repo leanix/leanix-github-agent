@@ -46,7 +46,7 @@ class GitHubScanningServiceTest {
         syncLogService,
         rateLimitHandler,
         gitHubEnterpriseService,
-        gitHubAPIService
+        gitHubAPIService,
     )
     private val runId = UUID.randomUUID()
 
@@ -57,7 +57,7 @@ class GitHubScanningServiceTest {
     fun setup() {
         every { cachingService.get(any()) } returns "value"
         every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(
-            Installation(1, Account("testInstallation"), permissions, events)
+            Installation(1, Account("testInstallation"), permissions, events),
         )
         every { gitHubClient.createInstallationToken(1, any()) } returns
             InstallationTokenResponse("testToken", "2024-01-01T00:00:00Z", mapOf(), "all")
@@ -66,7 +66,7 @@ class GitHubScanningServiceTest {
         every { gitHubGraphQLService.getRepositories(any(), any()) } returns PagedRepositories(
             repositories = emptyList(),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { cachingService.remove(any()) } returns Unit
         every { gitHubAuthenticationService.generateAndCacheInstallationTokens(any(), any()) } returns Unit
@@ -84,7 +84,7 @@ class GitHubScanningServiceTest {
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
         verify {
             syncLogService.sendInfoLog(
-                "The connector found 0 organizations with GitHub application installed, out of possible 1."
+                "The connector found 0 organizations with GitHub application installed, out of possible 1.",
             )
         }
     }
@@ -126,10 +126,10 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                )
+                ),
             ),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(0, emptyList())
         gitHubScanningService.scanGitHubResources()
@@ -154,10 +154,10 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                )
+                ),
             ),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
             1,
@@ -167,11 +167,11 @@ class GitHubScanningServiceTest {
                     path = "dir/leanix.yaml",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
-                )
-            )
+                    url = "http://url",
+                ),
+            ),
         )
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), "dir/leanix.yaml", any()) } returns "content"
 
@@ -205,10 +205,10 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                )
+                ),
             ),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
             1,
@@ -218,11 +218,11 @@ class GitHubScanningServiceTest {
                     path = "dir/leanix.yaml",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
-                )
-            )
+                    url = "http://url",
+                ),
+            ),
         )
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), "dir/leanix.yaml", any()) } returns "content"
 
@@ -233,7 +233,7 @@ class GitHubScanningServiceTest {
         verify(exactly = 0) { webSocketService.sendMessage(eq("$runId/manifestFiles"), any()) }
         verify(exactly = 0) { syncLogService.sendInfoLog("Scanning repository TestRepo for manifest files.") }
         verify(
-            exactly = 0
+            exactly = 0,
         ) { syncLogService.sendInfoLog("Fetched manifest file 'dir/leanix.yaml' from repository 'TestRepo'.") }
         verify(exactly = 0) { syncLogService.sendInfoLog("Found 1 manifest files in repository TestRepo.") }
         verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation.") }
@@ -258,10 +258,10 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                )
+                ),
             ),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
             1,
@@ -271,11 +271,11 @@ class GitHubScanningServiceTest {
                     path = MANIFEST_FILE_NAME,
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
-                )
-            )
+                    url = "http://url",
+                ),
+            ),
         )
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), MANIFEST_FILE_NAME, any()) } returns "content"
         val fileSlot = slot<ManifestFilesDTO>()
@@ -306,10 +306,10 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                )
+                ),
             ),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
             1,
@@ -319,29 +319,29 @@ class GitHubScanningServiceTest {
                     path = MANIFEST_FILE_NAME,
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
+                    url = "http://url",
                 ),
                 ItemResponse(
                     name = MANIFEST_FILE_NAME,
                     path = "a/$MANIFEST_FILE_NAME",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
+                    url = "http://url",
                 ),
                 ItemResponse(
                     name = "a-$MANIFEST_FILE_NAME",
                     path = "a/a-$MANIFEST_FILE_NAME",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
-                )
-            )
+                    url = "http://url",
+                ),
+            ),
         )
         every { gitHubGraphQLService.getManifestFileContent(any(), any(), MANIFEST_FILE_NAME, any()) } returns "content"
         every {
@@ -375,10 +375,10 @@ class GitHubScanningServiceTest {
                     updatedAt = "2024-01-01T00:00:00Z",
                     languages = listOf("Kotlin", "Java"),
                     topics = listOf("test", "example"),
-                )
+                ),
             ),
             hasNextPage = false,
-            cursor = null
+            cursor = null,
         )
         every { gitHubClient.searchManifestFiles(any(), any()) } returns GitHubSearchResponse(
             1,
@@ -388,29 +388,29 @@ class GitHubScanningServiceTest {
                     path = "leanIX.yaml",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
+                    url = "http://url",
                 ),
                 ItemResponse(
                     name = "lEAnIX.yaml",
                     path = "a/lEAnIX.yaml",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
+                    url = "http://url",
                 ),
                 ItemResponse(
                     name = MANIFEST_FILE_NAME,
                     path = "b/$MANIFEST_FILE_NAME",
                     repository = RepositoryItemResponse(
                         name = "TestRepo",
-                        fullName = "testOrg/TestRepo"
+                        fullName = "testOrg/TestRepo",
                     ),
-                    url = "http://url"
-                )
-            )
+                    url = "http://url",
+                ),
+            ),
         )
         every {
             gitHubGraphQLService.getManifestFileContent(any(), any(), "b/leanix.yaml", any())
@@ -435,7 +435,7 @@ class GitHubScanningServiceTest {
         every { gitHubAPIService.getPaginatedInstallations(any()) } returns listOf(
             Installation(1, Account("testInstallation1"), mapOf(), listOf()),
             Installation(2, Account("testInstallation2"), permissions, events),
-            Installation(3, Account("testInstallation3"), permissions, events)
+            Installation(3, Account("testInstallation3"), permissions, events),
         )
         gitHubScanningService.scanGitHubResources()
         verify { webSocketService.sendMessage(eq("$runId/organizations"), any()) }
@@ -443,7 +443,7 @@ class GitHubScanningServiceTest {
             syncLogService.sendErrorLog(
                 "Failed to scan organization testInstallation1. Installation missing " +
                     "the following permissions: [administration, contents, metadata], " +
-                    "and the following events: [label, public, repository, push]"
+                    "and the following events: [label, public, repository, push]",
             )
         }
         verify { syncLogService.sendInfoLog("Finished initial full scan for organization testInstallation2.") }

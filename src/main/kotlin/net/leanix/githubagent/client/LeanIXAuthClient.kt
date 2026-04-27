@@ -15,8 +15,5 @@ import org.springframework.web.bind.annotation.RequestHeader
 fun interface LeanIXAuthClient {
 
     @PostMapping(value = ["/oauth2/token"], consumes = [APPLICATION_FORM_URLENCODED_VALUE])
-    fun getToken(
-        @RequestHeader(name = AUTHORIZATION) authorization: String,
-        @RequestBody body: String,
-    ): JwtDto
+    fun getToken(@RequestHeader(name = AUTHORIZATION) authorization: String, @RequestBody body: String): JwtDto
 }

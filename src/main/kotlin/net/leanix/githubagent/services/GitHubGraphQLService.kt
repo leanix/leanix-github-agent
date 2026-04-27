@@ -17,26 +17,21 @@ import java.time.Duration
 import io.github.resilience4j.retry.annotation.Retry as ResilienceRetry
 
 @Component
-class GitHubGraphQLService(
-    private val cachingService: CachingService,
-) {
+class GitHubGraphQLService(private val cachingService: CachingService) {
     companion object {
         private val logger = LoggerFactory.getLogger(GitHubGraphQLService::class.java)
         private const val PAGE_COUNT = 20
     }
 
     @ResilienceRetry(name = "secondary_rate_limit")
-    fun getRepositories(
-        token: String,
-        cursor: String? = null
-    ): PagedRepositories {
+    fun getRepositories(token: String, cursor: String? = null): PagedRepositories {
         val client = buildGitHubGraphQLClient(token)
 
         val query = GetRepositories(
             GetRepositories.Variables(
                 pageCount = PAGE_COUNT,
                 cursor = cursor,
-            )
+            ),
         )
 
         val result = runBlocking {
@@ -64,26 +59,21 @@ class GitHubGraphQLService(
                         languages = it.languages!!.nodes!!.map { language -> language!!.name },
                         topics = it.repositoryTopics.nodes!!.map { topic -> topic!!.topic.name },
                     )
-                }
+                },
             )
         }
     }
 
     @ResilienceRetry(name = "secondary_rate_limit")
-    fun getManifestFileContent(
-        owner: String,
-        repositoryName: String,
-        filePath: String,
-        token: String
-    ): String? {
+    fun getManifestFileContent(owner: String, repositoryName: String, filePath: String, token: String): String? {
         val client = buildGitHubGraphQLClient(token)
 
         val query = GetRepositoryManifestContent(
             GetRepositoryManifestContent.Variables(
                 owner = owner,
                 repositoryName = repositoryName,
-                manifestFilePath = "HEAD:$filePath"
-            )
+                manifestFilePath = "HEAD:$filePath",
+            ),
         )
 
         val result = runBlocking {
@@ -99,18 +89,14 @@ class GitHubGraphQLService(
     }
 
     @ResilienceRetry(name = "secondary_rate_limit")
-    fun getRepository(
-        owner: String,
-        repositoryName: String,
-        token: String
-    ): RepositoryDto? {
+    fun getRepository(owner: String, repositoryName: String, token: String): RepositoryDto? {
         val client = buildGitHubGraphQLClient(token)
 
         val query = GetRepository(
             GetRepository.Variables(
                 owner = owner,
-                repositoryName = repositoryName
-            )
+                repositoryName = repositoryName,
+            ),
         )
 
         val result = runBlocking {
@@ -139,18 +125,15 @@ class GitHubGraphQLService(
         )
     }
 
-    private fun buildGitHubGraphQLClient(
-        token: String
-    ) =
-        GraphQLWebClient(
-            url = "${cachingService.get("baseUrl")}/api/graphql",
-            builder = WebClient.builder().defaultHeaders { it.setBearerAuth(token) }
-                .filter(RateLimitInterceptor())
-                .filter { request, next ->
-                    next.exchange(request)
-                        .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
-                }
-        )
+    private fun buildGitHubGraphQLClient(token: String) = GraphQLWebClient(
+        url = "${cachingService.get("baseUrl")}/api/graphql",
+        builder = WebClient.builder().defaultHeaders { it.setBearerAuth(token) }
+            .filter(RateLimitInterceptor())
+            .filter { request, next ->
+                next.exchange(request)
+                    .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+            },
+    )
 }
 
 typealias RepositoryManifestBlob = net.leanix.githubagent.graphql.`data`.getrepositorymanifestcontent.Blob

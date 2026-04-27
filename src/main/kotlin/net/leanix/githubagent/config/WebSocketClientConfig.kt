@@ -1,10 +1,9 @@
 package net.leanix.githubagent.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.resilience4j.retry.annotation.Retry
 import net.leanix.githubagent.handler.BrokerStompSessionHandler
 import net.leanix.githubagent.services.LeanIXAuthService
-import net.leanix.githubagent.shared.GitHubAgentProperties.GITHUB_AGENT_VERSION
+import net.leanix.githubagent.shared.GitHubAgentProperties.githubAgentVersion
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,10 +20,9 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport
 @Configuration
 class WebSocketClientConfig(
     private val brokerStompSessionHandler: BrokerStompSessionHandler,
-    private val objectMapper: ObjectMapper,
     private val leanIXAuthService: LeanIXAuthService,
     private val leanIXProperties: LeanIXProperties,
-    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties
+    private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
 ) {
     private val logger = LoggerFactory.getLogger(WebSocketClientConfig::class.java)
 
@@ -40,7 +38,7 @@ class WebSocketClientConfig(
             throw it
         }
         stompHeaders["GitHub-Enterprise-URL"] = gitHubEnterpriseProperties.baseUrl
-        stompHeaders["GitHub-Agent-Version"] = GITHUB_AGENT_VERSION
+        stompHeaders["GitHub-Agent-Version"] = githubAgentVersion
         return stompClient().connectAsync(
             leanIXProperties.wsBaseUrl,
             headers,
@@ -52,7 +50,6 @@ class WebSocketClientConfig(
     @Bean
     fun stompClient(): WebSocketStompClient {
         val jsonConverter = MappingJackson2MessageConverter()
-        jsonConverter.objectMapper = objectMapper
 
         val simpleWebSocketClient = StandardWebSocketClient()
         val transports = listOf(WebSocketTransport(simpleWebSocketClient))

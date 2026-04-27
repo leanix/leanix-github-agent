@@ -1,12 +1,12 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.expediagroup.graphql") version "8.8.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
+    id("com.expediagroup.graphql") version "10.0.0-alpha.2"
+    id("dev.detekt") version "2.0.0-alpha.2"
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.spring") version "2.3.0"
     jacoco
 }
 
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2025.0.0"
+extra["springCloudVersion"] = "2025.1.1"
 
 dependencyManagement {
     imports {
@@ -33,16 +33,16 @@ dependencyManagement {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.boot:spring-boot-starter-aspectj")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:5.0.1")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
-    implementation("io.github.resilience4j:resilience4j-spring-boot3")
+    implementation("io.github.resilience4j:resilience4j-spring-boot4:2.4.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.20")
-    implementation("com.expediagroup:graphql-kotlin-spring-client:8.8.1")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("com.expediagroup:graphql-kotlin-spring-client:10.0.0-alpha.2")
     developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.7.Final") {
         artifact {
             classifier = "osx-aarch_64"
@@ -54,6 +54,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testImplementation("com.ninja-squad:springmockk:4.0.2"){
         exclude(module = "mockito-core")
     }
@@ -83,7 +84,7 @@ detekt {
     parallel = true
     buildUponDefaultConfig = true
     dependencies {
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.8")
+        detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.2")
     }
 }
 

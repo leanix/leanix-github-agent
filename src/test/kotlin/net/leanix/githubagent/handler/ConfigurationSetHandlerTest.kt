@@ -22,7 +22,7 @@ class ConfigurationSetHandlerTest {
         val headers = StompHeaders()
         val supportedEvents = listOf(
             SupportedWebhookEvent("PUSH", listOf("created", "updated")),
-            SupportedWebhookEvent("PULL_REQUEST", listOf("opened", "closed"))
+            SupportedWebhookEvent("PULL_REQUEST", listOf("opened", "closed")),
         )
         val payload = AgentConfigurationRequest(supportedWebhookEvents = supportedEvents)
 

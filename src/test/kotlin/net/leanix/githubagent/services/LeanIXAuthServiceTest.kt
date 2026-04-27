@@ -25,7 +25,7 @@ class LeanIXAuthServiceTest {
             false,
             "valid_access_token",
             "access_token",
-            3600
+            3600,
         )
     }
 

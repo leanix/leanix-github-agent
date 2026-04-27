@@ -9,6 +9,6 @@ data class JwtDto(
     val accessToken: String,
     @JsonProperty("token_type")
     val tokenType: String,
-    @JsonProperty("expired_in")
+    @JsonProperty("expires_in")
     val expiredIn: Int,
 )

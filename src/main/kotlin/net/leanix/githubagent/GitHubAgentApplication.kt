@@ -18,13 +18,10 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableConfigurationProperties(
     value = [
         net.leanix.githubagent.config.GitHubEnterpriseProperties::class,
-        net.leanix.githubagent.config.LeanIXProperties::class
-    ]
+        net.leanix.githubagent.config.LeanIXProperties::class,
+    ],
 )
-class GitHubAgentApplication(
-    private val syncLogService: SyncLogService,
-    private val cachingService: CachingService
-) {
+class GitHubAgentApplication(private val syncLogService: SyncLogService, private val cachingService: CachingService) {
 
     private val logger = LoggerFactory.getLogger(GitHubAgentApplication::class.java)
 
@@ -43,7 +40,7 @@ class GitHubAgentApplication(
         syncLogService.sendSyncLog(
             message = message,
             logLevel = LogLevel.INFO,
-            synchronizationProgress = synchronizationProgress
+            synchronizationProgress = synchronizationProgress,
         )
         logger.info(message)
     }

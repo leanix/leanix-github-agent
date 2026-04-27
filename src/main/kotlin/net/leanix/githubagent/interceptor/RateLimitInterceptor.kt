@@ -10,8 +10,8 @@ import reactor.core.publisher.Mono
 
 class RateLimitInterceptor : ExchangeFilterFunction {
 
-    override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> {
-        return next.exchange(request).flatMap { response ->
+    override fun filter(request: ClientRequest, next: ExchangeFunction): Mono<ClientResponse> =
+        next.exchange(request).flatMap { response ->
             val headers = response.headers().asHttpHeaders()
             val rateLimitRemaining = headers["X-RateLimit-Remaining"]?.firstOrNull()?.toIntOrNull()
             val rateLimitReset = headers["X-RateLimit-Reset"]?.firstOrNull()?.toLongOrNull()
@@ -22,5 +22,4 @@ class RateLimitInterceptor : ExchangeFilterFunction {
             }
             Mono.just(response)
         }
-    }
 }

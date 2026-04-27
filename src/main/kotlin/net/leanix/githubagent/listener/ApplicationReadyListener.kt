@@ -9,9 +9,8 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("!test")
-class ApplicationReadyListener(
-    private val webSocketService: WebSocketService,
-) : ApplicationListener<ApplicationReadyEvent> {
+class ApplicationReadyListener(private val webSocketService: WebSocketService) :
+    ApplicationListener<ApplicationReadyEvent> {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

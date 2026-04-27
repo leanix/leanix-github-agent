@@ -6,9 +6,7 @@ import net.leanix.githubagent.shared.RateLimitMonitor
 import org.springframework.stereotype.Component
 
 @Component
-class RateLimitHandler(
-    private val syncLogService: SyncLogService,
-) {
+class RateLimitHandler(private val syncLogService: SyncLogService) {
 
     fun <T> executeWithRateLimitHandler(rateLimitType: RateLimitType, block: () -> T): T {
         while (true) {
@@ -16,7 +14,7 @@ class RateLimitHandler(
             if (waitTimeSeconds > 0) {
                 syncLogService.sendInfoLog(
                     "Approaching rate limit for $rateLimitType calls. " +
-                        "Waiting for $waitTimeSeconds seconds."
+                        "Waiting for $waitTimeSeconds seconds.",
                 )
                 Thread.sleep(waitTimeSeconds * 1000)
             }

@@ -28,7 +28,7 @@ class GitHubAuthenticationServiceTest {
         resourceLoader,
         gitHubEnterpriseService,
         gitHubClient,
-        gitHubAPIService
+        gitHubAPIService,
     )
 
     @BeforeEach

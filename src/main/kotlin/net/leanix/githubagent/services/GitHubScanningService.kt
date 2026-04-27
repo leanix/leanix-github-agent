@@ -44,7 +44,7 @@ class GitHubScanningService(
                 gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
                     INSTALLATION_LABEL,
                     installation.permissions,
-                    installation.events
+                    installation.events,
                 )
                 fetchAndSendRepositoriesData(installation)
                     .forEach { repository ->
@@ -58,6 +58,7 @@ class GitHubScanningService(
                         syncLogService.sendErrorLog("$message ${it.message}")
                         logger.error("$message ${it.message}")
                     }
+
                     else -> {
                         syncLogService.sendErrorLog(message)
                         logger.error(message, it)
@@ -74,9 +75,7 @@ class GitHubScanningService(
         return installations
     }
 
-    fun fetchAndSendOrganisationsData(
-        installations: List<Installation>
-    ) {
+    fun fetchAndSendOrganisationsData(installations: List<Installation>) {
         if (installations.isEmpty()) {
             logger.warn("No installations found, please install the GitHub App on an organization")
             webSocketService.sendMessage("${cachingService.get("runId")}/organizations", emptyList<Organization>())
@@ -96,7 +95,7 @@ class GitHubScanningService(
         logger.info("Sending organizations data")
         syncLogService.sendInfoLog(
             "The connector found ${organizations.filter { it.installed }.size} " +
-                "organizations with GitHub application installed, out of possible ${organizations.size}."
+                "organizations with GitHub application installed, out of possible ${organizations.size}.",
         )
         webSocketService.sendMessage("${cachingService.get("runId")}/organizations", organizations)
     }
@@ -111,12 +110,12 @@ class GitHubScanningService(
             val repositoriesPage = rateLimitHandler.executeWithRateLimitHandler(RateLimitType.GRAPHQL) {
                 gitHubGraphQLService.getRepositories(
                     token = installationToken,
-                    cursor = cursor
+                    cursor = cursor,
                 )
             }
             webSocketService.sendMessage(
                 "${cachingService.get("runId")}/repositories",
-                repositoriesPage.repositories.filter { !it.archived }
+                repositoriesPage.repositories.filter { !it.archived },
             )
             repositories.addAll(repositoriesPage.repositories)
             cursor = repositoriesPage.cursor
@@ -134,7 +133,7 @@ class GitHubScanningService(
             installation,
             manifestFiles,
             repository.name,
-            repository.defaultBranch
+            repository.defaultBranch,
         ).getOrThrow()
 
         webSocketService.sendMessage(
@@ -143,7 +142,7 @@ class GitHubScanningService(
                 repositoryId = repository.id,
                 repositoryFullName = repository.fullName,
                 manifestFiles = manifestFilesContents,
-            )
+            ),
         )
     }
 
@@ -153,7 +152,7 @@ class GitHubScanningService(
             gitHubClient.searchManifestFiles(
                 "Bearer $installationToken",
                 "" +
-                    "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME"
+                    "repo:${installation.account.login}/$repositoryName filename:$MANIFEST_FILE_NAME",
             )
         }
         manifestFiles.items.filter { it.name.lowercase() == MANIFEST_FILE_NAME }
@@ -162,7 +161,7 @@ class GitHubScanningService(
         installation: Installation,
         items: List<ItemResponse>,
         repositoryName: String,
-        defaultBranch: String?
+        defaultBranch: String?,
     ) = runCatching {
         val installationToken = cachingService.get("installationToken:${installation.id}").toString()
         syncLogService.sendInfoLog("Scanning repository $repositoryName for manifest files.")
@@ -172,16 +171,16 @@ class GitHubScanningService(
                 owner = installation.account.login,
                 repositoryName = repositoryName,
                 filePath = manifestFile.path,
-                token = installationToken
+                token = installationToken,
             )
             if (content != null) {
                 numOfManifestFilesFound++
                 syncLogService.sendInfoLog(
-                    "Fetched manifest file '${manifestFile.path}' from repository '$repositoryName'."
+                    "Fetched manifest file '${manifestFile.path}' from repository '$repositoryName'.",
                 )
                 ManifestFileDTO(
                     path = generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFile.path, "")),
-                    content = content
+                    content = content,
                 )
             } else {
                 throw ManifestFileNotFoundException()

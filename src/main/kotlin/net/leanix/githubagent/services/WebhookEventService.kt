@@ -1,7 +1,5 @@
 package net.leanix.githubagent.services
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import net.leanix.githubagent.dto.ManifestFileAction
 import net.leanix.githubagent.dto.ManifestFileUpdateDto
 import net.leanix.githubagent.dto.PushEventCommit
@@ -11,6 +9,8 @@ import net.leanix.githubagent.shared.fileNameMatchRegex
 import net.leanix.githubagent.shared.generateFullPath
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 @SuppressWarnings("TooManyFunctions")
 @Service
@@ -26,6 +26,7 @@ class WebhookEventService(
     fun consumeWebhookEvent(eventType: String, payload: String) {
         when (eventType.uppercase()) {
             "PUSH" -> handlePushEvent(payload)
+
             else -> {
                 logger.debug("Sending event of type: $eventType")
                 webSocketService.sendMessage("/events/other/$eventType", payload)
@@ -50,7 +51,7 @@ class WebhookEventService(
                 repositoryFullName,
                 owner,
                 repositoryName,
-                installationToken
+                installationToken,
             )
         }
     }
@@ -61,7 +62,7 @@ class WebhookEventService(
         repositoryFullName: String,
         owner: String,
         repositoryName: String,
-        installationToken: String
+        installationToken: String,
     ) {
         val addedManifestFiles = headCommit.added.filter { isLeanixManifestFile(it.lowercase()) }
         val modifiedManifestFiles = headCommit.modified.filter { isLeanixManifestFile(it.lowercase()) }
@@ -75,7 +76,7 @@ class WebhookEventService(
                 installationToken,
                 filePath,
                 ManifestFileAction.ADDED,
-                defaultBranch
+                defaultBranch,
             )
         }
 
@@ -87,7 +88,7 @@ class WebhookEventService(
                 installationToken,
                 filePath,
                 ManifestFileAction.MODIFIED,
-                defaultBranch
+                defaultBranch,
             )
         }
 
@@ -106,7 +107,7 @@ class WebhookEventService(
         installationToken: String,
         manifestFilePath: String,
         action: ManifestFileAction,
-        defaultBranch: String?
+        defaultBranch: String?,
     ) {
         val location = getManifestFileLocation(manifestFilePath)
 
@@ -116,7 +117,7 @@ class WebhookEventService(
             owner,
             repositoryName,
             manifestFilePath,
-            installationToken
+            installationToken,
         )
         webSocketService.sendMessage(
             "/events/manifestFile",
@@ -124,19 +125,19 @@ class WebhookEventService(
                 repositoryFullName,
                 action,
                 fileContent,
-                generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFilePath, ""))
-            )
+                generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFilePath, "")),
+            ),
         )
     }
 
     private fun handleRemovedManifestFile(
         repositoryFullName: String,
         manifestFilePath: String,
-        defaultBranch: String?
+        defaultBranch: String?,
     ) {
         val location = getManifestFileLocation(manifestFilePath)
         logger.info(
-            "   Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName under $location"
+            "   Manifest file ${ManifestFileAction.REMOVED} from repository $repositoryFullName under $location",
         )
         webSocketService.sendMessage(
             "/events/manifestFile",
@@ -144,16 +145,14 @@ class WebhookEventService(
                 repositoryFullName,
                 ManifestFileAction.REMOVED,
                 null,
-                generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFilePath, ""))
-            )
+                generateFullPath(defaultBranch, fileNameMatchRegex.replace(manifestFilePath, "")),
+            ),
         )
     }
 
-    private fun getManifestFileLocation(manifestFilePath: String): String {
-        return if (manifestFilePath.contains('/')) {
-            "directory '/${manifestFilePath.substringBeforeLast('/')}'"
-        } else {
-            "root folder"
-        }
+    private fun getManifestFileLocation(manifestFilePath: String): String = if (manifestFilePath.contains('/')) {
+        "directory '/${manifestFilePath.substringBeforeLast('/')}'"
+    } else {
+        "root folder"
     }
 }

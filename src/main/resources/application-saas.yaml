@@ -1,0 +1,30 @@
+github-enterprise:
+  baseUrl: https://api.github.com/
+  graphUrl: https://api.github.com/graphql
+  githubAppId: ${GITHUB_APP_ID:}
+  pemFile: ${PEM_FILE:}
+  manifestFileDirectory: ${MANIFEST_FILE_DIRECTORY:}
+  webhookSecret: ${WEBHOOK_SECRET:}
+leanix:
+  base-url: https://${LEANIX_DOMAIN}/services
+  ws-base-url: wss://${LEANIX_DOMAIN}/services/git-integrations/v1/git-ws
+#  ws-base-url: ws://localhost:8080/git-ws
+  auth:
+    access-token-uri: ${leanix.base-url}/mtm/v1
+    technical-user-token: ${LEANIX_TECHNICAL_USER_TOKEN}
+webhookEventService:
+  waitingTime: 10000
+
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 5
+      enable-exponential-backoff: true
+      exponential-backoff-multiplier: 2
+      waitDuration: 20s
+logging:
+  level:
+    org.springframework.web.socket.handler: DEBUG
+    sun.net.www.protocol.http.HttpURLConnection: OFF
+server:
+  port: 0

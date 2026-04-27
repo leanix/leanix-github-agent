@@ -19,7 +19,7 @@ class GitHubWebhookController(private val gitHubWebhookService: GitHubWebhookSer
         @RequestHeader("X-Github-Event") eventType: String,
         @RequestHeader("X-GitHub-Enterprise-Host") host: String,
         @RequestHeader("X-Hub-Signature-256", required = false) signature256: String?,
-        @RequestBody payload: String
+        @RequestBody payload: String,
     ) {
         gitHubWebhookService.handleWebhookEvent(eventType, host, signature256, payload)
     }

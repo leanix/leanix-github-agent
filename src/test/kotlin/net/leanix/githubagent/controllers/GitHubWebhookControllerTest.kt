@@ -13,7 +13,7 @@ import net.leanix.githubagent.services.WebhookEventService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -57,7 +57,7 @@ class GitHubWebhookControllerTest {
             MockMvcRequestBuilders.post("/github/webhook")
                 .header("X-GitHub-Event", eventType)
                 .header("X-GitHub-Enterprise-Host", host)
-                .content(payload)
+                .content(payload),
         )
             .andExpect(MockMvcResultMatchers.status().isAccepted)
     }
@@ -71,7 +71,10 @@ class GitHubWebhookControllerTest {
 
         every {
             gitHubWebhookService.handleWebhookEvent(
-                eventType, host, signature256, payload
+                eventType,
+                host,
+                signature256,
+                payload,
             )
         } throws WebhookSecretNotSetException()
 
@@ -80,7 +83,7 @@ class GitHubWebhookControllerTest {
                 .header("X-GitHub-Event", eventType)
                 .header("X-GitHub-Enterprise-Host", host)
                 .header("X-Hub-Signature-256", signature256)
-                .content(payload)
+                .content(payload),
         )
             .andExpect(MockMvcResultMatchers.status().isBadRequest)
     }
@@ -106,7 +109,7 @@ class GitHubWebhookControllerTest {
             MockMvcRequestBuilders.post("/github/webhook")
                 .header("X-GitHub-Event", eventType)
                 .header("X-GitHub-Enterprise-Host", host)
-                .content(payload)
+                .content(payload),
         )
             .andExpect(MockMvcResultMatchers.status().isAccepted)
 

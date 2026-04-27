@@ -7,10 +7,7 @@ import net.leanix.githubagent.shared.determineRateLimitType
 
 class RateLimitResponseInterceptor : ResponseInterceptor {
 
-    override fun intercept(
-        invocationContext: InvocationContext,
-        chain: ResponseInterceptor.Chain
-    ): Any {
+    override fun intercept(invocationContext: InvocationContext, chain: ResponseInterceptor.Chain): Any {
         val result = chain.next(invocationContext)
 
         val response = invocationContext.response()

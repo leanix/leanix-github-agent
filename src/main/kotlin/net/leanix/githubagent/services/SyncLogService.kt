@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class SyncLogService(
-    private val webSocketService: WebSocketService,
-    private val cachingService: CachingService
-) {
+class SyncLogService(private val webSocketService: WebSocketService, private val cachingService: CachingService) {
     private val logger = LoggerFactory.getLogger(SyncLogService::class.java)
 
     fun sendFullScanStart(orgName: String?) {
@@ -27,7 +24,7 @@ class SyncLogService(
         sendSyncLog(
             logLevel = LogLevel.INFO,
             synchronizationProgress = SynchronizationProgress.PENDING,
-            message = message
+            message = message,
         )
     }
 
@@ -35,7 +32,7 @@ class SyncLogService(
         sendSyncLog(
             logLevel = LogLevel.INFO,
             synchronizationProgress = SynchronizationProgress.FINISHED,
-            message = "Synchronization finished."
+            message = "Synchronization finished.",
         )
         cachingService.remove("runId")
         logger.info("Full sync finished")
@@ -47,7 +44,7 @@ class SyncLogService(
         sendSyncLog(
             logLevel = LogLevel.ERROR,
             synchronizationProgress = SynchronizationProgress.ABORTED,
-            message = message
+            message = message,
         )
         cachingService.remove("runId")
         logger.error(message)
@@ -65,7 +62,7 @@ class SyncLogService(
         message: String,
         topic: String = LOGS_TOPIC,
         logLevel: LogLevel,
-        synchronizationProgress: SynchronizationProgress
+        synchronizationProgress: SynchronizationProgress,
     ) {
         val runId = cachingService.get("runId")?.let { it as UUID }
         val syncLogDto = SyncLogDto(
@@ -73,12 +70,10 @@ class SyncLogService(
             trigger = if (runId != null) Trigger.FULL_SCAN else Trigger.WEB_HOOK,
             logLevel = logLevel,
             synchronizationProgress = synchronizationProgress,
-            message = message
+            message = message,
         )
         webSocketService.sendMessage(constructTopic(topic), syncLogDto)
     }
 
-    private fun constructTopic(topic: String): String {
-        return topic
-    }
+    private fun constructTopic(topic: String): String = topic
 }

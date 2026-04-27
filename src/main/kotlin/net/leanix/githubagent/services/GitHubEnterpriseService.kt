@@ -8,10 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class GitHubEnterpriseService(
-    private val githubClient: GitHubClient,
-    private val syncLogService: SyncLogService,
-) {
+class GitHubEnterpriseService(private val githubClient: GitHubClient, private val syncLogService: SyncLogService) {
 
     companion object {
         val expectedPermissions = listOf("administration", "contents", "metadata")
@@ -30,6 +27,7 @@ class GitHubEnterpriseService(
                     logger.error(it.message)
                     syncLogService.sendErrorLog(it.message!!)
                 }
+
                 else -> {
                     logger.error("Failed to verify JWT token", it)
                     throw UnableToConnectToGitHubEnterpriseException("Failed to verify JWT token")

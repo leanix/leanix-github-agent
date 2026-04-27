@@ -26,7 +26,7 @@ class GitHubStartService(
         val jwt = cachingService.get("jwtToken") as String
         webSocketService.sendMessage(
             APP_NAME_TOPIC,
-            gitHubEnterpriseService.getGitHubApp(jwt).slug
+            gitHubEnterpriseService.getGitHubApp(jwt).slug,
         )
     }
 }
