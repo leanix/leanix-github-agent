@@ -9,7 +9,7 @@ data class PushEventPayload(
     val repository: PushEventRepository,
     val installation: PushEventInstallation,
     @JsonProperty("head_commit")
-    val headCommit: PushEventCommit?
+    val headCommit: PushEventCommit?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,22 +20,14 @@ data class PushEventRepository(
     val fullName: String,
     @JsonProperty("default_branch")
     val defaultBranch: String,
-    val owner: PushEventOwner
+    val owner: PushEventOwner,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PushEventInstallation(
-    val id: Int
-)
+data class PushEventInstallation(val id: Int)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PushEventCommit(
-    val added: List<String>,
-    val removed: List<String>,
-    val modified: List<String>
-)
+data class PushEventCommit(val added: List<String>, val removed: List<String>, val modified: List<String>)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PushEventOwner(
-    val name: String
-)
+data class PushEventOwner(val name: String)

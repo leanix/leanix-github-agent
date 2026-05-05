@@ -37,9 +37,7 @@ class InstallationGetHandler(
 
     private val logger = LoggerFactory.getLogger(InstallationGetHandler::class.java)
 
-    override fun getPayloadType(headers: StompHeaders): Type {
-        return InstallationRequestDTO::class.java
-    }
+    override fun getPayloadType(headers: StompHeaders): Type = InstallationRequestDTO::class.java
 
     override fun handleFrame(headers: StompHeaders, payload: Any?) {
         payload?.let {
@@ -61,12 +59,12 @@ class InstallationGetHandler(
             val jwtToken = cachingService.get("jwtToken") ?: throw JwtTokenNotFound()
             val installation = gitHubClient.getInstallation(
                 installationRequestDTO.id,
-                "Bearer $jwtToken"
+                "Bearer $jwtToken",
             )
             gitHubEnterpriseService.validateEnabledPermissionsAndEvents(
                 INSTALLATION_LABEL,
                 installation.permissions,
-                installation.events
+                installation.events,
             )
             gitHubAuthenticationService.refreshTokens()
             gitHubScanningService.fetchAndSendOrganisationsData(listOf(installation))

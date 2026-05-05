@@ -22,14 +22,12 @@ class ArtifactDownloadHandler(
     @Lazy @Autowired
     private val webSocketService: WebSocketService,
     @Lazy @Autowired
-    private val gitHubAuthenticationService: GitHubAuthenticationService
+    private val gitHubAuthenticationService: GitHubAuthenticationService,
 ) : StompFrameHandler {
 
     private val logger = LoggerFactory.getLogger(ArtifactDownloadHandler::class.java)
 
-    override fun getPayloadType(headers: StompHeaders): Type {
-        return ArtifactDownloadDTO::class.java
-    }
+    override fun getPayloadType(headers: StompHeaders): Type = ArtifactDownloadDTO::class.java
 
     override fun handleFrame(headers: StompHeaders, payload: Any?) {
         payload?.let {
@@ -48,8 +46,8 @@ class ArtifactDownloadHandler(
             }
         }
     }
-    private fun getValidArtifacts(dto: ArtifactDownloadDTO, token: String): List<Artifact> {
-        return gitHubClient.getRunArtifacts(dto.repositoryOwner, dto.repositoryName, dto.runId, token)
+    private fun getValidArtifacts(dto: ArtifactDownloadDTO, token: String): List<Artifact> =
+        gitHubClient.getRunArtifacts(dto.repositoryOwner, dto.repositoryName, dto.runId, token)
             .artifacts
             .filter {
                 if (dto.artifactName != null) {
@@ -58,12 +56,11 @@ class ArtifactDownloadHandler(
                     true
                 }
             }
-    }
 
     private fun fetchAndProcessArtifacts(
         artifacts: List<Artifact>,
         dto: ArtifactDownloadDTO,
-        installationToken: String
+        installationToken: String,
     ) {
         artifacts.forEach { artifact ->
             logger.info("Processing artifact: ${artifact.name}")
@@ -95,7 +92,7 @@ class ArtifactDownloadHandler(
                 repositoryFullName = "${dto.repositoryOwner}/${dto.repositoryName}",
                 artifactFileName = artifactName,
                 artifactFileContent = artifactContent,
-            )
+            ),
         )
     }
 }

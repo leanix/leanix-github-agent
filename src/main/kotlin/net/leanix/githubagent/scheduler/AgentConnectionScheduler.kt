@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 class AgentConnectionScheduler(
     private val brokerStompSessionHandler: BrokerStompSessionHandler,
-    private val webSocketService: WebSocketService
+    private val webSocketService: WebSocketService,
 ) {
 
     private val logger = LoggerFactory.getLogger(AgentConnectionScheduler::class.java)

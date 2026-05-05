@@ -21,14 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam
 @FeignClient(
     name = "githubClient",
     url = "\${github-enterprise.baseUrl}",
-    configuration = [FeignClientConfig::class]
+    configuration = [FeignClientConfig::class],
 )
 interface GitHubClient {
 
     @GetMapping("/api/v3/app")
     fun getApp(
         @RequestHeader("Authorization") jwt: String,
-        @RequestHeader("Accept") accept: String = "application/vnd.github.v3+json"
+        @RequestHeader("Accept") accept: String = "application/vnd.github.v3+json",
     ): GitHubAppResponse
 
     @Retry(name = "secondary_rate_limit")
@@ -36,14 +36,14 @@ interface GitHubClient {
     fun getInstallations(
         @RequestHeader("Authorization") jwt: String,
         @RequestParam("per_page", defaultValue = "30") perPage: Int,
-        @RequestParam("page", defaultValue = "1") page: Int
+        @RequestParam("page", defaultValue = "1") page: Int,
     ): List<Installation>
 
     @Retry(name = "secondary_rate_limit")
     @GetMapping("/api/v3/app/installations/{installationId}")
     fun getInstallation(
         @PathVariable("installationId") installationId: Long,
-        @RequestHeader("Authorization") jwt: String
+        @RequestHeader("Authorization") jwt: String,
     ): Installation
 
     @Retry(name = "secondary_rate_limit")
@@ -51,7 +51,7 @@ interface GitHubClient {
     fun createInstallationToken(
         @PathVariable("installationId") installationId: Long,
         @RequestHeader("Authorization") jwt: String,
-        @RequestBody emptyBody: String = ""
+        @RequestBody emptyBody: String = "",
     ): InstallationTokenResponse
 
     @Retry(name = "secondary_rate_limit")
@@ -59,14 +59,14 @@ interface GitHubClient {
     fun getOrganizations(
         @RequestHeader("Authorization") jwt: String,
         @RequestParam("per_page", defaultValue = "30") perPage: Int,
-        @RequestParam("since", defaultValue = "1") since: Int
+        @RequestParam("since", defaultValue = "1") since: Int,
     ): List<Organization>
 
     @Retry(name = "secondary_rate_limit")
     @GetMapping("/api/v3/orgs/{org}/repos")
     fun getRepositories(
         @PathVariable("org") org: String,
-        @RequestHeader("Authorization") token: String
+        @RequestHeader("Authorization") token: String,
     ): List<Repository>
 
     @Retry(name = "secondary_rate_limit")
@@ -82,7 +82,7 @@ interface GitHubClient {
         @PathVariable("owner") owner: String,
         @PathVariable("repo") repo: String,
         @PathVariable("runId") runId: Long,
-        @RequestHeader("Authorization") token: String
+        @RequestHeader("Authorization") token: String,
     ): ArtifactsListResponse
 
     @Retry(name = "secondary_rate_limit")
@@ -91,6 +91,6 @@ interface GitHubClient {
         @PathVariable("owner") owner: String,
         @PathVariable("repo") repo: String,
         @PathVariable("artifactId") artifactId: Long,
-        @RequestHeader("Authorization") token: String
+        @RequestHeader("Authorization") token: String,
     ): Response
 }

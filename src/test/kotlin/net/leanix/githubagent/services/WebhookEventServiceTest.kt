@@ -86,8 +86,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    ""
-                )
+                    "",
+                ),
             )
         }
     }
@@ -119,8 +119,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    ""
-                )
+                    "",
+                ),
             )
         }
 
@@ -131,8 +131,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    "tree/main/a"
-                )
+                    "tree/main/a",
+                ),
             )
         }
     }
@@ -164,8 +164,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    "tree/main/b"
-                )
+                    "tree/main/b",
+                ),
             )
         }
 
@@ -176,8 +176,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    "tree/main/a"
-                )
+                    "tree/main/a",
+                ),
             )
         }
 
@@ -188,8 +188,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    ""
-                )
+                    "",
+                ),
             )
         }
     }
@@ -274,8 +274,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.REMOVED,
                     null,
-                    "tree/main/a/b/c"
-                )
+                    "tree/main/a/b/c",
+                ),
             )
         }
     }
@@ -307,8 +307,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "tree/main/a/b/c"
-                )
+                    "tree/main/a/b/c",
+                ),
             )
         }
     }
@@ -340,8 +340,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "tree/main/custom/path/added1"
-                )
+                    "tree/main/custom/path/added1",
+                ),
             )
             webSocketService.sendMessage(
                 "/events/manifestFile",
@@ -349,8 +349,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "tree/main/custom/path/added2"
-                )
+                    "tree/main/custom/path/added2",
+                ),
             )
             webSocketService.sendMessage(
                 "/events/manifestFile",
@@ -358,8 +358,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.MODIFIED,
                     "content",
-                    "tree/main/custom/path/modified"
-                )
+                    "tree/main/custom/path/modified",
+                ),
             )
         }
     }
@@ -391,8 +391,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "tree/main/custom/path/added2"
-                )
+                    "tree/main/custom/path/added2",
+                ),
             )
         }
 
@@ -403,8 +403,8 @@ class WebhookEventServiceTest {
                     "owner/repo",
                     ManifestFileAction.ADDED,
                     "content",
-                    "tree/main/custom/path/added1/$UNSUPPORTED_MANIFEST_EXTENSION"
-                )
+                    "tree/main/custom/path/added1/$UNSUPPORTED_MANIFEST_EXTENSION",
+                ),
             )
         }
     }
@@ -429,12 +429,10 @@ class WebhookEventServiceTest {
         }
     }
 
-    fun createItemResponse(repoName: String, organization: String): ItemResponse {
-        return ItemResponse(
-            MANIFEST_FILE_NAME,
-            "$organization/$repoName/$MANIFEST_FILE_NAME",
-            RepositoryItemResponse(repoName, repoName),
-            "url"
-        )
-    }
+    fun createItemResponse(repoName: String, organization: String): ItemResponse = ItemResponse(
+        MANIFEST_FILE_NAME,
+        "$organization/$repoName/$MANIFEST_FILE_NAME",
+        RepositoryItemResponse(repoName, repoName),
+        "url",
+    )
 }

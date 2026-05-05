@@ -34,10 +34,12 @@ object RateLimitMonitor {
                     graphqlRateLimitRemaining = remaining
                     graphqlRateLimitResetTime = resetTimeEpochSeconds
                 }
+
                 RateLimitType.REST -> {
                     restRateLimitRemaining = remaining
                     restRateLimitResetTime = resetTimeEpochSeconds
                 }
+
                 RateLimitType.SEARCH -> {
                     searchRateLimitRemaining = remaining
                     searchRateLimitResetTime = resetTimeEpochSeconds
@@ -61,13 +63,13 @@ object RateLimitMonitor {
                 val adjustedWaitTime = if (waitTimeSeconds > 0) waitTimeSeconds else 0
                 logger.warn(
                     "Rate limit remaining ($rateLimitRemaining) for $rateLimitType calls, is at or below " +
-                        "threshold ($THRESHOLD). Throttling for $adjustedWaitTime seconds."
+                        "threshold ($THRESHOLD). Throttling for $adjustedWaitTime seconds.",
                 )
                 return adjustedWaitTime
             } else {
                 logger.debug(
                     "Rate limit remaining ($rateLimitRemaining) for $rateLimitType calls, is above threshold" +
-                        " ($THRESHOLD). No need to throttle."
+                        " ($THRESHOLD). No need to throttle.",
                 )
             }
             return 0

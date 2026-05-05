@@ -8,18 +8,15 @@ import java.util.*
 @Service
 class LeanIXAuthService(
     private val leanIXAuthClient: LeanIXAuthClient,
-    private val leanIXProperties: LeanIXProperties
+    private val leanIXProperties: LeanIXProperties,
 ) {
 
-    fun getBearerToken(): String {
-        return leanIXAuthClient.getToken(
-            authorization = getBasicAuthHeader(),
-            body = "grant_type=client_credentials",
-        ).accessToken
-    }
+    fun getBearerToken(): String = leanIXAuthClient.getToken(
+        authorization = getBasicAuthHeader(),
+        body = "grant_type=client_credentials",
+    ).accessToken
 
-    private fun getBasicAuthHeader(): String =
-        "Basic " + Base64.getEncoder().encodeToString(
-            "apitoken:${leanIXProperties.auth.technicalUserToken}".toByteArray(),
-        )
+    private fun getBasicAuthHeader(): String = "Basic " + Base64.getEncoder().encodeToString(
+        "apitoken:${leanIXProperties.auth.technicalUserToken}".toByteArray(),
+    )
 }

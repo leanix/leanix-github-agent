@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class AgentSetupValidation(
     private val gitHubEnterpriseProperties: GitHubEnterpriseProperties,
-    private val leanIXProperties: LeanIXProperties
+    private val leanIXProperties: LeanIXProperties,
 ) {
 
     @EventListener

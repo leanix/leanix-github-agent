@@ -1,6 +1,5 @@
 package net.leanix.githubagent.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -27,7 +26,6 @@ class WebSocketClientConfigTests {
     @BeforeEach
     fun setUp() {
         val brokerStompSessionHandler = mockk<BrokerStompSessionHandler>()
-        val objectMapper = mockk<ObjectMapper>()
         leanIXProperties = mockk()
         gitHubEnterpriseProperties = mockk()
         stompClient = mockk()
@@ -36,13 +34,12 @@ class WebSocketClientConfigTests {
         leanIXAuthService = mockk()
         webSocketClientConfig = WebSocketClientConfig(
             brokerStompSessionHandler,
-            objectMapper,
             leanIXAuthService,
             leanIXProperties,
-            gitHubEnterpriseProperties
+            gitHubEnterpriseProperties,
         )
 
-        GitHubAgentProperties.GITHUB_AGENT_VERSION = "test-version"
+        GitHubAgentProperties.githubAgentVersion = "test-version"
     }
 
     @Test
@@ -54,8 +51,10 @@ class WebSocketClientConfigTests {
         coEvery { leanIXAuthService.getBearerToken() } returns "bearer token"
         coEvery {
             stompClient.connectAsync(
-                any<String>(), any<WebSocketHttpHeaders>(),
-                any<StompHeaders>(), any<BrokerStompSessionHandler>()
+                any<String>(),
+                any<WebSocketHttpHeaders>(),
+                any<StompHeaders>(),
+                any<BrokerStompSessionHandler>(),
             )
         } throws RuntimeException("Connection failed")
 

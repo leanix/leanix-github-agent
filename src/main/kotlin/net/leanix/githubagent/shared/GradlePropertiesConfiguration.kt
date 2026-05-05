@@ -1,7 +1,7 @@
 package net.leanix.githubagent.shared
 
 import jakarta.annotation.PostConstruct
-import net.leanix.githubagent.shared.GitHubAgentProperties.GITHUB_AGENT_VERSION
+import net.leanix.githubagent.shared.GitHubAgentProperties.githubAgentVersion
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
@@ -17,10 +17,10 @@ class GradlePropertiesConfiguration {
         try {
             val gradleProperties = Properties()
             gradleProperties.load(this::class.java.getResourceAsStream("/gradle.properties"))
-            GITHUB_AGENT_VERSION = gradleProperties.getProperty("version")
-            logger.info("Running GitHub agent on version: $GITHUB_AGENT_VERSION")
+            githubAgentVersion = gradleProperties.getProperty("version")
+            logger.info("Running GitHub agent on version: $githubAgentVersion")
         } catch (e: RuntimeException) {
-            GITHUB_AGENT_VERSION = "unknown"
+            githubAgentVersion = "unknown"
             logger.error("Unable to load GitHub agent version")
         }
     }

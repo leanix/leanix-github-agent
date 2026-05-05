@@ -15,7 +15,7 @@ class ApplicationReadyListenerTest {
     @BeforeEach
     fun setUp() {
         applicationListener = ApplicationReadyListener(
-            webSocketService
+            webSocketService,
         )
 
         every { webSocketService.initSession() } returns Unit

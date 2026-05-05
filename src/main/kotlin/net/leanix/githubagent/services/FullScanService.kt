@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 class FullScanService(
     private val gitHubScanningService: GitHubScanningService,
     private val syncLogService: SyncLogService,
-    private val gitHubAuthenticationService: GitHubAuthenticationService
+    private val gitHubAuthenticationService: GitHubAuthenticationService,
 ) {
 
     companion object {

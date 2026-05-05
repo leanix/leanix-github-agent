@@ -7,16 +7,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class GitHubSearchResponse(
     @JsonProperty("total_count")
     val totalCount: Int,
-    val items: List<ItemResponse>
+    val items: List<ItemResponse>,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ItemResponse(
-    val name: String,
-    val path: String,
-    val repository: RepositoryItemResponse,
-    val url: String,
-)
+data class ItemResponse(val name: String, val path: String, val repository: RepositoryItemResponse, val url: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RepositoryItemResponse(

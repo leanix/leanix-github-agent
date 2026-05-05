@@ -12,9 +12,7 @@ class ConfigurationSetHandler : StompFrameHandler {
 
     private val logger = LoggerFactory.getLogger(ConfigurationSetHandler::class.java)
 
-    override fun getPayloadType(headers: StompHeaders): Type {
-        return AgentConfigurationRequest::class.java
-    }
+    override fun getPayloadType(headers: StompHeaders): Type = AgentConfigurationRequest::class.java
 
     override fun handleFrame(headers: StompHeaders, payload: Any?) {
         payload?.let {
@@ -24,7 +22,7 @@ class ConfigurationSetHandler : StompFrameHandler {
                 config.supportedWebhookEvents?.let { supportedEvents ->
                     GitHubWebhookService.updateSupportedWebhookEvents(supportedEvents)
                     logger.info(
-                        "Supported webhook events updated: ${GitHubWebhookService.getSupportedWebhookEvents()}"
+                        "Supported webhook events updated: ${GitHubWebhookService.getSupportedWebhookEvents()}",
                     )
                 }
             }

@@ -6,7 +6,4 @@ data class RepositoryRequestDTO(
     val repositoryFullName: String,
 )
 
-data class RepositoryRequestInstallationDTO(
-    val id: Long,
-    val account: Account
-)
+data class RepositoryRequestInstallationDTO(val id: Long, val account: Account)

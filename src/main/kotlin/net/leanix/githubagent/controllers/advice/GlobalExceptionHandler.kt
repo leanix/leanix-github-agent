@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
 @ControllerAdvice
-class GlobalExceptionHandler(
-    private val syncLogService: SyncLogService
-) {
+class GlobalExceptionHandler(private val syncLogService: SyncLogService) {
 
     val exceptionLogger: Logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 

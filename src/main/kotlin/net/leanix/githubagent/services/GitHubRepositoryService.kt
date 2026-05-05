@@ -29,7 +29,7 @@ class GitHubRepositoryService(
         installation: Installation,
         repositoryName: String,
         repositoryFullName: String,
-        installationToken: String
+        installationToken: String,
     ) {
         kotlin.runCatching {
             logger.info("Fetching repository details for: $repositoryFullName")
@@ -37,7 +37,7 @@ class GitHubRepositoryService(
                 gitHubGraphQLService.getRepository(
                     installation.account.login,
                     repositoryName,
-                    installationToken
+                    installationToken,
                 )
             }
             if (repository == null) {
@@ -63,7 +63,7 @@ class GitHubRepositoryService(
             installation,
             manifestFiles,
             repositoryAdded.name,
-            repositoryAdded.defaultBranch
+            repositoryAdded.defaultBranch,
         ).getOrThrow()
 
         if (manifestContents.isEmpty()) {
@@ -78,8 +78,8 @@ class GitHubRepositoryService(
                     repositoryAdded.fullName,
                     ManifestFileAction.ADDED,
                     it.content,
-                    generateFullPath(repositoryAdded.defaultBranch, fileNameMatchRegex.replace(it.path, ""))
-                )
+                    generateFullPath(repositoryAdded.defaultBranch, fileNameMatchRegex.replace(it.path, "")),
+                ),
             )
         }
     }

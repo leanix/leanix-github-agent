@@ -1,6 +1,5 @@
 package net.leanix.githubagent.services
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.leanix.githubagent.config.GitHubEnterpriseProperties
 import net.leanix.githubagent.dto.GenericWebhookEvent
 import net.leanix.githubagent.exceptions.InvalidEventSignatureException
@@ -11,6 +10,7 @@ import net.leanix.githubagent.shared.timingSafeEqual
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.jacksonObjectMapper
 
 @Service
 class GitHubWebhookService(
@@ -51,7 +51,7 @@ class GitHubWebhookService(
                 logger.error(
                     "Event signature is present but webhook secret is not set, " +
                         "please restart the agent with a valid secret, " +
-                        "or remove the secret from the GitHub App settings."
+                        "or remove the secret from the GitHub App settings.",
                 )
                 throw WebhookSecretNotSetException()
             }
@@ -80,15 +80,14 @@ class GitHubWebhookService(
         }
     }
 
-    private fun findSupportedWebhookEvent(eventType: String): SupportedWebhookEvent? {
-        return getSupportedWebhookEvents().find { it.eventType.equals(eventType, ignoreCase = true) }
-    }
+    private fun findSupportedWebhookEvent(eventType: String): SupportedWebhookEvent? =
+        getSupportedWebhookEvents().find {
+            it.eventType.equals(eventType, ignoreCase = true)
+        }
 
-    private fun extractEventAction(payload: String): String? {
-        return objectMapper.readValue(payload, GenericWebhookEvent::class.java).action
-    }
+    private fun extractEventAction(payload: String): String? =
+        objectMapper.readValue(payload, GenericWebhookEvent::class.java).action
 
-    private fun isEventSupported(event: SupportedWebhookEvent?, action: String?): Boolean {
-        return event != null && (event.actions.isEmpty() || (action != null && action in event.actions))
-    }
+    private fun isEventSupported(event: SupportedWebhookEvent?, action: String?): Boolean =
+        event != null && (event.actions.isEmpty() || (action != null && action in event.actions))
 }

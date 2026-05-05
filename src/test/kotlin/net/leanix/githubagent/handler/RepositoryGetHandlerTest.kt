@@ -22,7 +22,7 @@ class RepositoryGetHandlerTest {
 
     private val repositoryGetHandler = RepositoryGetHandler(
         gitHubAuthenticationService,
-        gitHubRepositoryService
+        gitHubRepositoryService,
     )
 
     @BeforeEach
@@ -41,8 +41,8 @@ class RepositoryGetHandlerTest {
             RepositoryRequestDTO(
                 installation = RepositoryRequestInstallationDTO(1, Account("account")),
                 repositoryName = "repoName",
-                repositoryFullName = "repoFullName"
-            )
+                repositoryFullName = "repoFullName",
+            ),
         )
 
         // then
@@ -51,7 +51,7 @@ class RepositoryGetHandlerTest {
                 installation = Installation(1, Account("account"), mapOf(), listOf()),
                 repositoryName = "repoName",
                 repositoryFullName = "repoFullName",
-                installationToken = "token"
+                installationToken = "token",
             )
         }
     }

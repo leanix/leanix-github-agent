@@ -26,7 +26,11 @@ style:
     active: true
   ReturnCount:
     active: false
-  UnusedPrivateMember:
+  UnusedPrivateClass:
+    active: true
+  UnusedPrivateFunction:
+    active: true
+  UnusedPrivateProperty:
     active: true
   ThrowsCount:
     active: false

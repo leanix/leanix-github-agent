@@ -22,7 +22,7 @@ class GitHubAPIServiceTest {
         val jwtToken = "test-jwt-token"
         val installationsPage1 = listOf(
             Installation(1, Account("test-account"), permissions, events),
-            Installation(2, Account("test-account"), permissions, events)
+            Installation(2, Account("test-account"), permissions, events),
         )
 
         every { gitHubClient.getInstallations(any(), any(), any()) } returns installationsPage1
@@ -54,7 +54,7 @@ class GitHubAPIServiceTest {
         val installationToken = "test-installation-token"
         val organizationsPage1 = listOf(
             Organization("org-1", 1),
-            Organization("org-2", 2)
+            Organization("org-2", 2),
         )
 
         every { gitHubClient.getOrganizations(any(), any(), any()) } returns organizationsPage1

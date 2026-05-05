@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class ArtifactsListResponse(
     @JsonProperty("total_count")
     val totalCount: Int,
-    val artifacts: List<Artifact>
+    val artifacts: List<Artifact>,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

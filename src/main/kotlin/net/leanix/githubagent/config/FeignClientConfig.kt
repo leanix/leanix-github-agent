@@ -9,7 +9,5 @@ import org.springframework.context.annotation.Configuration
 class FeignClientConfig {
 
     @Bean
-    fun rateLimitResponseInterceptor(): ResponseInterceptor {
-        return RateLimitResponseInterceptor()
-    }
+    fun rateLimitResponseInterceptor(): ResponseInterceptor = RateLimitResponseInterceptor()
 }

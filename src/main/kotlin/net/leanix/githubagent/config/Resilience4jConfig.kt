@@ -37,17 +37,17 @@ class Resilience4jConfig {
                     Locale.getDefault(),
                     "%d minutes, %d seconds",
                     event.waitInterval.toMinutes(),
-                    event.waitInterval.minus(event.waitInterval.toMinutes(), ChronoUnit.MINUTES).seconds
+                    event.waitInterval.minus(event.waitInterval.toMinutes(), ChronoUnit.MINUTES).seconds,
                 )
                 logger.info(
                     "Retrying call due to ${event.name}, attempt: ${event.numberOfRetryAttempts}, " +
-                        "wait time: $readableWaitTime"
+                        "wait time: $readableWaitTime",
                 )
             }
             .onError { event ->
                 logger.error(
                     "Call failed due to ${event.name}, after attempts: ${event.numberOfRetryAttempts}, " +
-                        "last exception: ${event.lastThrowable.message}"
+                        "last exception: ${event.lastThrowable.message}",
                 )
             }
 

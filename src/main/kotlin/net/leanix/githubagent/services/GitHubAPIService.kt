@@ -6,9 +6,7 @@ import net.leanix.githubagent.dto.Organization
 import org.springframework.stereotype.Service
 
 @Service
-class GitHubAPIService(
-    private val gitHubClient: GitHubClient,
-) {
+class GitHubAPIService(private val gitHubClient: GitHubClient) {
 
     companion object {
         private const val PAGE_SIZE = 30 // Maximum allowed by GitHub API is 100

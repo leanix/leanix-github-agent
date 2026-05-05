@@ -29,7 +29,7 @@ class GitHubEnterpriseServiceTest {
         val githubApp = GitHubAppResponse(
             slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
-            events = listOf("label", "public", "repository", "push", "installation")
+            events = listOf("label", "public", "repository", "push", "installation"),
         )
         every { githubClient.getApp(any()) } returns githubApp
 
@@ -49,7 +49,7 @@ class GitHubEnterpriseServiceTest {
         val response = GitHubAppResponse(
             slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
-            events = listOf("label", "public", "repository", "push", "installation")
+            events = listOf("label", "public", "repository", "push", "installation"),
         )
 
         assertDoesNotThrow {
@@ -62,11 +62,11 @@ class GitHubEnterpriseServiceTest {
         val response = GitHubAppResponse(
             slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read"),
-            events = listOf("label", "public", "repository")
+            events = listOf("label", "public", "repository"),
         )
 
         assertThrows(
-            GitHubAppInsufficientPermissionsException::class.java
+            GitHubAppInsufficientPermissionsException::class.java,
         ) { service.validateEnabledPermissionsAndEvents(GITHUB_APP_LABEL, response.permissions, response.events) }
     }
 
@@ -75,11 +75,11 @@ class GitHubEnterpriseServiceTest {
         val response = GitHubAppResponse(
             slug = "validApp",
             permissions = mapOf("administration" to "read", "contents" to "read", "metadata" to "read"),
-            events = listOf("label", "public")
+            events = listOf("label", "public"),
         )
 
         assertThrows(
-            GitHubAppInsufficientPermissionsException::class.java
+            GitHubAppInsufficientPermissionsException::class.java,
         ) { service.validateEnabledPermissionsAndEvents(GITHUB_APP_LABEL, response.permissions, response.events) }
     }
 }

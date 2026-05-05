@@ -17,14 +17,12 @@ class RepositoryGetHandler(
     @Lazy @Autowired
     private val gitHubAuthenticationService: GitHubAuthenticationService,
     @Lazy @Autowired
-    private val repositoryGetService: GitHubRepositoryService
+    private val repositoryGetService: GitHubRepositoryService,
 ) : StompFrameHandler {
 
     private val logger = LoggerFactory.getLogger(RepositoryGetHandler::class.java)
 
-    override fun getPayloadType(headers: StompHeaders): Type {
-        return RepositoryRequestDTO::class.java
-    }
+    override fun getPayloadType(headers: StompHeaders): Type = RepositoryRequestDTO::class.java
 
     override fun handleFrame(headers: StompHeaders, payload: Any?) {
         payload?.let {
@@ -41,7 +39,7 @@ class RepositoryGetHandler(
                     ),
                     dto.repositoryName,
                     dto.repositoryFullName,
-                    installationToken
+                    installationToken,
                 )
             }
         }

@@ -34,8 +34,8 @@ class GitHubAuthenticationService(
     companion object {
         private const val JWT_EXPIRATION_DURATION_IN_SECONDS = 600L
         private const val INSTALLATION_JWT_EXPIRATION_DURATION_IN_SECONDS = 3600L
-        private const val pemPrefix = "-----BEGIN RSA PRIVATE KEY-----"
-        private const val pemSuffix = "-----END RSA PRIVATE KEY-----"
+        private const val PEM_PREFIX = "-----BEGIN RSA PRIVATE KEY-----"
+        private const val PEM_SUFFIX = "-----END RSA PRIVATE KEY-----"
         private val logger = LoggerFactory.getLogger(GitHubAuthenticationService::class.java)
     }
 
@@ -58,33 +58,29 @@ class GitHubAuthenticationService(
         }
     }
 
-    private fun loadPrivateKey(): PrivateKey {
-        return runCatching {
-            Security.addProvider(BouncyCastleProvider())
-            val rsaPrivateKey: String = readPrivateKey()
-            val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
-            KeyFactory.getInstance("RSA").generatePrivate(keySpec)
-        }.getOrElse {
-            logger.error("Failed to load private key", it)
-            throw IllegalArgumentException(
-                "Failed to load private key, " +
-                    "the provided private key is not a valid PKCS8 key."
-            )
-        }
+    private fun loadPrivateKey(): PrivateKey = runCatching {
+        Security.addProvider(BouncyCastleProvider())
+        val rsaPrivateKey: String = readPrivateKey()
+        val keySpec = PKCS8EncodedKeySpec(Base64.getDecoder().decode(rsaPrivateKey))
+        KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+    }.getOrElse {
+        logger.error("Failed to load private key", it)
+        throw IllegalArgumentException(
+            "Failed to load private key, " +
+                "the provided private key is not a valid PKCS8 key.",
+        )
     }
 
-    private fun createJwtToken(privateKey: PrivateKey): String {
-        return runCatching {
-            Jwts.builder()
-                .setIssuedAt(Date())
-                .setExpiration(Date(System.currentTimeMillis() + (JWT_EXPIRATION_DURATION_IN_SECONDS * 1000)))
-                .setIssuer(cachingService.get("githubAppId").toString())
-                .signWith(privateKey, SignatureAlgorithm.RS256)
-                .compact()
-        }.getOrElse {
-            logger.error("Failed to generate a JWT token", it)
-            throw FailedToCreateJWTException("Failed to generate a JWT token")
-        }
+    private fun createJwtToken(privateKey: PrivateKey): String = runCatching {
+        Jwts.builder()
+            .setIssuedAt(Date())
+            .setExpiration(Date(System.currentTimeMillis() + (JWT_EXPIRATION_DURATION_IN_SECONDS * 1000)))
+            .setIssuer(cachingService.get("githubAppId").toString())
+            .signWith(privateKey, SignatureAlgorithm.RS256)
+            .compact()
+    }.getOrElse {
+        logger.error("Failed to generate a JWT token", it)
+        throw FailedToCreateJWTException("Failed to generate a JWT token")
     }
 
     private fun verifyAndCacheJwtToken(jwt: String) {
@@ -98,16 +94,13 @@ class GitHubAuthenticationService(
         }
     }
 
-    fun generateAndCacheInstallationTokens(
-        installations: List<Installation>,
-        jwtToken: String
-    ) {
+    fun generateAndCacheInstallationTokens(installations: List<Installation>, jwtToken: String) {
         installations.forEach { installation ->
             val installationToken = gitHubClient.createInstallationToken(installation.id, "Bearer $jwtToken").token
             cachingService.set(
                 "installationToken:${installation.id}",
                 installationToken,
-                INSTALLATION_JWT_EXPIRATION_DURATION_IN_SECONDS
+                INSTALLATION_JWT_EXPIRATION_DURATION_IN_SECONDS,
             )
         }
     }
@@ -117,14 +110,14 @@ class GitHubAuthenticationService(
         val pemFile = File(resourceLoader.getResource("file:${githubEnterpriseProperties.pemFile}").uri)
         val fileContent = String(Files.readAllBytes(pemFile.toPath()), Charset.defaultCharset()).trim()
 
-        require(fileContent.startsWith(pemPrefix) && fileContent.endsWith(pemSuffix)) {
+        require(fileContent.startsWith(PEM_PREFIX) && fileContent.endsWith(PEM_SUFFIX)) {
             "The provided file is not a valid PEM file."
         }
 
         return fileContent
-            .replace(pemPrefix, "")
+            .replace(PEM_PREFIX, "")
             .replace(System.lineSeparator().toRegex(), "")
-            .replace(pemSuffix, "")
+            .replace(PEM_SUFFIX, "")
     }
 
     fun getInstallationToken(installationId: Int): String {

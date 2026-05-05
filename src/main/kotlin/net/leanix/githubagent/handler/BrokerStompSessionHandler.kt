@@ -19,7 +19,7 @@ class BrokerStompSessionHandler(
     private val installationGetHandler: InstallationGetHandler,
     private val fullScanHandler: FullScanHandler,
     private val configurationSetHandler: ConfigurationSetHandler,
-    private val eventPublisher: ApplicationEventPublisher
+    private val eventPublisher: ApplicationEventPublisher,
 ) : StompSessionHandlerAdapter() {
     @Lazy
     @Autowired
@@ -60,7 +60,5 @@ class BrokerStompSessionHandler(
         }
     }
 
-    fun isConnected(): Boolean {
-        return isConnected
-    }
+    fun isConnected(): Boolean = isConnected
 }

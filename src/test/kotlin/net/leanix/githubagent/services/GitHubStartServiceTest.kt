@@ -56,7 +56,9 @@ class GitHubStartServiceTest {
         val gitHubAppName = "appName"
         every { gitHubEnterpriseService.getGitHubApp("jwt") } returns
             GitHubAppResponse(
-                gitHubAppName, mapOf(), listOf()
+                gitHubAppName,
+                mapOf(),
+                listOf(),
             )
 
         gitHubStartService.startAgent(ConnectionEstablishedEvent())
