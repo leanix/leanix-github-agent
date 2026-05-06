@@ -32,7 +32,7 @@ class ArtifactDownloadHandler(
     override fun handleFrame(headers: StompHeaders, payload: Any?) {
         payload?.let {
             val dto = payload as ArtifactDownloadDTO
-            logger.info("Received artifact download message from server for repo: ${dto.repositoryName}")
+            logger.debug("Received artifact download message from server for repo: ${dto.repositoryName}")
             runCatching {
                 val installationToken =
                     "Bearer ${gitHubAuthenticationService.getInstallationToken(dto.installationId)}"
@@ -40,9 +40,9 @@ class ArtifactDownloadHandler(
                 getValidArtifacts(dto, installationToken)
                     .takeIf { it.isNotEmpty() }
                     ?.let { artifacts ->
-                        logger.info("Found ${artifacts.size} artifact(s).")
+                        logger.debug("Found ${artifacts.size} artifact(s).")
                         fetchAndProcessArtifacts(artifacts, dto, installationToken)
-                    } ?: logger.info("No artifacts found for this repository: ${dto.repositoryName}")
+                    } ?: logger.debug("No artifacts found for this repository: ${dto.repositoryName}")
             }
         }
     }
@@ -63,7 +63,7 @@ class ArtifactDownloadHandler(
         installationToken: String,
     ) {
         artifacts.forEach { artifact ->
-            logger.info("Processing artifact: ${artifact.name}")
+            logger.debug("Processing artifact: ${artifact.name}")
             downloadAndSendArtifact(dto, artifact, installationToken)
         }
     }
