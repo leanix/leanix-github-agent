@@ -1,12 +1,12 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "4.0.5"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.expediagroup.graphql") version "10.0.0-alpha.2"
-    id("dev.detekt") version "2.0.0-alpha.2"
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.spring") version "2.3.0"
+    id("com.expediagroup.graphql") version "10.0.0-alpha.3"
+    id("dev.detekt") version "2.0.0-alpha.3"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.spring") version "2.3.21"
     jacoco
 }
 
@@ -42,8 +42,8 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot4:2.4.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("com.expediagroup:graphql-kotlin-spring-client:10.0.0-alpha.2")
-    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.7.Final") {
+    implementation("com.expediagroup:graphql-kotlin-spring-client:10.0.0-alpha.3")
+    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.13.Final") {
         artifact {
             classifier = "osx-aarch_64"
         }
@@ -84,7 +84,7 @@ detekt {
     parallel = true
     buildUponDefaultConfig = true
     dependencies {
-        detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.2")
+        detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.3")
     }
 }
 
