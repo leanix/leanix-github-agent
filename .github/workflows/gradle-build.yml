@@ -12,6 +12,7 @@ jobs:
   validation:
     name: Branch name validation
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Check branch name
         run: |
@@ -29,6 +30,9 @@ jobs:
     name: Build and test
     needs: validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
