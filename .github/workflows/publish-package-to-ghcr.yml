@@ -166,7 +166,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         if: (steps.tag-action.outputs.tag != '')
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
