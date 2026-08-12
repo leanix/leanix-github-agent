@@ -98,7 +98,7 @@ jobs:
           java-version: '21'
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@ac2d340dc04d9e1113182899e983b5400c17cda1 # v3
         if: (steps.tag-action.outputs.tag != '')
         continue-on-error: false
         with:
