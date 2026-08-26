@@ -1,12 +1,12 @@
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 
 plugins {
-    id("org.springframework.boot") version "4.0.5"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.expediagroup.graphql") version "10.0.0-alpha.2"
-    id("dev.detekt") version "2.0.0-alpha.2"
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.spring") version "2.3.0"
+    id("com.expediagroup.graphql") version "10.2.2"
+    id("dev.detekt") version "2.0.0-alpha.6"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.spring") version "2.4.10"
     jacoco
 }
 
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-extra["springCloudVersion"] = "2025.1.1"
+extra["springCloudVersion"] = "2025.1.3"
 
 dependencyManagement {
     imports {
@@ -37,13 +37,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:5.0.1")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign:5.0.3")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("io.github.resilience4j:resilience4j-spring-boot4:2.4.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("com.expediagroup:graphql-kotlin-spring-client:10.0.0-alpha.2")
-    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.7.Final") {
+    implementation("com.expediagroup:graphql-kotlin-spring-client:10.2.2")
+    developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.17.Final") {
         artifact {
             classifier = "osx-aarch_64"
         }
@@ -84,7 +84,7 @@ detekt {
     parallel = true
     buildUponDefaultConfig = true
     dependencies {
-        detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.2")
+        detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.6")
     }
 }
 
