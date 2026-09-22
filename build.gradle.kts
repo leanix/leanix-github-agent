@@ -36,7 +36,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aspectj")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
-    implementation("com.github.ben-manes.caffeine:caffeine:2.9.3")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.4")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:5.0.1")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("io.github.resilience4j:resilience4j-spring-boot4:2.4.0")
