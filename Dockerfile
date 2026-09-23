@@ -1,4 +1,4 @@
-FROM --platform=linux/x86_64 eclipse-temurin:21.0.8_9-jre-alpine@sha256:990397e0495ac088ab6ee3d949a2e97b715a134d8b96c561c5d130b3786a489d
+FROM --platform=linux/x86_64 eclipse-temurin:21.0.12_8-jre-alpine@sha256:1a29e1fe337eb28b5bec30f0ee8ed29f0ff80ab6f75dcf9313efe82911065a52
 
 RUN apk --no-cache upgrade && apk --no-cache add curl ca-certificates
 
