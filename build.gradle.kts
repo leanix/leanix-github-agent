@@ -3,7 +3,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLGenerateClientTask
 plugins {
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
-    id("com.expediagroup.graphql") version "10.0.0-alpha.2"
+    id("com.expediagroup.graphql") version "11.0.0"
     id("dev.detekt") version "2.0.0-alpha.2"
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.spring") version "2.3.0"
