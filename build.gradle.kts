@@ -42,7 +42,7 @@ dependencies {
     implementation("io.github.resilience4j:resilience4j-spring-boot4:2.4.0")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("tools.jackson.module:jackson-module-kotlin")
-    implementation("com.expediagroup:graphql-kotlin-spring-client:10.0.0-alpha.2")
+    implementation("com.expediagroup:graphql-kotlin-spring-client:11.0.0")
     developmentOnly("io.netty:netty-resolver-dns-native-macos:4.2.7.Final") {
         artifact {
             classifier = "osx-aarch_64"
