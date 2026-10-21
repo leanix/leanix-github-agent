@@ -4,7 +4,6 @@
     "local>leanix/.github"
   ],
   "automerge": false,
-  "prConcurrentLimit": 1,
   "packageRules": [
     {
       "matchPackagePatterns": [
