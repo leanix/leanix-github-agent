@@ -95,7 +95,7 @@ jobs:
         if: (steps.tag-action.outputs.tag != '')
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '21.0.13+9.0.LTS'
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
