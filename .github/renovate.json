@@ -6,14 +6,14 @@
   "automerge": false,
   "packageRules": [
     {
-      "matchPackagePatterns": [
-        "*"
-      ],
       "matchUpdateTypes": [
         "patch",
         "minor"
       ],
-      "groupName": "all dependencies"
+      "groupName": "all dependencies",
+      "matchPackageNames": [
+        "*"
+      ]
     }
   ],
   "schedule": [
